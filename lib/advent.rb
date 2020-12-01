@@ -20,7 +20,7 @@ end
 
 if ARGV.size > 1
   puts output(part: ARGV[1].to_i)
-else
+elsif ARGV.size == 1
   puts [1, 2].map { |part| "\n  #{output(part: part)}" }.join
 end
 
