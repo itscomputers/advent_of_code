@@ -1,10 +1,10 @@
-require 'advent/day01'
+Dir["lib/advent/day**.rb"].each(&method(:load))
 
 describe Advent::Day01 do
   describe "example 1" do
     let(:input) { [1721, 979, 366, 299, 675, 1456] }
     let(:sum) { 2020 }
-    let(:day) { described_class.new(input, sum) }
+    let(:day) { described_class.new(input, sum: sum) }
 
     describe "#pair" do
       subject { day.pair }

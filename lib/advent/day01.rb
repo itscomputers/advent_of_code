@@ -12,7 +12,7 @@ module Advent
       { :sum => 2020 }
     end
 
-    def initialize(input, sum)
+    def initialize(input, sum:)
       @input = input
       @sum = sum
     end
