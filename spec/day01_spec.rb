@@ -1,4 +1,4 @@
-Dir["lib/advent/day**.rb"].each(&method(:load))
+require 'advent/day01'
 
 describe Advent::Day01 do
   describe "example 1" do

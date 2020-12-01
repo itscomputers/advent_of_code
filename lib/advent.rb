@@ -1,4 +1,4 @@
-require 'advent/day01'
+Dir["lib/advent/day**.rb"].each(&method(:load))
 
 module Advent
   class Solver
