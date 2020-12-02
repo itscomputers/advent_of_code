@@ -40,11 +40,9 @@ module Advent
 
     def pair_difference_from_sum_hash
       @pair_difference ||= @input
-        .product(@input)
+        .combination(2)
         .each_with_object(Hash.new { |h, k| h[k] = [] }) do |values, memo|
-          if values.uniq == values
-            memo[@sum - values.sum] << values
-          end
+          memo[@sum - values.sum] << values
       end
     end
 
