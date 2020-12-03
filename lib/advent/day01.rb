@@ -18,38 +18,23 @@ module Advent
     end
 
     def solve(part:)
-      case part
-      when 1 then pair.reduce(1) { |acc, val| acc * val }
-      when 2 then trio.reduce(1) { |acc, val| acc * val }
-      end
+      tuple(size: part + 1).reduce(1) { |acc, val| acc * val }
     end
 
-    def pair
-      @pair ||= @input.each do |value|
-        unless difference_from_sum_hash[value].empty?
-          return [value, difference_from_sum_hash[value].first]
+    def difference_from_sum_hash(size)
+      return @difference[size] unless @difference.nil?
+      @difference ||= Hash.new
+      @difference[size] = @input
+        .combination(size - 1)
+        .each_with_object(Hash.new) do |values, memo|
+          memo[@sum - values.sum] = values
         end
-      end
     end
 
-    def difference_from_sum_hash
-      @difference ||= @input.each_with_object(Hash.new { |h, k| h[k] = [] }) do |value, memo|
-        memo[@sum - value] << value
-      end
-    end
-
-    def pair_difference_from_sum_hash
-      @pair_difference ||= @input
-        .combination(2)
-        .each_with_object(Hash.new { |h, k| h[k] = [] }) do |values, memo|
-          memo[@sum - values.sum] << values
-      end
-    end
-
-    def trio
-      @trio ||= @input.each do |value|
-        unless pair_difference_from_sum_hash[value].empty?
-          return [value, *pair_difference_from_sum_hash[value].first]
+    def tuple(size:)
+      @input.each do |value|
+        if difference_from_sum_hash(size).key? value
+          return [value, *difference_from_sum_hash(size)[value]]
         end
       end
     end

@@ -16,19 +16,9 @@ describe Advent::Day01 do
     let(:sum) { 2020 }
     let(:day) { described_class.new(input, sum: sum) }
 
-    describe "#pair" do
-      subject { day.pair }
-      it { is_expected.to match_array [1721, 299] }
-    end
-
     describe "#part 1" do
       subject { day.solve(part: 1) }
       it { is_expected.to eq 514579 }
-    end
-
-    describe "#trio" do
-      subject { day.trio }
-      it { is_expected.to match_array [979, 366, 675] }
     end
 
     describe "#part 2" do
