@@ -33,9 +33,9 @@ module Advent
     end
 
     def tree_count(slope)
-      (0...@size.y).step(slope.y).select.with_index do |y, idx|
-        @trees.include? Point.new((idx * slope.x) % @size.x, y)
-      end.count
+      (@size.y / slope.y).times.count do |idx|
+        @trees.include? Point.new((idx * slope.x) % @size.x, idx * slope.y)
+      end
     end
 
     def tree_count_product(slopes)
