@@ -36,11 +36,6 @@ describe Advent::Day03 do
     it { is_expected.to eq input }
   end
 
-  describe '#display' do
-    subject { day.display }
-    it { is_expected.to eq raw_input }
-  end
-
   describe '#tree count' do
     subject { day.tree_count(slope) }
 
