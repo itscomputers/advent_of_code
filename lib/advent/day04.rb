@@ -19,13 +19,13 @@ module Advent
 
     def solve(part:)
       case part
-      when 1 then valid_count policy: SimplePolicy
-      when 2 then valid_count policy: ComplexPolicy
+      when 1 then valid_count policy: SimplePolicy.new
+      when 2 then valid_count policy: ComplexPolicy.new
       end
     end
 
     def valid_count(policy:)
-      @passports.count { |passport| policy.new.valid?(passport) }
+      @passports.count { |passport| policy.valid?(passport) }
     end
 
     class Passport
