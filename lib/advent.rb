@@ -6,8 +6,12 @@ module Advent
       @day_number = day_number
     end
 
+    def day
+      @day ||= Advent.class_eval("Day#{@day_number}").build
+    end
+
     def solve(part:)
-      Advent.class_eval("Day#{@day_number}").solve(part: part)
+      day.solve(part: part)
     end
   end
 end

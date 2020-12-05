@@ -12,8 +12,8 @@ module Advent
       Hash.new
     end
 
-    def self.solve(part:)
-      new(sanitized_input, **options).solve(part: part)
+    def self.build
+      new(sanitized_input, **options)
     end
   end
 end
