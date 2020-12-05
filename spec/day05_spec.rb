@@ -17,46 +17,8 @@ describe Advent::Day05 do
   describe Advent::Day05::Seat do
     let(:seat) { described_class.new(string) }
 
-    describe "row" do
-      subject { seat.row }
-
-      context "when BFFFBBFRRR" do
-        let(:string) { "BFFFBBFRRR" }
-        it { is_expected.to eq 70 }
-      end
-
-      context "when FFFBBBFRRR" do
-        let(:string) { "FFFBBBFRRR" }
-        it { is_expected.to eq 14 }
-      end
-
-      context "when BBFFBBFRLL" do
-        let(:string) { "BBFFBBFRLL" }
-        it { is_expected.to eq 102 }
-      end
-    end
-
-    describe "col" do
-      subject { seat.col }
-
-      context "when BFFFBBFRRR" do
-        let(:string) { "BFFFBBFRRR" }
-        it { is_expected.to eq  7 }
-      end
-
-      context "when FFFBBBFRRR" do
-        let(:string) { "FFFBBBFRRR" }
-        it { is_expected.to eq 7 }
-      end
-
-      context "when BBFFBBFRLL" do
-        let(:string) { "BBFFBBFRLL" }
-        it { is_expected.to eq 4 }
-      end
-    end
-
-    describe "seat_id" do
-      subject { seat.seat_id }
+    describe "#id" do
+      subject { seat.id }
 
       context "when BFFFBBFRRR" do
         let(:string) { "BFFFBBFRRR" }

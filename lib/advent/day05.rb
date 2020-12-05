@@ -20,7 +20,7 @@ module Advent
     end
 
     def ordered_seat_ids
-      @ordered_seat_ids ||= @seats.map(&:seat_id).sort
+      @ordered_seat_ids ||= @seats.map(&:id).sort
     end
 
     def max_seat_id
@@ -34,20 +34,14 @@ module Advent
     end
 
     class Seat
-      attr_reader :row, :col
+      attr_reader :id
 
       def initialize(string)
-        arr = string.split("")
-        @row = int_from_string arr.take(7), "B", 7
-        @col = int_from_string arr.drop(7), "R", 3
+        @id = string.gsub(/[BFRL]/, **bitmap).to_i(2)
       end
 
-      def seat_id
-        8 * @row + @col
-      end
-
-      def int_from_string(arr, char, len)
-        arr.map.with_index { |ch, idx| ch == char ? 2**(len - 1 - idx) : 0 }.sum
+      def bitmap
+        ["B", "F", "R", "L"].zip([1, 0, 1, 0]).to_h
       end
     end
   end
