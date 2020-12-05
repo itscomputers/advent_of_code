@@ -15,12 +15,12 @@ end
 SOLVER = Advent::Solver.new("#{ARGV.first}")
 
 def output(part:)
-  "part #{part}: #{SOLVER.solve(part: part)}"
+  "  part #{part}: #{SOLVER.solve(part: part)}"
 end
 
 if ARGV.size > 1
   puts output(part: ARGV[1].to_i)
 elsif ARGV.size == 1
-  puts [1, 2].map { |part| "\n  #{output(part: part)}" }.join
+  puts [1, 2].map { |part| output(part: part) }.join("\n")
 end
 
