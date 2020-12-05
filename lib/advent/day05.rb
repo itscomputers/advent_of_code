@@ -9,7 +9,7 @@ module Advent
     end
 
     def initialize(input)
-      @seats = input.map { |string| Seat.new(string) }
+      @ids = input.map { |string| string.gsub(/[BFRL]/, **bitmap).to_i(2) }
     end
 
     def solve(part:)
@@ -20,7 +20,7 @@ module Advent
     end
 
     def ordered_seat_ids
-      @ordered_seat_ids ||= @seats.map(&:id).sort
+      @ordered_seat_ids ||= @ids.sort
     end
 
     def max_seat_id
@@ -33,16 +33,8 @@ module Advent
       end
     end
 
-    class Seat
-      attr_reader :id
-
-      def initialize(string)
-        @id = string.gsub(/[BFRL]/, **bitmap).to_i(2)
-      end
-
-      def bitmap
-        ["B", "F", "R", "L"].zip([1, 0, 1, 0]).to_h
-      end
+    def bitmap
+      @bitmap ||= ["B", "F", "R", "L"].zip([1, 0, 1, 0]).to_h
     end
   end
 end

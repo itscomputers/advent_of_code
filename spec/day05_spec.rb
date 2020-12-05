@@ -14,27 +14,12 @@ describe Advent::Day05 do
     end
   end
 
-  describe Advent::Day05::Seat do
-    let(:seat) { described_class.new(string) }
+  describe '#ordered_seat_ids' do
+    let(:input) { %w(BFFFBBFRRR FFFBBBFRRR BBFFBBFRLL) }
+    let(:day) { described_class.new(input) }
+    subject { day.ordered_seat_ids }
 
-    describe "#id" do
-      subject { seat.id }
-
-      context "when BFFFBBFRRR" do
-        let(:string) { "BFFFBBFRRR" }
-        it { is_expected.to eq 567 }
-      end
-
-      context "when FFFBBBFRRR" do
-        let(:string) { "FFFBBBFRRR" }
-        it { is_expected.to eq 119 }
-      end
-
-      context "when BBFFBBFRLL" do
-        let(:string) { "BBFFBBFRLL" }
-        it { is_expected.to eq 820 }
-      end
-    end
+    it { is_expected.to eq [119, 567, 820] }
   end
 end
 
