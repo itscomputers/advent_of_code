@@ -22,7 +22,7 @@ module Advent
     end
 
     def difference_from_sum_hash(size)
-      return @difference[size] unless @difference.nil?
+      return @difference[size] if @difference&.key? size
       @difference ||= Hash.new
       @difference[size] = @input
         .combination(size - 1)
