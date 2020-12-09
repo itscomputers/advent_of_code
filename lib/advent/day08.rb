@@ -30,7 +30,7 @@ module Advent
     end
 
     def hacked_console
-      modified_instructions_list.each do |instructions|
+      multiverse_instructions.each do |instructions|
         console = GameConsole.new instructions
         unless console.run.loop_found?
           return console
@@ -38,15 +38,15 @@ module Advent
       end
     end
 
-    def modified_instructions_list
+    def multiverse_instructions
       @instructions.map.with_index do |instruction, index|
         unless instruction.operation == 'acc'
-          modified_instructions_at index
+          alt_universe_instructions_at index
         end
       end.compact
     end
 
-    def modified_instructions_at(index)
+    def alt_universe_instructions_at(index)
       head = @instructions.take index
       tail = @instructions.drop index + 1
       new_op = case @instructions[index].operation
