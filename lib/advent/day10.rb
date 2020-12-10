@@ -20,13 +20,11 @@ module Advent
       end
     end
 
-    def differences
-      @voltage_values.each_cons(2).map { |(a, b)| b - a }
-    end
-
     def distribution
-      @distribution ||= differences.each_with_object(Hash.new { |h, k| h[k] = 0 }) do |diff, memo|
-        memo[diff] += 1
+      @distribution ||= @voltage_values
+        .each_cons(2)
+        .each_with_object(Hash.new { |h, k| h[k] = 0 }) do |pair, memo|
+          memo[pair.last - pair.first] += 1
       end
     end
 
@@ -64,7 +62,7 @@ module Advent
         end
 
         def leaf_count
-          @leaf_count ||= @children.empty? ? 1 : @children.sum(&:leaf_count)
+          @leaf_count ||= [@children.sum(&:leaf_count), 1].max
         end
       end
     end
