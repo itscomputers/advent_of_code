@@ -9,14 +9,14 @@ module Advent
     end
 
     def self.options
-      { :block_length => 25 }
+      { :preamble_length => 25 }
     end
 
-    def initialize(input, block_length:)
+    def initialize(input, preamble_length:)
       @numbers = input
-      @original = input.take block_length
-      @remaining = input.drop block_length
-      @block = Block.new @original
+      @original = input.take preamble_length
+      @remaining = input.drop preamble_length
+      @preamble = Preamble.new @original
     end
 
     def solve(part:)
@@ -28,8 +28,8 @@ module Advent
 
     def first_invalid
       @first_invalid ||= begin
-        while @block.valid? @remaining.first
-          @block.shift! @remaining.shift
+        while @preamble.valid? @remaining.first
+          @preamble.shift! @remaining.shift
         end
         @remaining.first
       end
@@ -39,50 +39,12 @@ module Advent
       ContiguousSumSearcher.new(@numbers, first_invalid).search.contiguous_set
     end
 
-    class ContiguousSumSearcher
-      def initialize(numbers, target)
-        @numbers = numbers
-        @target = target
-        @index = 0
-        @length = 2
-      end
-
-      def search
-        expand_search until @search_complete
-        self
-      end
-
-      def contiguous_set
-        @numbers.slice(@index, @length)
-      end
-
-      def sum
-        contiguous_set.sum
-      end
-
-      def expand_search
-        difference = sum - @target
-        if difference < 0
-          @length += 1
-        elsif difference > 0
-          @index += 1
-          @length -= 1
-        else
-          @search_complete = true
-        end
-      end
-    end
-
-    class Block
+    class Preamble
       attr_reader :numbers
 
       def initialize(numbers)
         @numbers = numbers
-        numbers_hash
-      end
-
-      def numbers_hash
-        @numbers_hash ||= @numbers
+        @numbers_hash = @numbers
           .combination(2)
           .each_with_object(Hash.new { |h, k| h[k] = [] }) do |pair, memo|
             memo[pair.first] << pair.sum
@@ -90,7 +52,7 @@ module Advent
       end
 
       def sums
-        numbers_hash.values.flatten.to_set
+        @numbers_hash.values.flatten.to_set
       end
 
       def valid?(number)
@@ -103,6 +65,41 @@ module Advent
         @numbers << new_number
       end
     end
+
+    class ContiguousSumSearcher
+      def initialize(numbers, target)
+        @numbers = numbers
+        @target = target
+        @index = 0
+        @length = 2
+      end
+
+      def search
+        continue_search until @search_complete
+        self
+      end
+
+      def contiguous_set
+        @numbers.slice(@index, @length)
+      end
+
+      def sum
+        contiguous_set.sum
+      end
+
+      def continue_search
+        difference = sum - @target
+        if difference < 0
+          @length += 1
+        elsif difference > 0
+          @index += 1
+          @length -= 1
+        else
+          @search_complete = true
+        end
+      end
+    end
+
   end
 end
 

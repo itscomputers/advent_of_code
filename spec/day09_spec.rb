@@ -2,31 +2,31 @@ require 'advent/day09'
 
 describe Advent::Day09 do
   let(:input) { [35, 20, 15, 25, 47, 40, 62, 55, 65, 95, 102, 117, 150, 182, 127, 219, 299, 277, 309, 576] }
-  let(:block_length) { 5 }
+  let(:preamble_length) { 5 }
 
   describe 'part 1' do
-    subject { described_class.new(input, block_length: block_length).solve part: 1 }
+    subject { described_class.new(input, preamble_length: preamble_length).solve part: 1 }
     it { is_expected.to eq 127 }
   end
 
   describe 'part 2' do
-    subject { described_class.new(input, block_length: block_length).solve part: 2 }
+    subject { described_class.new(input, preamble_length: preamble_length).solve part: 2 }
     it { is_expected.to eq 62 }
   end
 
-  describe Advent::Day09::Block do
-    let(:block) { described_class.new numbers }
+  describe Advent::Day09::Preamble do
+    let(:preamble) { described_class.new numbers }
 
     describe 'first 25 numbers' do
       let(:numbers) { [20, *(1..19).to_a, *(21..25).to_a] }
 
       describe '#sums' do
-        subject { block.sums }
+        subject { preamble.sums }
         it { is_expected.to eq (3..49).to_set }
       end
 
       describe '#valid?' do
-        subject { block.valid? new_number }
+        subject { preamble.valid? new_number }
 
         context "when new number is 26" do
           let(:new_number) { 26 }
@@ -60,15 +60,15 @@ describe Advent::Day09 do
           end
 
           it "has original minus first and 45 as numbers" do
-            expect { block.shift! new_number }
-              .to change { block.numbers }
+            expect { preamble.shift! new_number }
+              .to change { preamble.numbers }
               .from(numbers)
               .to expected_numbers
           end
 
           it "recomputes the numbers hash" do
-            expect { block.shift! new_number }
-              .to change { block.sums }
+            expect { preamble.shift! new_number }
+              .to change { preamble.sums }
               .from((3..49).to_set)
               .to expected_numbers_hash.values.flatten.to_set
           end
