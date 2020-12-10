@@ -14,9 +14,8 @@ module Advent
 
     def initialize(input, preamble_length:)
       @numbers = input
-      @original = input.take preamble_length
+      @preamble = Preamble.new input.take preamble_length
       @remaining = input.drop preamble_length
-      @preamble = Preamble.new @original
     end
 
     def solve(part:)
@@ -99,7 +98,6 @@ module Advent
         end
       end
     end
-
   end
 end
 
