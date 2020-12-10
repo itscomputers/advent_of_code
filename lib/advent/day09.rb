@@ -22,7 +22,7 @@ module Advent
     def solve(part:)
       case part
       when 1 then first_invalid
-      when 2 then range_summing_to_invalid.minmax.sum
+      when 2 then contiguous_set.minmax.sum
       end
     end
 
@@ -35,30 +35,40 @@ module Advent
       end
     end
 
-    def minmax
-      @minmax ||= @numbers.minmax
+    def contiguous_set
+      ContiguousSumSearcher.new(@numbers, first_invalid).search.contiguous_set
     end
 
-    def min
-      minmax.first
-    end
+    class ContiguousSumSearcher
+      def initialize(numbers, target)
+        @numbers = numbers
+        @target = target
+        @index = 0
+        @length = 2
+      end
 
-    def max
-      minmax.last
-    end
+      def search
+        expand_search until @search_complete
+        self
+      end
 
-    def contiguous_length_min
-      [first_invalid / max, 2].max
-    end
+      def contiguous_set
+        @numbers.slice(@index, @length)
+      end
 
-    def contiguous_length_max
-      [first_invalid / min, @numbers.size].min
-    end
+      def sum
+        contiguous_set.sum
+      end
 
-    def range_summing_to_invalid
-      (contiguous_length_min..contiguous_length_max).each do |length|
-        @numbers.each_cons(length).each do |contiguous_set|
-          return contiguous_set if contiguous_set.sum == first_invalid
+      def expand_search
+        difference = sum - @target
+        if difference < 0
+          @length += 1
+        elsif difference > 0
+          @index += 1
+          @length -= 1
+        else
+          @search_complete = true
         end
       end
     end
