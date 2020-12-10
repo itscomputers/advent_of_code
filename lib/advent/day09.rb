@@ -75,7 +75,7 @@ module Advent
       end
 
       def search
-        continue_search until @search_complete
+        continue_search until @search_complete || contiguous_set.empty?
         self
       end
 
