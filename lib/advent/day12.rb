@@ -61,7 +61,7 @@ module Advent
       end
 
       def distance
-        @location.x.abs + @location.y.abs
+        @location.norm
       end
 
       def execute_all

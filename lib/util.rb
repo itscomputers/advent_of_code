@@ -18,5 +18,13 @@ class Point < Struct.new(:x, :y)
   def to_a
     [x, y]
   end
+
+  def norm
+    to_a.map(&:abs).sum
+  end
+
+  def euclidean_norm
+    to_a.map { |t| t**2 }.sum
+  end
 end
 
