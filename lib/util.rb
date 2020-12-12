@@ -26,5 +26,13 @@ class Point < Struct.new(:x, :y)
   def euclidean_norm
     to_a.map { |t| t**2 }.sum
   end
+
+  def rotate_clockwise_90
+    Point.new -y, x
+  end
+
+  def rotate_counter_clockwise_90
+    Point.new y, -x
+  end
 end
 

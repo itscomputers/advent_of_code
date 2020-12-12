@@ -104,10 +104,6 @@ module Advent
           { **options, key => options[key] + direction * @value }
         end
 
-        def turn(orientation, options)
-          { **options, :direction => send(orientation, options) }
-        end
-
         def turn_clockwise(options)
           { **options, :direction => clockwise(options) }
         end
@@ -156,32 +152,14 @@ module Advent
           :waypoint
         end
 
-        def turn(orientation, options)
-          self.send "turn_#{orientation}", options
-        end
-
         def turn_clockwise(options)
-          x, y = options[:waypoint].to_a
-          (@value / 90).times do
-            x, y = -y, x
-          end
-          {
-            **options,
-            :waypoint => Point.new(x, y),
-            :direction => clockwise(options)
-          }
+          waypoint = (@value / 90).times.reduce(options[:waypoint]) { |pt| pt.rotate_clockwise_90 }
+          { **options, :waypoint => waypoint, :direction => clockwise(options) }
         end
 
         def turn_counter_clockwise(options)
-          x, y = options[:waypoint].to_a
-          (@value / 90).times do
-            x, y = y, -x
-          end
-          {
-            **options,
-            :waypoint => Point.new(x, y),
-            :direction => counter_clockwise(options)
-          }
+          waypoint = (@value / 90).times.reduce(options[:waypoint]) { |pt| pt.rotate_counter_clockwise_90 }
+          { **options, :waypoint => waypoint, :direction => clockwise(options) }
         end
 
         def forward(options)
