@@ -105,11 +105,11 @@ module Advent
         end
 
         def turn_clockwise(options)
-          { **options, :direction => clockwise(options) }
+          { **options, :direction => rotate_clockwise(options[:direction]) }
         end
 
         def turn_counter_clockwise(options)
-          { **options, :direction => counter_clockwise(options) }
+          { **options, :direction => rotate_counter_clockwise(options[:direction]) }
         end
 
         def forward(options)
@@ -120,12 +120,12 @@ module Advent
           :location
         end
 
-        def clockwise(options)
-          DEGREE_DIRECTION[(DIRECTION_DEGREE[options[:direction]] + @value) % 360]
+        def rotate_clockwise(point)
+          (@value / 90).times.reduce(point) { |pt| pt.rotate_clockwise_90 }
         end
 
-        def counter_clockwise(options)
-          DEGREE_DIRECTION[(DIRECTION_DEGREE[options[:direction]] - @value) % 360]
+        def rotate_counter_clockwise(point)
+          (@value / 90).times.reduce(point) { |pt| pt.rotate_counter_clockwise_90 }
         end
       end
     end
@@ -153,13 +153,19 @@ module Advent
         end
 
         def turn_clockwise(options)
-          waypoint = (@value / 90).times.reduce(options[:waypoint]) { |pt| pt.rotate_clockwise_90 }
-          { **options, :waypoint => waypoint, :direction => clockwise(options) }
+          {
+            **options,
+            :waypoint => rotate_clockwise(options[:waypoint]),
+            :direction => rotate_clockwise(options[:direction]),
+          }
         end
 
         def turn_counter_clockwise(options)
-          waypoint = (@value / 90).times.reduce(options[:waypoint]) { |pt| pt.rotate_counter_clockwise_90 }
-          { **options, :waypoint => waypoint, :direction => clockwise(options) }
+          {
+            **options,
+            :waypoint => rotate_counter_clockwise(options[:waypoint]),
+            :direction => rotate_counter_clockwise(options[:direction]),
+          }
         end
 
         def forward(options)
