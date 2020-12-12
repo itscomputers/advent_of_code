@@ -63,20 +63,16 @@ module Advent
         required_fields.all? { |key| self.send key, passport.hash[key] }
       end
 
-      def between?(value, lower, upper)
-        lower <= value.to_i && value.to_i <= upper
-      end
-
       def byr(value)
-        between? value, 1920, 2002
+        value.to_i.between? 1920, 2002
       end
 
       def iyr(value)
-        between? value, 2010, 2020
+        value.to_i.between? 2010, 2020
       end
 
       def eyr(value)
-        between? value, 2020, 2030
+        value.to_i.between? 2020, 2030
       end
 
       def hgt_regex
@@ -87,8 +83,8 @@ module Advent
         match = hgt_regex.match(value)
         return false if match.nil?
         case match[:unit]
-        when "cm" then between? match[:number], 150, 193
-        when "in" then between? match[:number], 59, 76
+        when "cm" then match[:number].to_i.between? 150, 193
+        when "in" then match[:number].to_i.between? 59, 76
         else false
         end
       end
