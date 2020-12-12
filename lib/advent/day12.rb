@@ -27,24 +27,16 @@ module Advent
 
     def solve(part:)
       case part
-      when 1 then executor.execute_all.distance
-      when 2 then enhanced_executor.execute_all.distance
+      when 1 then Executor.new(@input).execute_all.distance
+      when 2 then EnhancedExecutor.new(@input).execute_all.distance
       end
     end
 
-    def executor
-      Executor.new @input, Point.new(0, 0), EAST
-    end
-
-    def enhanced_executor
-      EnhancedExecutor.new @input, Point.new(0, 0), EAST, Point.new(10, 1)
-    end
-
     class Executor
-      def initialize(input, location, direction)
-        @instructions = input.map { |args| Instruction.new *args }
-        @location = location
-        @direction = direction
+      def initialize(input)
+        @instructions = input.map { |args| self.class::Instruction.new *args }
+        @location = Point.new 0, 0
+        @direction = EAST
       end
 
       def inspect
@@ -122,11 +114,9 @@ module Advent
     end
 
     class EnhancedExecutor < Executor
-      def initialize(input, location, direction, waypoint)
-        @instructions = input.map { |args| Instruction.new *args }
-        @location = location
-        @direction = direction
-        @waypoint = waypoint
+      def initialize(input)
+        super
+        @waypoint = Point.new 10, 1
       end
 
       def to_h
