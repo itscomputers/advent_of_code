@@ -10,15 +10,6 @@ module Advent
     NORTH = Point.new 0, 1
     SOUTH = Point.new 0, -1
 
-    DIRECTION_DEGREE = {
-      EAST => 0,
-      NORTH => 90,
-      WEST => 180,
-      SOUTH => 270,
-    }
-
-    DEGREE_DIRECTION = DIRECTION_DEGREE.invert
-
     def self.sanitized_input
       raw_input.split("\n").map do |string|
         match = instruction_regex.match string
