@@ -1,10 +1,5 @@
 require 'advent/day'
-
-class Point
-  def +(other)
-    Point.new(x + other.x, y + other.y)
-  end
-end
+require 'util'
 
 module Advent
   class Day11 < Advent::Day

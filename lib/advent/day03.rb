@@ -1,6 +1,5 @@
 require 'advent/day'
-
-Point = Struct.new(:x, :y)
+require 'util'
 
 module Advent
   class Day03 < Advent::Day
