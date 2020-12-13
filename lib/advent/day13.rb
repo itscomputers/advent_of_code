@@ -61,12 +61,8 @@ class ChineseRemainderTheorem
     product / modulus * Modular.inverse(product / modulus, modulus) % product
   end
 
-  def coeffs
-    @moduli.map(&method(:coeff))
-  end
-
   def solution
-    @residues.zip(coeffs).map { |(r, c)| r * c % product }.sum % product
+    @residues.zip(@moduli).map { |(r, m)| coeff(m) * r % product }.sum % product
   end
 end
 
