@@ -16,7 +16,7 @@ module Advent
 
     def solve(part:)
       case part
-      when 1 then bus_finder.find.reduce(&:*)
+      when 1 then earliest_bus_and_time.reduce(&:*)
       when 2 then ChineseRemainderTheorem.new(residues, moduli).solution
       end
     end
@@ -33,7 +33,7 @@ module Advent
       @buses.compact.map { |bus| [bus, bus - local_departure % bus] }
     end
 
-    def bus_finder
+    def earliest_bus_and_time
       buses_and_wait_times.min_by(&:last)
     end
 
