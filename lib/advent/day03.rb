@@ -19,15 +19,25 @@ module Advent
       }
     end
 
-    def initialize(input)
+    def self.options
+      {
+        :slopes => {
+          :part_1 => [[3, 1]],
+          :part_2 => [[1, 1], [3, 1], [5, 1], [7, 1], [1, 2]],
+        },
+      }
+    end
+
+    def initialize(input, slopes:)
       @size = input[:size]
       @trees = input[:trees]
+      @slopes = slopes
     end
 
     def solve(part:)
       case part
-      when 1 then tree_count Point.new(3, 1)
-      when 2 then tree_count_product part_two_slopes
+      when 1 then tree_count_product @slopes[:part_1]
+      when 2 then tree_count_product @slopes[:part_2]
       end
     end
 
@@ -38,11 +48,7 @@ module Advent
     end
 
     def tree_count_product(slopes)
-      slopes.reduce(1) { |acc, slope| acc * tree_count(slope) }
-    end
-
-    def part_two_slopes
-      [[1, 1], [3, 1], [5, 1], [7, 1], [1, 2]].map { |arr| Point.new(*arr) }
+      slopes.reduce(1) { |acc, array| acc * tree_count(Point.new *array) }
     end
   end
 end
