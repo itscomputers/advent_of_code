@@ -1,7 +1,8 @@
 require 'advent/day03'
 
 describe Advent::Day03 do
-  let(:day) { described_class.new(input) }
+  let(:day) { described_class.new(input, slopes: slopes) }
+  let(:slopes) { [] }
   let(:raw_input) { [
     "..#.",
     ".#..",
