@@ -30,10 +30,6 @@ module Advent
         end.map(&:flatten) - [Array.new(@dimensions) { 0 }]
       end
 
-      def point(*coords)
-        GridPoint.new *coords
-      end
-
       def get_status(point)
         @point_hash[point]
       end
@@ -46,46 +42,48 @@ module Advent
         directions.map { |direction| point.zip(direction).map(&:sum) }
       end
 
-      def active_neighbor_count(point)
-        neighbors_of(point).count(&method(:get_status))
+      def active_count(points)
+        points.count(&method(:get_status))
       end
 
-      def should_activate?(point)
-        !get_status(point) && active_neighbor_count(point) == 3
-      end
-
-      def should_deactivate?(point)
-        get_status(point) && !active_neighbor_count(point).between?(2, 3)
-      end
-
-      def activate!(point)
-        set_status point, active: true
-      end
-
-      def deactivate!(point)
-        set_status point, active: false
-      end
-
-      def points_to_consider
-        @point_hash.keys.reduce(Set.new) do |set, point|
-          set + [point, *neighbors_of(point)]
+      def action(status, count)
+        if !status && count == 3
+          :activate!
+        elsif status && !count.between?(2, 3)
+          :deactivate!
         end
       end
 
-      def to_activate
-        points_to_consider.select(&method(:should_activate?))
+      def activation_data
+        boundary = Set.new
+
+        result = @point_hash.each_with_object(Hash.new) do |(point, status), memo|
+          neighbors = neighbors_of(point).tap do |neighbors|
+            neighbors.each { |nb| boundary.add(nb) unless @point_hash.key? nb }
+          end
+
+          memo[point] = action status, active_count(neighbors)
+        end
+
+        boundary.each do |point|
+          result[point] = action get_status(point), active_count(neighbors_of point)
+        end
+
+        result
       end
 
-      def to_deactivate
-        points_to_consider.select(&method(:should_deactivate?))
+      def activate!(point)
+        @point_hash[point] = true
+      end
+
+      def deactivate!(point)
+        @point_hash.delete point
       end
 
       def advance
-        @to_activate = to_activate
-        @to_deactivate = to_deactivate
-
-        @to_activate.map(&method(:activate!))
-        @to_deactivate.map(&method(:deactivate!))
+        activation_data.each do |point, action|
+          send action, point unless action.nil?
+        end
       end
 
       def advance_by(number)
@@ -104,7 +102,7 @@ module Advent
         char_array.map.with_index do |row, y|
           row.map.with_index do |char, x|
             point = [x, y, *(@dimensions - 2).times.map { 0 }]
-            point_hash[point] = char == "#"
+            point_hash[point] = true if char == "#"
           end
         end
         point_hash
