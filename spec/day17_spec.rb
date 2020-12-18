@@ -17,9 +17,10 @@ describe Advent::Day17 do
     it { is_expected.to eq 112 }
   end
 
-  describe 'part 2' do
-    subject { day.solve part: 2 }
-    it { is_expected.to eq 848 }
-  end
+# runs slow
+# describe 'part 2' do
+#   subject { day.solve part: 2 }
+#   it { is_expected.to eq 848 }
+# end
 end
 
