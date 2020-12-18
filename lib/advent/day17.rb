@@ -21,7 +21,7 @@ module Advent
 
       def initialize(char_array, dimensions:)
         @dimensions = dimensions
-        @point_hash = point_hash_from(char_array)
+        @active_points = active_points_from(char_array)
       end
 
       def directions
@@ -31,11 +31,7 @@ module Advent
       end
 
       def get_status(point)
-        @point_hash[point]
-      end
-
-      def set_status(point, active:)
-        @point_hash[point] = active
+        @active_points.include? point
       end
 
       def neighbors_of(point)
@@ -43,7 +39,7 @@ module Advent
       end
 
       def active_count(points)
-        points.count(&method(:get_status))
+        (@active_points & points).count
       end
 
       def action(status, count)
@@ -55,29 +51,29 @@ module Advent
       end
 
       def activation_data
-        boundary = Set.new
+        inactive_neighbors = Set.new
 
-        result = @point_hash.each_with_object(Hash.new) do |(point, status), memo|
+        result = @active_points.each_with_object(Hash.new) do |point, memo|
           neighbors = neighbors_of(point).tap do |neighbors|
-            neighbors.each { |nb| boundary.add(nb) unless @point_hash.key? nb }
+            neighbors.each { |nb| inactive_neighbors.add(nb) unless get_status(nb) }
           end
 
-          memo[point] = action status, active_count(neighbors)
+          memo[point] = action true, active_count(neighbors)
         end
 
-        boundary.each do |point|
-          result[point] = action get_status(point), active_count(neighbors_of point)
+        inactive_neighbors.each do |point|
+          result[point] = action false, active_count(neighbors_of point)
         end
 
         result
       end
 
       def activate!(point)
-        @point_hash[point] = true
+        @active_points.add point
       end
 
       def deactivate!(point)
-        @point_hash.delete point
+        @active_points.delete point
       end
 
       def advance
@@ -92,20 +88,19 @@ module Advent
       end
 
       def active_cube_count
-        @point_hash.count { |_point, status| status }
+        @active_points.count
       end
 
       private
 
-      def point_hash_from(char_array)
-        point_hash = Hash.new
-        char_array.map.with_index do |row, y|
+      def active_points_from(char_array)
+        char_array.each_with_index.reduce(Set.new) do |set, (row, y)|
           row.map.with_index do |char, x|
-            point = [x, y, *(@dimensions - 2).times.map { 0 }]
-            point_hash[point] = true if char == "#"
+            next unless char == "#"
+            set.add [x, y, *(@dimensions - 2).times.map { 0 }]
           end
+          set
         end
-        point_hash
       end
     end
   end
