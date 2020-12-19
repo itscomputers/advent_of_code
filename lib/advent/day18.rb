@@ -12,10 +12,6 @@ module Advent
       @input = input
     end
 
-    def expressions
-      @input.map { |string| Expression.new string.gsub(/ +/, "").chars }
-    end
-
     def solve(part:)
       case part
       when 1 then @input.map(&method(:no_order_of_operations)).sum
