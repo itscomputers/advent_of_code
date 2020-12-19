@@ -19,20 +19,16 @@ module Advent
       end
     end
 
+    def evaluate(string, pattern, substitution, klass)
+      eval(string.gsub(pattern, substitution).gsub(/\d+/) { |val| "#{klass}.new(#{val})" }).value
+    end
+
     def no_order_of_operations(string)
-      eval(
-        string
-          .gsub("*", "-")
-          .gsub(/\d+/) { |val| "SubtractIsMultiply.new(#{val})" }
-      ).value
+      evaluate string, /\*/, { "*" => "-" }, SubtractIsMultiply
     end
 
     def opposite_order_of_operations(string)
-      eval(
-        string
-          .gsub(/[+*]/, "+" => "*", "*" => "+")
-          .gsub(/\d+/) { |val| "SwapAddAndMultiply.new(#{val})" }
-      ).value
+      evaluate string, /[\*\+]/, { "+" => "*", "*" => "+" }, SwapAddAndMultiply
     end
 
     class SubtractIsMultiply < Struct.new(:value)
