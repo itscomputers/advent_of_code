@@ -53,8 +53,8 @@ describe Advent::Day19 do
       }) }
     end
 
-    describe 'rule#regex' do
-      subject { rule_hash.transform_values(&:regex) }
+    describe 'rule#full_regex' do
+      subject { rule_hash.transform_values(&:full_regex) }
       it { is_expected.to eq({
         0 => /^(a((aa|bb)(ab|ba)|(ab|ba)(aa|bb))b)$/,
         1 => /^((aa|bb)(ab|ba)|(ab|ba)(aa|bb))$/,
