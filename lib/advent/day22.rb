@@ -34,16 +34,12 @@ module Advent
         @cards = cards
       end
 
-      def inspect
-        "#{@cards.join(",")}"
-      end
-
       def draw
-        @cards.shift
+        @cards.first
       end
 
-      def add(cards)
-        @cards += cards
+      def cycle(cards)
+        @cards = [*@cards.drop(1), *cards]
       end
 
       def score
@@ -58,29 +54,13 @@ module Advent
         @decks = decks
       end
 
-      def inspect
-        "<#{@decks.map(&:inspect).join(" -- ")} prev=#{@cards}>"
-      end
-
       def draw
         @cards = @decks.map(&:draw)
       end
 
-      def round_result_for(index)
-        index == 0 ? [@cards, []] : [[], @cards.reverse]
-      end
-
-      def player_two_new_cards
-        @cards.reverse
-      end
-
-      def round_result
-        @cards == @cards.sort ? round_result_for(1) : round_result_for(0)
-      end
-
       def cycle_cards
         @decks.zip(round_result).each do |deck, cards|
-          deck.add cards
+          deck.cycle cards
         end
       end
 
@@ -93,6 +73,18 @@ module Advent
       def play
         play_round until game_over?
         self
+      end
+
+      def round_result_for(index)
+        index == 0 ? [@cards, []] : [[], @cards.reverse]
+      end
+
+      def round_winner
+        @cards == @cards.sort ? 1 : 0
+      end
+
+      def round_result
+        round_result_for round_winner
       end
 
       def game_over?
@@ -112,74 +104,34 @@ module Advent
       end
     end
 
-    class GameLog
-      def initialize
-        @hash = Hash.new
-      end
-
-      def result_for(cards_array)
-        if @hash.key? cards_array
-          @hash[cards_array]
-        elsif @hash.key? cards_array.reverse
-          1 - @hash[cards_array]
-        end
-      end
-
-      def record(cards_array, winner)
-        @hash[cards_array] = winner
-      end
-    end
-
     class RecursiveCombat < Combat
-      def game_log
-        @game_log ||= GameLog.new
-      end
-
-      def game_log=(value)
-        @game_log = value
-      end
-
       def configurations
         @configurations ||= Set.new
       end
 
-      def previously_seen?
-        configurations.include? @decks.map(&:cards)
+      def add_configuration?
+        configurations.add? @decks.first.cards
       end
 
-      def add_configuration
-        configurations.add @decks.map(&:cards)
-      end
-
-      def round_result
+      def round_winner
         return super unless recurse?
-        round_result_for(recursive_winner)
+        recursive_winner
       end
 
       def recursive_winner
-        cards_array = @decks.zip(@cards).map { |deck, card| deck.cards.take(card) }
-        winner_index = game_log.result_for cards_array
-        return winner_index unless winner_index.nil?
-
         RecursiveCombat
-          .new(cards_array.map { |cards| Deck.new cards })
-          .tap { |recursive_combat| recursive_combat.game_log = game_log }
+          .new(@decks.zip(@cards).map { |deck, count| Deck.new deck.cards.drop(1).take(count) })
           .play
           .winner
-          .tap { |winner| game_log.record cards_array, winner }
       end
 
       def play_round
-        if previously_seen?
-          @winner = 0
-          return
-        end
-        add_configuration
+        return @winner = 0 unless add_configuration?
         super
       end
 
       def recurse?
-        @decks.zip(@cards).all? { |deck, card| deck.cards.size >= card }
+        @decks.zip(@cards).all? { |deck, card| deck.cards.size > card }
       end
     end
   end
