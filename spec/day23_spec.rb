@@ -1,0 +1,25 @@
+require 'advent/day23'
+
+describe Advent::Day23 do
+  let(:day) { Advent::Day23.build }
+  let(:raw_input) { "389125467" }
+
+  before { allow(Advent::Day23).to receive(:raw_input).and_return raw_input }
+
+  describe 'part 1' do
+    subject { day.solve part: 1 }
+    it { is_expected.to eq "67384529" }
+  end
+
+  describe Advent::Day23::CrabCups do
+    let(:crab_cups) { described_class.new "389125467".chars.map(&:to_i) }
+
+    context "after 10 moves" do
+      it "has the right string representation" do
+        crab_cups.advance_by(10)
+        expect(crab_cups.to_s).to eq "92658374"
+      end
+    end
+  end
+end
+
