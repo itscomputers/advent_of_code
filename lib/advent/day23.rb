@@ -24,6 +24,12 @@ module Advent
 
     class CrabCup < Struct.new(:label)
       attr_accessor :next
+
+      def array_of_next(number)
+        number.times.reduce([]) do |array, _|
+          [*array, (array.last || self).next]
+        end
+      end
     end
 
     class CrabCups
@@ -31,7 +37,12 @@ module Advent
 
       def initialize(cup_labels)
         @size = cup_labels.size
-        @cup_lookup = cup_labels
+        @cup_lookup = build_cup_lookup_from cup_labels
+        @current = cup_for cup_labels.first
+      end
+
+      def build_cup_lookup_from(cup_labels)
+        cup_labels
           .cycle
           .take(@size + 1)
           .each_cons(2)
@@ -40,7 +51,6 @@ module Advent
             memo[next_label] ||= CrabCup.new(next_label)
             memo[label].next = memo[next_label]
         end
-        @current = cup_for cup_labels.first
       end
 
       def cup_for(label)
@@ -48,37 +58,28 @@ module Advent
       end
 
       def to_s
-        cups_after(1, 8).map(&:label).join("")
-      end
-
-      def cups_after(label, number)
-        number.times.reduce([cup_for(label)]) do |array, _|
-          [*array, array.last.next]
-        end.drop(1)
+        cup_for(1).array_of_next(8).map(&:label).join("")
       end
 
       def inspect
-        cups = "(#{current.label}) #{cups_after(current.label, 8).map(&:label).join(" ")}"
+        cups = "(#{@current.label}) #{current.array_of_next(8).map(&:label).join(" ")}"
         "cups: #{cups}\npick up: #{pick_up.map(&:label)}\ndestination: #{destination.label}"
       end
 
       def pick_up
-        cups_after(current.label, 3)
-      end
-
-      def remaining_labels
-        (1..@size).to_a - pick_up.map(&:label)
+        @current.array_of_next 3
       end
 
       def destination
-        cup_for(
-          remaining_labels
-            .sort
-            .reverse.cycle(2 * @size)
-            .drop_while { |label| label != @current.label }
-            .drop(1)
-            .first
-        )
+        label = subtract_one_from @current.label
+        while pick_up.map(&:label).include? label
+          label = subtract_one_from label
+        end
+        cup_for label
+      end
+
+      def subtract_one_from(label)
+        label == 1 ? @size : label - 1
       end
 
       def advance
