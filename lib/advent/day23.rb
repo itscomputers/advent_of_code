@@ -30,63 +30,51 @@ module Advent
       attr_accessor :current
 
       def initialize(cup_labels)
-        @cup_labels = cup_labels
-        @current = cup_for cup_labels.first
-        build_connections
-      end
-
-      def size
-        @size ||= @cup_labels.size
-      end
-
-      def cup_lookup
-        @cup_lookup ||= @cup_labels.each_with_object(Hash.new) do |label, memo|
-          memo[label] = CrabCup.new label
+        @size = cup_labels.size
+        @cup_lookup = cup_labels
+          .cycle
+          .take(@size + 1)
+          .each_cons(2)
+          .each_with_object(Hash.new) do |(label, next_label), memo|
+            memo[label] ||= CrabCup.new(label)
+            memo[next_label] ||= CrabCup.new(next_label)
+            memo[label].next = memo[next_label]
         end
+        @current = cup_for cup_labels.first
       end
 
       def cup_for(label)
-        cup_lookup[label]
-      end
-
-      def build_connections
-        @cup_labels.cycle.take(size + 1).each_cons(2) do |(label, next_label)|
-          cup_for(label).next = cup_for(next_label)
-        end
+        @cup_lookup[label]
       end
 
       def to_s
-        cups_after(1).map(&:label).join("")
+        cups_after(1, 8).map(&:label).join("")
       end
 
-      def cups_from(label)
-        8.times.reduce([cup_for(label)]) do |array, _|
+      def cups_after(label, number)
+        number.times.reduce([cup_for(label)]) do |array, _|
           [*array, array.last.next]
-        end
-      end
-
-      def cups_after(label)
-        cups_from(label).drop(1)
+        end.drop(1)
       end
 
       def inspect
-        cups = "(#{current.label}) #{cups_after(current.label).map(&:label).join(" ")}"
+        cups = "(#{current.label}) #{cups_after(current.label, 8).map(&:label).join(" ")}"
         "cups: #{cups}\npick up: #{pick_up.map(&:label)}\ndestination: #{destination.label}"
       end
 
       def pick_up
-        cups_after(current.label).take(3)
+        cups_after(current.label, 3)
       end
 
       def remaining_labels
-        @cup_labels - pick_up.map(&:label)
+        (1..@size).to_a - pick_up.map(&:label)
       end
 
       def destination
         cup_for(
           remaining_labels
             .sort
-            .reverse.cycle(2 * size)
+            .reverse.cycle(2 * @size)
             .drop_while { |label| label != @current.label }
             .drop(1)
             .first
