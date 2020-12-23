@@ -11,6 +11,12 @@ describe Advent::Day23 do
     it { is_expected.to eq "67384529" }
   end
 
+# slow spec
+# describe 'part 2' do
+#   subject { day.solve part: 2 }
+#   it { is_expected.to eq 149245887792 }
+# end
+
   describe Advent::Day23::CrabCupGame do
     let(:crab_cups) { described_class.new "389125467".chars.map(&:to_i) }
 

@@ -15,11 +15,16 @@ module Advent
     def solve(part:)
       case part
       when 1 then crab_cup_game.advance_by(100).to_s
+      when 2 then mega_crab_cup_game.advance_by(10**7).product_of_next_two
       end
     end
 
     def crab_cup_game
       CrabCupGame.new @labels
+    end
+
+    def mega_crab_cup_game
+      MegaCrabCupGame.new @labels, 10**6
     end
 
     class CrabCup < Struct.new(:label)
@@ -61,6 +66,10 @@ module Advent
         cup_for(1).array_of_next(8).map(&:label).join("")
       end
 
+      def product_of_next_two
+        cup_for(1).array_of_next(2).map(&:label).reduce(&:*)
+      end
+
       def inspect
         cups = "(#{@current.label}) #{current.array_of_next(8).map(&:label).join(" ")}"
         "cups: #{cups}\npick up: #{pick_up.map(&:label)}\ndestination: #{destination.label}"
@@ -99,10 +108,12 @@ module Advent
       end
     end
 
-    class MegaCrabCups
-      def initialize(cup_labels, total_cups)
-        @cup_labels = cup_labels + (cup_labels.size..total_cups).to_a
-        super
+    class MegaCrabCupGame < CrabCupGame
+      def initialize(labels, total_cups)
+        @size = total_cups
+        labels = [*labels, *((labels.size + 1)..@size).to_a]
+        @cup_lookup = build_cup_lookup_from labels
+        @current = cup_for labels.first
       end
     end
   end
