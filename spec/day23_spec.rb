@@ -11,7 +11,7 @@ describe Advent::Day23 do
     it { is_expected.to eq "67384529" }
   end
 
-  describe Advent::Day23::CrabCups do
+  describe Advent::Day23::CrabCupGame do
     let(:crab_cups) { described_class.new "389125467".chars.map(&:to_i) }
 
     context "after 10 moves" do

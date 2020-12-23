@@ -14,12 +14,12 @@ module Advent
 
     def solve(part:)
       case part
-      when 1 then crab_cups.to_s
+      when 1 then crab_cup_game.advance_by(100).to_s
       end
     end
 
-    def crab_cups
-      CrabCups.new(@labels).advance_by(100)
+    def crab_cup_game
+      CrabCupGame.new @labels
     end
 
     class CrabCup < Struct.new(:label)
@@ -32,17 +32,17 @@ module Advent
       end
     end
 
-    class CrabCups
+    class CrabCupGame
       attr_accessor :current
 
-      def initialize(cup_labels)
-        @size = cup_labels.size
-        @cup_lookup = build_cup_lookup_from cup_labels
-        @current = cup_for cup_labels.first
+      def initialize(labels)
+        @size = labels.size
+        @cup_lookup = build_cup_lookup_from labels
+        @current = cup_for labels.first
       end
 
-      def build_cup_lookup_from(cup_labels)
-        cup_labels
+      def build_cup_lookup_from(labels)
+        labels
           .cycle
           .take(@size + 1)
           .each_cons(2)
