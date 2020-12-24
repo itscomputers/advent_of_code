@@ -25,12 +25,7 @@ module Advent
 
     class TileFloor
       def initialize(tile_strings)
-        @tile_strings = tile_strings
-        @black_tiles = initial_state
-      end
-
-      def initial_state
-        @tile_strings.each_with_object(Set.new) do |string, set|
+        @black_tiles = tile_strings.each_with_object(Set.new) do |string, set|
           location = location_from string
           set.add?(location) || set.delete(location)
         end
