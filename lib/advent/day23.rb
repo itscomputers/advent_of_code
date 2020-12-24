@@ -29,7 +29,6 @@ module Advent
 
     class CrabCupGame
       def initialize(labels)
-        @labels = labels
         @size = labels.size
         @state = Array.new
         [*labels, labels.first].each_cons(2) { |(label, next_label)| set_next label, next_label }
