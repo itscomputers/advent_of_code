@@ -36,10 +36,6 @@ module Advent
         @current = labels.first
       end
 
-      def build_state_from(labels)
-
-      end
-
       def inspect
         [
           "cups: (#{@current}) #{array_of_next(@current, 8).join(" ")}",
