@@ -63,7 +63,7 @@ module Advent
       end
 
       def next_after(cup)
-        @state[cup] || cup + 1
+        @state[cup]
       end
 
       def destination
@@ -82,10 +82,10 @@ module Advent
         p = pick_up
         d = destination
 
-        @state[@current] = @state[p.last]
-        @state[p.last] = @state[d]
+        @state[@current] = next_after p.last
+        @state[p.last] = next_after d
         @state[d] = p.first
-        @current = @state[@current]
+        @current = next_after @current
         self
       end
 
