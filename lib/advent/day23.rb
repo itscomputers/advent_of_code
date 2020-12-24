@@ -32,7 +32,7 @@ module Advent
         @labels = labels
         @size = labels.size
         @state = Array.new
-        [*labels, labels.first].each_cons(2) { |(label, next_label)| @state[label] = next_label }
+        [*labels, labels.first].each_cons(2) { |(label, next_label)| set_next label, next_label }
         @current = labels.first
       end
 
@@ -66,6 +66,10 @@ module Advent
         @state[cup]
       end
 
+      def set_next(cup, next_cup)
+        @state[cup] = next_cup
+      end
+
       def destination
         label = subtract_one_from @current
         while pick_up.include? label
@@ -82,9 +86,9 @@ module Advent
         p = pick_up
         d = destination
 
-        @state[@current] = next_after p.last
-        @state[p.last] = next_after d
-        @state[d] = p.first
+        set_next @current, next_after(p.last)
+        set_next p.last, next_after(d)
+        set_next d, p.first
         @current = next_after @current
         self
       end
