@@ -39,15 +39,5 @@ describe Advent::Day24 do
 #   subject { day.solve part: 2 }
 #   it { is_expected.to eq 2208 }
 # end
-
-  describe Advent::Day24::TileFloor::Tile do
-    let(:tile) { described_class.new(string) }
-    subject { tile.directions }
-
-    context "when string is sesenwnenenewseeswwswswwnenewsewsw" do
-      let(:string) { "sesenwnenenewseeswwswswwnenewsewsw" }
-      it { is_expected.to eq %w(se se nw ne ne ne w se e sw w sw sw w ne ne w se w sw) }
-    end
-  end
 end
 

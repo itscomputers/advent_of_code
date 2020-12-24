@@ -25,13 +25,14 @@ module Advent
 
     class TileFloor
       def initialize(tile_strings)
-        @tiles = tile_strings.map { |string| Tile.new string }
+        @tile_strings = tile_strings
         @black_tiles = initial_state
       end
 
       def initial_state
-        @tiles.each_with_object(Set.new) do |tile, set|
-          set.add?(tile.location) || set.delete(tile.location)
+        @tile_strings.each_with_object(Set.new) do |string, set|
+          location = location_from string
+          set.add?(location) || set.delete(location)
         end
       end
 
@@ -39,29 +40,35 @@ module Advent
         @black_tiles.size
       end
 
-      def tiles_to_flip
-        boundary = Set.new
-        result = { :black => [], :white => [] }
-        @black_tiles.each do |tile|
-          black_neighbors, white_neighbors = HexGrid.neighbors_of(tile).partition do |neighbor|
-            @black_tiles.include? neighbor
-          end
-          if black_neighbors.size == 0 || black_neighbors.size > 2
-            result[:white] << tile
-          end
-          boundary += white_neighbors
+      def is_black?(location)
+        @black_tiles.include? location
+      end
+
+      def should_flip?(location)
+        count = HexGrid.neighbors_of(location).count(&method(:is_black?))
+        if is_black? location
+          count == 0 || count > 2
+        else
+          count == 2
         end
-        boundary.each do |white_tile|
-          if (@black_tiles & HexGrid.neighbors_of(white_tile)).size == 2
-            result[:black] << white_tile
+      end
+
+      def black_tiles_to_flip
+        @black_tiles.select(&method(:should_flip?))
+      end
+
+      def white_tiles_to_flip
+        @black_tiles.each_with_object(Hash.new) do |black_tile, memo|
+          HexGrid.neighbors_of(black_tile).reject(&method(:is_black?)).each do |white_tile|
+            memo[white_tile] ||= { :should_flip => should_flip?(white_tile) }
           end
-        end
-        result
+        end.select { |k, v| v[:should_flip] }.keys
       end
 
       def flip_tiles!
-        new_black, new_white = tiles_to_flip.slice(:black, :white).values
-        @black_tiles = @black_tiles + new_black - new_white
+        new_black = white_tiles_to_flip
+        no_longer_black = black_tiles_to_flip
+        @black_tiles = @black_tiles + new_black - no_longer_black
         self
       end
 
@@ -70,30 +77,17 @@ module Advent
         self
       end
 
-      class Tile
-        def initialize(string)
-          @string = string
-        end
-
-        def directions
-          result = []
-          chars = @string.chars
-          until chars.empty?
-            char = chars.shift
-            if ["n", "s"].include? char
-              result << "#{char}#{chars.shift}"
-            else
-              result << char
-            end
+      def location_from(string)
+        location = [0, 0]
+        chars = string.chars
+        until chars.empty?
+          direction = chars.shift
+          if ["n", "s"].include? direction
+            direction = [direction, chars.shift].join("")
           end
-          result
+          location = HexGrid.add location, HexGrid.point(direction)
         end
-
-        def location
-          @location ||= directions.reduce([0, 0]) do |point, direction|
-            HexGrid.add point, HexGrid.point(direction)
-          end
-        end
+        location
       end
     end
 
