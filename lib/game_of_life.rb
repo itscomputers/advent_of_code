@@ -41,8 +41,8 @@ class GameOfLife
     select_active(points).size
   end
 
-  def condition_for(status)
-    case status
+  def condition_for(action)
+    case action
     when :activating then lambda { |count| count == 3 }
     when :deactivating then lambda { |count| !count.between?(2, 3) }
     end
