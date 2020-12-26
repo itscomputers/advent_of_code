@@ -6,15 +6,13 @@ module Year2020
       @instruction_regex ||= /^(?<operation>\w+) (?<argument>[\+\-]\d+)$/
     end
 
-    def instruction_args_from(string)
-      match = instruction_regex.match string
-      [match[:operation], match[:argument]]
+    def parse_line(line)
+      match = instruction_regex.match line
+      Instruction.new match[:operation], match[:argument]
     end
 
     def instructions
-      @instructions ||= raw_input.split("\n").map do |string|
-        Instruction.new *instruction_args_from(string)
-      end
+      parsed_lines
     end
 
     def console

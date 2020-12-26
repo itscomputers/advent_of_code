@@ -3,7 +3,7 @@ require 'solver'
 module Year2020
   class Day02 < Solver
     def line_regex
-      @line_regex = Regexp.new(/(?<lower>\d+)\-(?<upper>\d+) (?<char>\w)\: (?<password>\w+)/)
+      @line_regex ||= Regexp.new(/(?<lower>\d+)\-(?<upper>\d+) (?<char>\w)\: (?<password>\w+)/)
     end
 
     def parse_line(line)
@@ -11,10 +11,6 @@ module Year2020
       [:lower, :upper, :char, :password].each_with_object(Hash.new) do |key, memo|
         memo[key] = match[key]
       end
-    end
-
-    def lines
-      @lines ||= raw_input.split("\n").map(&method(:parse_line))
     end
 
     def solve(part:)
@@ -25,7 +21,7 @@ module Year2020
     end
 
     def valid_count(policy:)
-      lines.count { |hash| policy.new(hash).valid? }
+      parsed_lines.count { |hash| policy.new(hash).valid? }
     end
 
     class LegacyPasswordPolicy

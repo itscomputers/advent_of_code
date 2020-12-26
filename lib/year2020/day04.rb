@@ -3,7 +3,7 @@ require 'solver'
 module Year2020
   class Day04 < Solver
     def passports
-      @passports ||= raw_input.split("\n\n").map do |passport_string|
+      @passports ||= chunks.map do |passport_string|
         passport_hash = passport_string
           .gsub("\n", " ")
           .split(" ")

@@ -2,10 +2,6 @@ require 'solver'
 
 module Year2020
   class Day22 < Solver
-    def player_strings
-      @player_strings ||= raw_input.split("\n\n")
-    end
-
     def combat(part)
       case part
       when 1 then Combat
@@ -18,7 +14,7 @@ module Year2020
     end
 
     def decks
-      player_strings.map { |player_string| Deck.new cards_from(player_string) }
+      chunks.map { |player_string| Deck.new cards_from(player_string) }
     end
 
     def cards_from(player_string)

@@ -5,7 +5,7 @@ require 'grid_parser'
 module Year2020
   class Day17 < Solver
     def points
-      @initial_points ||= GridParser.new(string: raw_input).parse_as_set(char: "#")
+      @initial_points ||= grid_parser.parse_as_set(char: "#")
     end
 
     def initial_points(dimensions)

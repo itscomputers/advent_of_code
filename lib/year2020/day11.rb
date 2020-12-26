@@ -1,11 +1,10 @@
 require 'solver'
-require 'grid_parser'
 require 'vector'
 
 module Year2020
   class Day11 < Solver
     def location_lookup
-      @location_lookup ||= GridParser.new(string: raw_input).parse_as_hash do |point, char|
+      @location_lookup ||= grid_parser.parse_as_hash do |point, char|
         Location.new(point, char)
       end
     end

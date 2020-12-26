@@ -2,13 +2,13 @@ require 'solver'
 
 module Year2020
   class Day21 < Solver
-    def recipes
-      @recipes ||= raw_input.split("\n").map { |string| Recipe.new string }
+    def parse_line(line)
+      Recipe.new line
     end
 
     def allergen_hash
       @allergen_hash ||= IngredientClassifier
-        .new(recipes)
+        .new(parsed_lines)
         .deduce_allergens
         .determined_allergens
     end
@@ -18,7 +18,7 @@ module Year2020
     end
 
     def part_one
-      recipes.reduce(0) do |acc, recipe|
+      parsed_lines.reduce(0) do |acc, recipe|
         recipe.ingredients.count do |ingredient|
           !ingredients_with_allergens.include? ingredient
         end + acc

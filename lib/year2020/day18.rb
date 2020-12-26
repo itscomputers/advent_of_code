@@ -2,10 +2,6 @@ require 'solver'
 
 module Year2020
   class Day18 < Solver
-    def lines
-      @lines ||= raw_input.split("\n")
-    end
-
     def solve(part:)
       case part
       when 1 then lines.map(&method(:no_order_of_operations)).sum

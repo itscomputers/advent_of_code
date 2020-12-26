@@ -2,10 +2,6 @@ require 'solver'
 
 module Year2020
   class Day20 < Solver
-    def tile_strings
-      @tile_strings ||= raw_input.split("\n\n")
-    end
-
     def part_one
       corner_ids.reduce(&:*)
     end
@@ -50,7 +46,7 @@ module Year2020
     end
 
     def tile_lookup
-      @tile_lookup ||= tile_strings.each_with_object(Hash.new) do |string, memo|
+      @tile_lookup ||= chunks.each_with_object(Hash.new) do |string, memo|
         rows = string.split("\n")
         id = /Tile (?<id>\d+):/.match(rows.first)[:id].to_i
         memo[id] = Tile.new(id, rows.drop(1))

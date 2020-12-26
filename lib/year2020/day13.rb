@@ -4,17 +4,13 @@ require 'chinese_remainder_theorem'
 module Year2020
   class Day13 < Solver
     def earliest_departure
-      @earliest_departure ||= raw_input.split("\n").first.to_i
-    end
-
-    def buses_string
-      raw_input.split("\n").last
+      @earliest_departure ||= lines.first.to_i
     end
 
     def buses
-      @buses ||= buses_string
-        .split(",")
-        .map { |string| string == "x" ? nil : string.to_i }
+      @buses ||= lines.last.split(",").map do |string|
+        string == "x" ? nil : string.to_i
+      end
     end
 
     def part_one

@@ -16,7 +16,7 @@ module Year2020
     end
 
     def initial_points
-      raw_input.split("\n").each_with_object(Set.new) do |string, set|
+      lines.each_with_object(Set.new) do |string, set|
         point = point_from string
         set.add?(point) || set.delete(point)
       end

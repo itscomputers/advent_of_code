@@ -1,4 +1,4 @@
-require 'advent/day'
+require 'solver'
 require 'point'
 
 module Year2020
@@ -8,11 +8,9 @@ module Year2020
     NORTH = Point.new 0, 1
     SOUTH = Point.new 0, -1
 
-    def instruction_hashes
-      @instruction_hashes ||= raw_input.split("\n").map do |string|
-        match = instruction_regex.match string
-        [match[:action], match[:value]]
-      end
+    def parse_line(line)
+      match = instruction_regex.match line
+      [match[:action], match[:value]]
     end
 
     def instruction_regex
@@ -27,7 +25,7 @@ module Year2020
     end
 
     def solve(part:)
-      executor(part).new(instruction_hashes).execute_all.distance
+      executor(part).new(parsed_lines).execute_all.distance
     end
 
     class Executor

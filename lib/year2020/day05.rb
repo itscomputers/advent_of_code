@@ -2,10 +2,12 @@ require 'solver'
 
 module Year2020
   class Day05 < Solver
+    def parse_line(line)
+      line.gsub(/[BFRL]/, **bitmap).to_i 2
+    end
+
     def ids
-      @ids ||= raw_input.split("\n").map do |string|
-        string.gsub(/[BFRL]/, **bitmap).to_i(2)
-      end.sort
+      @ids ||= parsed_lines.sort
     end
 
     def part_one

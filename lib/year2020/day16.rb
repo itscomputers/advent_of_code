@@ -2,14 +2,6 @@ require 'solver'
 
 module Year2020
   class Day16 < Solver
-    def part_one
-      invalid_values.sum
-    end
-
-    def part_two
-      my_departures.reduce(&:*)
-    end
-
     def rule_regex
       @rule_regex ||= Regexp.new /(?<name>[\w ]+)\: (?<range_1>\d+\-\d+) or (?<range_2>\d+\-\d+)/
     end
@@ -18,19 +10,23 @@ module Year2020
       @ticket_regex ||= Regexp.new /\d+\,[\d\,?]+/
     end
 
-    def rows
-      @rows ||= raw_input.split("\n")
+    def part_one
+      invalid_values.sum
+    end
+
+    def part_two
+      my_departures.reduce(&:*)
     end
 
     def rules
-      @rules ||= rows.map do |row|
-        match = rule_regex.match row
+      @rules ||= lines.map do |line|
+        match = rule_regex.match line
         Rule.new(match[:name], match[:range_1], match[:range_2]) if match
       end.compact
     end
 
     def tickets
-      @tickets ||= rows
+      @tickets ||= lines
         .select { |row| ticket_regex.match row }
         .map { |row| Ticket.new row.split(",").map(&:to_i), rules }
     end
@@ -52,15 +48,16 @@ module Year2020
     end
 
     def rule_index_hash
-      RuleOrderDeducer.new(rules, valid_tickets).deduce_all.index_hash
     end
 
     def my_departures
-      rule_index_hash
+      RuleOrderDeducer
+        .new(rules, valid_tickets)
+        .deduce_all
+        .index_hash
         .select { |rule, _index| rule.name.start_with? 'departure' }
         .map { |_rule, index| my_ticket.numbers[index] }
     end
-
 
     class Rule
       attr_reader :name, :ranges

@@ -2,16 +2,12 @@ require 'solver'
 
 module Year2020
   class Day19 < Solver
-    def line_groups
-      @line_groups ||= raw_input.split("\n\n").map { |chunk| chunk.split("\n") }
-    end
-
     def raw_rules
-      @raw_rules ||= line_groups.first
+      @raw_rules ||= chunks.first.split("\n")
     end
 
     def messages
-      @messages ||= line_groups.last
+      @messages ||= chunks.last.split("\n")
     end
 
     def part_one

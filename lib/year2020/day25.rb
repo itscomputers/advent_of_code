@@ -8,7 +8,7 @@ module Year2020
     end
 
     def public_keys
-      @public_keys ||= ids.zip(raw_input.split("\n").map(&:to_i)).to_h
+      @public_keys ||= ids.zip(lines.map(&:to_i)).to_h
     end
 
     def base

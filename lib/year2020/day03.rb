@@ -1,18 +1,13 @@
 require 'solver'
-require 'grid_parser'
 
 module Year2020
   class Day03 < Solver
-    def lines
-      @lines ||= raw_input.split("\n")
-    end
-
     def bounds
       @bounds ||= [lines.first.size, lines.size]
     end
 
     def trees
-      @trees ||= GridParser.new(lines: lines).parse_as_set(char: "#")
+      @trees ||= grid_parser.parse_as_set(char: "#")
     end
 
     def slopes(part:)

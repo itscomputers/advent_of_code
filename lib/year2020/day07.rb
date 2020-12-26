@@ -3,7 +3,7 @@ require 'solver'
 module Year2020
   class Day07 < Solver
     def initialize
-      raw_input.split("\n").each do |string|
+      lines.each do |string|
         rule_parser = RuleParser.new string
         parent = bag_for rule_parser.parent_color
         rule_parser.children_data.each do |hash|

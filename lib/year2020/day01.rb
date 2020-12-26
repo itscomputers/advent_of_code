@@ -3,7 +3,7 @@ require "solver"
 module Year2020
   class Day01 < Solver
     def numbers
-      @numbers ||= raw_input.split("\n").map(&:to_i)
+      @numbers ||= lines.map(&:to_i)
     end
 
     def sum

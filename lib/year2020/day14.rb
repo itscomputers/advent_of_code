@@ -2,10 +2,6 @@ require 'solver'
 
 module Year2020
   class Day14 < Solver
-    def rows
-      @rows ||= raw_input.split("\n")
-    end
-
     def decoder(part)
       case part
       when 1 then Decoder
@@ -14,7 +10,7 @@ module Year2020
     end
 
     def solve(part:)
-      decoder(part).new(rows).memory.values.sum
+      decoder(part).new(lines).memory.values.sum
     end
 
     class Decoder

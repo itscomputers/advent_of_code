@@ -3,7 +3,7 @@ require 'solver'
 module Year2020
   class Day06 < Solver
     def groups
-      @groups ||= raw_input.split("\n\n").map { |string| Group.new(string) }
+      @groups ||= chunks.map { |string| Group.new(string) }
     end
 
     def part_one
