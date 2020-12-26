@@ -14,7 +14,7 @@ module Year2020
     end
 
     class Decoder
-      attr_reader :memory
+      attr_reader :mask, :memory
 
       def self.mask_regex
         @mask_regex ||= Regexp.new /mask = (?<mask>[01X]+)/
