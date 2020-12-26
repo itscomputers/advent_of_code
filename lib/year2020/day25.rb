@@ -3,12 +3,14 @@ require 'modular'
 
 module Year2020
   class Day25 < Solver
-    def ids
-      [:card, :door]
+    def part_one
+      encryptions.tap do |encryptions|
+        raise "incompatible" unless encryptions.uniq.size == 1
+      end.first
     end
 
-    def public_keys
-      @public_keys ||= ids.zip(lines.map(&:to_i)).to_h
+    def ids
+      [:card, :door]
     end
 
     def base
@@ -19,10 +21,8 @@ module Year2020
       20201227
     end
 
-    def part_one
-      encryptions.tap do |encryptions|
-        raise "incompatible" unless encryptions.uniq.size == 1
-      end.first
+    def public_keys
+      @public_keys ||= ids.zip(lines.map(&:to_i)).to_h
     end
 
     def private_keys

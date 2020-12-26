@@ -2,12 +2,8 @@ require 'solver'
 
 module Year2020
   class Day03 < Solver
-    def bounds
-      @bounds ||= [lines.first.size, lines.size]
-    end
-
-    def trees
-      @trees ||= grid_parser.parse_as_set(char: "#")
+    def solve(part:)
+      tree_count_product slopes(part: part)
     end
 
     def slopes(part:)
@@ -17,8 +13,12 @@ module Year2020
       end
     end
 
-    def solve(part:)
-      tree_count_product slopes(part: part)
+    def bounds
+      @bounds ||= [lines.first.size, lines.size]
+    end
+
+    def trees
+      @trees ||= grid_parser.parse_as_set(char: "#")
     end
 
     def tree_count(slope)

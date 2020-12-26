@@ -8,13 +8,8 @@ module Year2020
     NORTH = Point.new 0, 1
     SOUTH = Point.new 0, -1
 
-    def parse_line(line)
-      match = instruction_regex.match line
-      [match[:action], match[:value]]
-    end
-
-    def instruction_regex
-      @instruction_regex ||= Regexp.new /(?<action>[NSEWLRF])(?<value>\d+)/
+    def solve(part:)
+      executor(part).new(parsed_lines).execute_all.distance
     end
 
     def executor(part)
@@ -24,8 +19,13 @@ module Year2020
       end
     end
 
-    def solve(part:)
-      executor(part).new(parsed_lines).execute_all.distance
+    def parse_line(line)
+      match = instruction_regex.match line
+      [match[:action], match[:value]]
+    end
+
+    def instruction_regex
+      @instruction_regex ||= Regexp.new /(?<action>[NSEWLRF])(?<value>\d+)/
     end
 
     class Executor

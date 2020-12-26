@@ -2,15 +2,15 @@ require 'solver'
 
 module Year2020
   class Day14 < Solver
+    def solve(part:)
+      decoder(part).new(lines).memory.values.sum
+    end
+
     def decoder(part)
       case part
       when 1 then Decoder
       when 2 then DecoderV2
       end
-    end
-
-    def solve(part:)
-      decoder(part).new(lines).memory.values.sum
     end
 
     class Decoder

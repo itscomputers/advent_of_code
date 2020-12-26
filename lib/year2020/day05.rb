@@ -2,14 +2,6 @@ require 'solver'
 
 module Year2020
   class Day05 < Solver
-    def parse_line(line)
-      line.gsub(/[BFRL]/, **bitmap).to_i 2
-    end
-
-    def ids
-      @ids ||= parsed_lines.sort
-    end
-
     def part_one
       ids.last
     end
@@ -18,6 +10,14 @@ module Year2020
       ids.each_cons(2).each do |(id, next_id)|
         return id + 1 if next_id - id == 2
       end
+    end
+
+    def parse_line(line)
+      line.gsub(/[BFRL]/, **bitmap).to_i 2
+    end
+
+    def ids
+      @ids ||= parsed_lines.sort
     end
 
     def bitmap

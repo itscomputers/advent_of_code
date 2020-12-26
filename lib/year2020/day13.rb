@@ -3,6 +3,14 @@ require 'chinese_remainder_theorem'
 
 module Year2020
   class Day13 < Solver
+    def part_one
+      earliest_bus_and_time.reduce(&:*)
+    end
+
+    def part_two
+      ChineseRemainderTheorem.new(residues, moduli).solution
+    end
+
     def earliest_departure
       @earliest_departure ||= lines.first.to_i
     end
@@ -11,14 +19,6 @@ module Year2020
       @buses ||= lines.last.split(",").map do |string|
         string == "x" ? nil : string.to_i
       end
-    end
-
-    def part_one
-      earliest_bus_and_time.reduce(&:*)
-    end
-
-    def part_two
-      ChineseRemainderTheorem.new(residues, moduli).solution
     end
 
     def period

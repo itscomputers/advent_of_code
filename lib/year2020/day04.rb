@@ -2,6 +2,17 @@ require 'solver'
 
 module Year2020
   class Day04 < Solver
+    def solve(part:)
+      case part
+      when 1 then valid_count policy: SimplePolicy.new
+      when 2 then valid_count policy: ComplexPolicy.new
+      end
+    end
+
+    def valid_count(policy:)
+      passports.count { |passport| policy.valid?(passport) }
+    end
+
     def passports
       @passports ||= chunks.map do |passport_string|
         passport_hash = passport_string
@@ -13,17 +24,6 @@ module Year2020
           end
         Passport.new passport_hash
       end
-    end
-
-    def solve(part:)
-      case part
-      when 1 then valid_count policy: SimplePolicy.new
-      when 2 then valid_count policy: ComplexPolicy.new
-      end
-    end
-
-    def valid_count(policy:)
-      passports.count { |passport| policy.valid?(passport) }
     end
 
     class Passport

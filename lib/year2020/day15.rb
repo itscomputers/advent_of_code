@@ -2,15 +2,15 @@ require 'solver'
 
 module Year2020
   class Day15 < Solver
-    def numbers
-      @numbers ||= raw_input.split(",").map(&:to_i)
-    end
-
     def solve(part:)
       case part
       when 1 then MemoryGame.new(numbers).play_until(2020).last_spoken
       when 2 then MemoryGame.new(numbers).play_until(30000000).last_spoken
       end
+    end
+
+    def numbers
+      @numbers ||= raw_input.split(",").map(&:to_i)
     end
 
     class MemoryGame

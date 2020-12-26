@@ -2,19 +2,19 @@ require 'solver'
 
 module Year2020
   class Day10 < Solver
-    def voltage_values
-      @voltage_values ||= begin
-        sorted_values = lines.map(&:to_i).sort
-        [0, *sorted_values, sorted_values.last + 3]
-      end
-    end
-
     def part_one
       distribution[1] * distribution[3]
     end
 
     def part_two
       VoltageTree.new(voltage_values).build.leaf_count
+    end
+
+    def voltage_values
+      @voltage_values ||= begin
+        sorted_values = lines.map(&:to_i).sort
+        [0, *sorted_values, sorted_values.last + 3]
+      end
     end
 
     def distribution

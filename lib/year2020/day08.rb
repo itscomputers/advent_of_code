@@ -2,6 +2,14 @@ require 'solver'
 
 module Year2020
   class Day08 < Solver
+    def part_one
+      console.run.accumulator
+    end
+
+    def part_two
+      hacked_console.accumulator
+    end
+
     def instruction_regex
       @instruction_regex ||= /^(?<operation>\w+) (?<argument>[\+\-]\d+)$/
     end
@@ -17,14 +25,6 @@ module Year2020
 
     def console
       @console ||= GameConsole.new instructions
-    end
-
-    def part_one
-      console.run.accumulator
-    end
-
-    def part_two
-      hacked_console.accumulator
     end
 
     def hacked_console

@@ -2,6 +2,14 @@ require 'solver'
 
 module Year2020
   class Day09 < Solver
+    def part_one
+      first_invalid
+    end
+
+    def part_two
+      contiguous_set.minmax.sum
+    end
+
     def numbers
       @numbers ||= lines.map(&:to_i)
     end
@@ -12,14 +20,6 @@ module Year2020
 
     def preamble
       Preamble.new numbers.take(preamble_length)
-    end
-
-    def part_one
-      first_invalid
-    end
-
-    def part_two
-      contiguous_set.minmax.sum
     end
 
     def first_invalid

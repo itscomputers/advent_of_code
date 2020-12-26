@@ -2,20 +2,20 @@ require 'solver'
 
 module Year2020
   class Day19 < Solver
-    def raw_rules
-      @raw_rules ||= chunks.first.split("\n")
-    end
-
-    def messages
-      @messages ||= chunks.last.split("\n")
-    end
-
     def part_one
       matching_rule 0
     end
 
     def part_two
       modified_matching_rule_zero
+    end
+
+    def raw_rules
+      @raw_rules ||= chunks.first.split("\n")
+    end
+
+    def messages
+      @messages ||= chunks.last.split("\n")
     end
 
     def matching_rule(index)

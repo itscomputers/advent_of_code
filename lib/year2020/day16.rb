@@ -2,20 +2,20 @@ require 'solver'
 
 module Year2020
   class Day16 < Solver
-    def rule_regex
-      @rule_regex ||= Regexp.new /(?<name>[\w ]+)\: (?<range_1>\d+\-\d+) or (?<range_2>\d+\-\d+)/
-    end
-
-    def ticket_regex
-      @ticket_regex ||= Regexp.new /\d+\,[\d\,?]+/
-    end
-
     def part_one
       invalid_values.sum
     end
 
     def part_two
       my_departures.reduce(&:*)
+    end
+
+    def rule_regex
+      @rule_regex ||= Regexp.new /(?<name>[\w ]+)\: (?<range_1>\d+\-\d+) or (?<range_2>\d+\-\d+)/
+    end
+
+    def ticket_regex
+      @ticket_regex ||= Regexp.new /\d+\,[\d\,?]+/
     end
 
     def rules

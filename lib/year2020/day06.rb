@@ -2,16 +2,16 @@ require 'solver'
 
 module Year2020
   class Day06 < Solver
-    def groups
-      @groups ||= chunks.map { |string| Group.new(string) }
-    end
-
     def part_one
       groups.sum { |group| group.unique_answers.size }
     end
 
     def part_two
       groups.sum { |group| group.common_answers.size }
+    end
+
+    def groups
+      @groups ||= chunks.map { |string| Group.new(string) }
     end
 
     class Group

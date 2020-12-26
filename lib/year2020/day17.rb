@@ -4,20 +4,20 @@ require 'grid_parser'
 
 module Year2020
   class Day17 < Solver
-    def points
-      @initial_points ||= grid_parser.parse_as_set(char: "#")
-    end
-
-    def initial_points(dimensions)
-      points.map { |point| [*point, *Array.new(dimensions - 2) { 0 }] }
-    end
-
     def solve(part:)
       grid(part + 2).after(generations: 6).active.size
     end
 
     def grid(dimensions)
       Grid.new(dimensions: dimensions).activate!(*initial_points(dimensions))
+    end
+
+    def points
+      @initial_points ||= grid_parser.parse_as_set(char: "#")
+    end
+
+    def initial_points(dimensions)
+      points.map { |point| [*point, *Array.new(dimensions - 2) { 0 }] }
     end
 
     class Grid < GameOfLife

@@ -2,6 +2,18 @@ require 'solver'
 
 module Year2020
   class Day21 < Solver
+    def part_one
+      parsed_lines.reduce(0) do |acc, recipe|
+        recipe.ingredients.count do |ingredient|
+          !ingredients_with_allergens.include? ingredient
+        end + acc
+      end
+    end
+
+    def part_two
+      allergen_hash.sort.map(&:last).join(",")
+    end
+
     def parse_line(line)
       Recipe.new line
     end
@@ -15,18 +27,6 @@ module Year2020
 
     def ingredients_with_allergens
       @ingredients_with_allergens ||= allergen_hash.values.to_set
-    end
-
-    def part_one
-      parsed_lines.reduce(0) do |acc, recipe|
-        recipe.ingredients.count do |ingredient|
-          !ingredients_with_allergens.include? ingredient
-        end + acc
-      end
-    end
-
-    def part_two
-      allergen_hash.sort.map(&:last).join(",")
     end
 
     class Recipe

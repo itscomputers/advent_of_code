@@ -2,6 +2,14 @@ require 'solver'
 
 module Year2020
   class Day07 < Solver
+    def part_one
+      bag_for("shiny gold").ancestors.count
+    end
+
+    def part_two
+      bag_for("shiny gold").interior_count
+    end
+
     def initialize
       lines.each do |string|
         rule_parser = RuleParser.new string
@@ -12,14 +20,6 @@ module Year2020
           child.add_parent parent
         end
       end
-    end
-
-    def part_one
-      bag_for("shiny gold").ancestors.count
-    end
-
-    def part_two
-      bag_for("shiny gold").interior_count
     end
 
     def bag_lookup

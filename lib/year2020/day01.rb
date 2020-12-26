@@ -2,16 +2,16 @@ require "solver"
 
 module Year2020
   class Day01 < Solver
+    def solve(part:)
+      find_tuple(size: part + 1).reduce(1) { |acc, val| acc * val }
+    end
+
     def numbers
       @numbers ||= lines.map(&:to_i)
     end
 
     def sum
       2020
-    end
-
-    def solve(part:)
-      find_tuple(size: part + 1).reduce(1) { |acc, val| acc * val }
     end
 
     def difference_from_sum_hash(size)

@@ -2,10 +2,6 @@ require 'solver'
 
 module Year2020
   class Day23 < Solver
-    def labels
-      @labels ||= raw_input.chomp.chars.map(&:to_i)
-    end
-
     def part_one
       CrabCupGame.new(labels).advance_by(100).part_one
     end
@@ -14,6 +10,10 @@ module Year2020
       CrabCupGame.new(
         labels + ((labels.size + 1)..10**6).to_a
       ).advance_by(10**7).part_two
+    end
+
+    def labels
+      @labels ||= raw_input.chomp.chars.map(&:to_i)
     end
 
     class CrabCupGame

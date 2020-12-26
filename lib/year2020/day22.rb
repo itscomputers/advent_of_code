@@ -2,15 +2,15 @@ require 'solver'
 
 module Year2020
   class Day22 < Solver
+    def solve(part:)
+      combat(part).new(decks).play.winning_score
+    end
+
     def combat(part)
       case part
       when 1 then Combat
       when 2 then RecursiveCombat
       end
-    end
-
-    def solve(part:)
-      combat(part).new(decks).play.winning_score
     end
 
     def decks

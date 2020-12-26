@@ -3,16 +3,16 @@ require 'vector'
 
 module Year2020
   class Day11 < Solver
-    def location_lookup
-      @location_lookup ||= grid_parser.parse_as_hash do |point, char|
-        Location.new(point, char)
-      end
-    end
-
     def solve(part:)
       case part
       when 1 then stable_occupied_count neighbor_method: 'neighbors'
       when 2 then stable_occupied_count neighbor_method: 'line_of_sight'
+      end
+    end
+
+    def location_lookup
+      @location_lookup ||= grid_parser.parse_as_hash do |point, char|
+        Location.new(point, char)
       end
     end
 
