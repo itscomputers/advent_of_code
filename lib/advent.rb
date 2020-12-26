@@ -1,7 +1,7 @@
 Dir["lib/year****/day**.rb"].each(&method(:load))
 
 YEAR, DAY, PART = ARGV
-SOLVER = Object.const_get("Year#{YEAR}::Day#{DAY}").new
+SOLVER = Object.const_get("Year#{YEAR}::Day#{DAY.to_i < 10 ? "0#{DAY.to_i}" : DAY}").new
 
 def output(part:)
   "  part #{part}: #{SOLVER.solve(part: part)}"
