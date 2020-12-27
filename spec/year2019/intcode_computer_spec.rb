@@ -66,7 +66,7 @@ describe IntcodeComputer do
     }.each do |opcode, position_5|
       context "when opcode is #{opcode}" do
         let(:opcode) { opcode }
-        before { computer.input = 666 }
+        before { computer.set_input 666 }
         it { expect(memory).to eq [opcode, 5, 1, 4, 2, position_5] }
         it { expect(address).to eq 2 }
       end

@@ -1,15 +1,58 @@
+class IntcodeInterface
+  attr_reader :outputs
+
+  def initialize(program)
+    @program = program
+    @outputs = []
+  end
+
+  def inspect
+    "<IntcodeInterface #{computer.inspect} output: #{output}>"
+  end
+
+  def output
+    @outputs.last
+  end
+
+  def computer
+    @computer ||= IntcodeComputer.new @program.dup
+  end
+
+  def reset
+    @computer = nil
+    @outputs = []
+    self
+  end
+
+  def run_with(inputs:, debug: false)
+    until computer.halted?
+      computer.advance_to_next_io
+      if computer.requires_input?
+        computer.set_input(inputs.shift).advance
+      elsif computer.will_output?
+        @outputs << computer.advance.output
+        yield @outputs
+      end
+    end
+    self
+  end
+end
+
 class IntcodeComputer
-  attr_reader :memory, :address
-  attr_accessor :input
+  attr_reader :memory, :address, :output
 
   def initialize(program)
     @memory = program
     @address = 0
-    @outputs = []
+  end
+
+  def inspect
+    display = halted? ? "halted" : "instruction: #{[opcode, *params]}"
+    "<IntcodeComputer #{display}>"
   end
 
   def run
-    advance until terminated?
+    advance until halted?
     self
   end
 
@@ -19,12 +62,29 @@ class IntcodeComputer
     self
   end
 
-  def terminated?
-    @terminated || opcode.nil?
+  def advance_to_next_io
+    advance until io? || halted?
   end
 
-  def output
-    @outputs.last
+  def halted?
+    @halted || opcode.nil?
+  end
+
+  def requires_input?
+    opcode == 3
+  end
+
+  def will_output?
+    opcode == 4
+  end
+
+  def io?
+    requires_input? || will_output?
+  end
+
+  def set_input(value)
+    @input = value
+    self
   end
 
   #---------------------------
@@ -127,11 +187,11 @@ class IntcodeComputer
   end
 
   def write_from_input
-    set(params.first, input || 0)
+    set(params.first, @input || 0)
   end
 
   def write_to_output
-    @outputs << moded_params.first
+    @output = moded_params.first
   end
 
   def jump_if_true
@@ -156,7 +216,7 @@ class IntcodeComputer
   end
 
   def halt
-    @terminated = true
+    @halted = true
   end
 
   def binary_operation(operation, &block)
