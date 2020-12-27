@@ -18,22 +18,48 @@ class IntcodeInterface
     @computer ||= IntcodeComputer.new @program.dup
   end
 
-  def reset
-    @computer = nil
-    @outputs = []
+  def advance
+    computer.advance
+  end
+
+  def next_output
+    computer.next_output
+  end
+
+  def add_input(*values)
+    computer.add_input *values
     self
   end
 
-  def run_with(inputs:, debug: false)
+  def reset
+    @computer = nil
+    @outputs = []
+    @inputs = []
+    self
+  end
+
+  def run(inputs: [], &block)
+    add_input *inputs
     until computer.halted?
-      computer.advance_to_next_io
-      if computer.requires_input?
-        computer.set_input(inputs.shift).advance
-      elsif computer.will_output?
-        @outputs << computer.advance.output
-        yield @outputs
+      output = computer.next_output
+      unless computer.halted?
+        @outputs << output
+        block.call(@outputs) unless block.nil?
       end
     end
+    self
+  end
+
+  def run_interactive(inputs: [], &block)
+    add_input *inputs
+    until computer.will_output? || computer.halted?
+      computer.advance_to_next_io
+      if computer.requires_input?
+        add_input(block.call).advance
+      end
+    end
+    output = next_output
+    @outputs << output unless computer.halted?
     self
   end
 end
@@ -44,6 +70,7 @@ class IntcodeComputer
   def initialize(program)
     @memory = program
     @address = 0
+    @inputs = []
   end
 
   def inspect
@@ -57,8 +84,10 @@ class IntcodeComputer
   end
 
   def advance
-    execute
-    move_address unless already_moved?
+    unless halted?
+      execute
+      move_address unless already_moved?
+    end
     self
   end
 
@@ -67,11 +96,11 @@ class IntcodeComputer
   end
 
   def halted?
-    @halted || opcode.nil?
+    @halted || opcode.nil? || instruction_size.nil?
   end
 
   def requires_input?
-    opcode == 3
+    opcode == 3 && @inputs.empty?
   end
 
   def will_output?
@@ -82,8 +111,14 @@ class IntcodeComputer
     requires_input? || will_output?
   end
 
-  def set_input(value)
-    @input = value
+  def next_output
+    advance until will_output? || halted?
+    advance
+    output
+  end
+
+  def add_input(*values)
+    @inputs += values
     self
   end
 
@@ -187,7 +222,8 @@ class IntcodeComputer
   end
 
   def write_from_input
-    set(params.first, @input || 0)
+    raise "requires input" if @inputs.empty?
+    set(params.first, @inputs.shift)
   end
 
   def write_to_output
