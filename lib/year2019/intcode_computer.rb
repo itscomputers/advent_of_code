@@ -177,18 +177,18 @@ class IntcodeComputer
     end
   end
 
-  def instruction_size
+  def params_shape
     case @opcode
-    when 1 then 4
-    when 2 then 4
-    when 3 then 2
-    when 4 then 2
-    when 5 then 3
-    when 6 then 3
-    when 7 then 4
-    when 8 then 4
-    when 9 then 2
-    when 99 then 1
+    when 1 then [2, 1]
+    when 2 then [2, 1]
+    when 3 then [0, 1]
+    when 4 then [1, 0]
+    when 5 then [2, 0]
+    when 6 then [2, 0]
+    when 7 then [2, 1]
+    when 8 then [2, 1]
+    when 9 then [1, 0]
+    when 99 then [0, 0]
     end
   end
 
@@ -200,21 +200,33 @@ class IntcodeComputer
     @opcode = raw_opcode % 100
   end
 
+  def instruction_size
+    params_shape.sum + 1
+  end
+
   def instruction
     @memory.slice @address, instruction_size
   end
 
-  def params
+  def raw_params
     instruction.drop(1)
   end
 
-  def moded_params
-    params.zip(modes).map do |(param, mode)|
+  def input_params
+    raw_params.take(params_shape.first).zip(modes).map do |(param, mode)|
       case mode
       when '1' then param
       when '2' then get(param + @relative_base)
       else get(param)
       end
+    end
+  end
+
+  def output_address
+    address = raw_params.drop(params_shape.first).take(params_shape.last).first
+    case modes[instruction_size - 2]
+    when '2' then address + @relative_base
+    else address
     end
   end
 
@@ -232,19 +244,19 @@ class IntcodeComputer
 
   def write_from_input
     raise "requires input" if @inputs.empty?
-    set(params.first, @inputs.shift)
+    set(output_address, @inputs.shift)
   end
 
   def write_to_output
-    @outputs << moded_params.first
+    @outputs << input_params.first
   end
 
   def jump_if_true
-    jump if moded_params.first != 0
+    jump if input_params.first != 0
   end
 
   def jump_if_false
-    jump if moded_params.first == 0
+    jump if input_params.first == 0
   end
 
   def less_than
@@ -256,11 +268,11 @@ class IntcodeComputer
   end
 
   def relative_base_offset
-    @relative_base += moded_params.first
+    @relative_base += input_params.first
   end
 
   def jump
-    set_address moded_params.last
+    set_address input_params.last
     @already_moved = true
   end
 
@@ -269,8 +281,7 @@ class IntcodeComputer
   end
 
   def binary_operation(operation, &block)
-    output_address = params.last
-    output = moded_params.take(2).reduce(operation)
+    output = input_params.reduce(operation)
     unless block.nil?
       output = block.call output
     end
