@@ -65,12 +65,14 @@ class IntcodeInterface
 end
 
 class IntcodeComputer
-  attr_reader :memory, :address, :output
+  attr_reader :memory, :address, :outputs
 
   def initialize(program)
     @memory = program
     @address = 0
     @inputs = []
+    @outputs = []
+    @relative_base = 0
   end
 
   def inspect
@@ -109,6 +111,10 @@ class IntcodeComputer
 
   def io?
     requires_input? || will_output?
+  end
+
+  def output
+    @outputs.last
   end
 
   def next_output
@@ -166,6 +172,7 @@ class IntcodeComputer
     when 6 then jump_if_false
     when 7 then less_than
     when 8 then equals
+    when 9 then relative_base_offset
     when 99 then halt
     end
   end
@@ -180,6 +187,7 @@ class IntcodeComputer
     when 6 then 3
     when 7 then 4
     when 8 then 4
+    when 9 then 2
     when 99 then 1
     end
   end
@@ -204,6 +212,7 @@ class IntcodeComputer
     params.zip(modes).map do |(param, mode)|
       case mode
       when '1' then param
+      when '2' then get(param + @relative_base)
       else get(param)
       end
     end
@@ -227,7 +236,7 @@ class IntcodeComputer
   end
 
   def write_to_output
-    @output = moded_params.first
+    @outputs << moded_params.first
   end
 
   def jump_if_true
@@ -244,6 +253,10 @@ class IntcodeComputer
 
   def equals
     binary_boolean_operation(:==)
+  end
+
+  def relative_base_offset
+    @relative_base += moded_params.first
   end
 
   def jump
