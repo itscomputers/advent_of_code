@@ -23,22 +23,20 @@ describe IntcodeComputer do
     end
   end
 
+  let(:memory) { computer.advance.memory }
+  let(:address) { computer.advance.address }
+
   describe '#add' do
     let(:opcode) { 1 }
-    subject { computer.advance.memory }
-    it { is_expected.to eq [opcode, 5, 1, 4, 5 + 3, 3] }
+    it { expect(memory).to eq [opcode, 5, 1, 4, 5 + 3, 3] }
+    it { expect(address).to eq 4 }
   end
 
   describe '#multiply' do
     let(:opcode) { 2 }
     subject { computer.advance.memory }
-    it { is_expected.to eq [opcode, 5, 1, 4, 5 * 3, 3] }
-  end
-
-  describe 'add and multiply' do
-    let(:program) { [1,9,10,3,2,3,11,0,99,30,40,50] }
-    subject { computer.run.memory }
-    it { is_expected.to eq [3500,9,10,70,2,3,11,0,99,30,40,50] }
+    it { expect(memory).to eq [opcode, 5, 1, 4, 5 * 3, 3] }
+    it { expect(address).to eq 4 }
   end
 
 
