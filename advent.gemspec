@@ -1,11 +1,9 @@
-require File.expand_path("../lib/advent/version", __FILE__)
-
 Gem::Specification.new do |s|
-  s.name = "advent2020"
-  s.version = Advent::VERSION
+  s.name = "advent_of_code"
+  s.version = "0.2.0"
 
   s.authors = ["itscomputers"]
-  s.summary = "advent of code 2020"
+  s.summary = "advent of code"
 
   s.require_paths = ["lib"]
 end
