@@ -24,7 +24,7 @@ class Vector
   end
 
   def self.neg(array)
-    apply { |coord| -coord }
+    apply(array) { |coord| -coord }
   end
 end
 
