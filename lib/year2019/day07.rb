@@ -24,50 +24,33 @@ module Year2019
     class AmplifierSet
       def initialize(sequence, program)
         @sequence = sequence
-        @interface = IntcodeInterface.new program
+        @program = program
       end
 
       def output_signal
         @output_signal ||= @sequence.reduce(0) do |output, input|
-          @interface.reset.run(inputs: [input, output]).output
+          IntcodeComputer.run(@program, inputs: [input, output]).output
         end
       end
     end
 
     class AmplifierSetWithFeedback
       def initialize(sequence, program)
-        @sequence = sequence
-        @size = sequence.size
-        @interfaces = @size.times.map do |index|
-          IntcodeInterface.new(program).add_input @sequence[index]
+        @computers = sequence.map do |input|
+          IntcodeComputer.new(program).add_input input
         end
-        @index = 0
+        @computer_cycle = [@computers.last, *@computers].each_cons(2).cycle
       end
 
-      def input
-        prev_interface.output || 0
-      end
-
-      def interface_at(index)
-        @interfaces[index % @size]
-      end
-
-      def interface
-        interface_at @index
-      end
-
-      def prev_interface
-        interface_at @index - 1
+      def advance
+        prev, curr = @computer_cycle.next
+        curr.next_input { |computer| computer.add_input prev.output || 0 }.next_output
+        self
       end
 
       def output_signal
-        until @interfaces.all? { |interface| interface.computer.halted? }
-          interface.run_interactive do |computer|
-            computer.add_input(input).advance
-          end
-          @index += 1
-        end
-        interface_at(4).output
+        advance until @computers.all?(&:halted?)
+        @computers.last.output
       end
     end
   end

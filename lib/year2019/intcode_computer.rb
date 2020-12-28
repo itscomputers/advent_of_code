@@ -1,72 +1,12 @@
-class IntcodeInterface
-  def initialize(program)
-    @program = program
-  end
-
-  def inspect
-    "<IntcodeInterface #{computer.inspect} output: #{output}>"
-  end
-
-  def computer
-    @computer ||= IntcodeComputer.new @program.dup
-  end
-
-  def outputs
-    computer.outputs
-  end
-
-  def output
-    computer.output
-  end
-
-  def add_input(*values)
-    computer.add_input *values
-    self
-  end
-
-  def reset
-    @computer = nil
-    self
-  end
-
-  def run(inputs: [], &block)
-    computer.add_input(*inputs).run
-    self
-  end
-
-  def next_output(&block)
-    block.call computer.next_output
-  end
-
-  def next_input(&block)
-    until computer.requires_input? || computer.halted?
-      computer.advance
-    end
-    block.call computer
-    computer.advance
-  end
-
-  def run_interactive(&block)
-    until computer.will_output? || computer.halted?
-      computer.advance_to_next_io
-      if computer.requires_input?
-        block.call computer
-      end
-    end
-    computer.next_output
-    self
-  end
-end
-
 class IntcodeComputer
   attr_reader :memory, :address, :outputs
 
   def self.run(program, inputs: [])
-    new(program.dup).add_input(*inputs).run
+    new(program).add_input(*inputs).run
   end
 
   def initialize(program)
-    @memory = program
+    @memory = program.dup
     @address = 0
     @inputs = []
     @outputs = []
@@ -91,8 +31,8 @@ class IntcodeComputer
     self
   end
 
-  def advance_to_next_io
-    advance until io? || halted?
+  def output
+    @outputs.last
   end
 
   def halted?
@@ -107,20 +47,13 @@ class IntcodeComputer
     opcode == 4
   end
 
-  def io?
-    requires_input? || will_output?
-  end
-
-  def output
-    @outputs.last
-  end
-
   def next_output(&block)
     advance until will_output? || halted?
     unless halted?
       advance
       block.call self unless block.nil?
     end
+    self
   end
 
   def next_input(&block)
@@ -129,12 +62,15 @@ class IntcodeComputer
       block.call self unless block.nil?
       advance
     end
+    self
   end
 
   def add_input(*values)
     @inputs += values
     self
   end
+
+  private
 
   #---------------------------
   # state management

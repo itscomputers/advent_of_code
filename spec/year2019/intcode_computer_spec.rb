@@ -6,29 +6,11 @@ describe IntcodeComputer do
   let(:opcode) { 1 }
 
   def changes(index:, from:, to:)
-    expect { subject }.to change { computer.get index }.from(from).to(to)
+    expect { subject }.to change { computer.send :get, index }.from(from).to(to)
   end
 
   def does_not_change(index:)
-    expect { subject }.to_not change { computer.get index }
-  end
-
-  describe '#set and #get' do
-    it 'can set position 2 to 1000' do
-      expect(computer.memory[2]).to_not eq 1000
-      expect(computer.get 2).to_not eq 1000
-      computer.set 2, 1000
-      expect(computer.get 2).to eq 1000
-      expect(computer.memory[2]).to eq 1000
-    end
-
-    it 'can set position 500 to 1000' do
-      expect(computer.memory[500]).to be_nil
-      expect(computer.get 500).to eq 0
-      computer.set 500, 1000
-      expect(computer.get 500).to eq 1000
-      expect(computer.memory[500]).to eq 1000
-    end
+    expect { subject }.to_not change { computer.send :get, index }
   end
 
   let(:memory) { computer.advance.memory }
