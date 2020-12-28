@@ -61,6 +61,10 @@ end
 class IntcodeComputer
   attr_reader :memory, :address, :outputs
 
+  def self.run(program, inputs: [])
+    new(program.dup).add_input(*inputs).run
+  end
+
   def initialize(program)
     @memory = program
     @address = 0
@@ -113,14 +117,18 @@ class IntcodeComputer
 
   def next_output(&block)
     advance until will_output? || halted?
-    advance
-    block.call self
+    unless halted?
+      advance
+      block.call self unless block.nil?
+    end
   end
 
   def next_input(&block)
     advance until requires_input? || halted?
-    block.call self
-    advance
+    unless halted?
+      block.call self unless block.nil?
+      advance
+    end
   end
 
   def add_input(*values)

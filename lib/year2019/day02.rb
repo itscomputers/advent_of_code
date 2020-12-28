@@ -4,7 +4,7 @@ require 'year2019/intcode_computer'
 module Year2019
   class Day02 < Solver
     def part_one
-      IntcodeComputer.new(modified_program 1202).run.memory.first
+      IntcodeComputer.run(modified_program 1202).memory.first
     end
 
     def part_two
@@ -38,7 +38,7 @@ module Year2019
     end
 
     def too_big?(value)
-      IntcodeComputer.new(modified_program value).run.memory.first > desired_output
+      IntcodeComputer.run(modified_program value).memory.first > desired_output
     end
 
     def modified_program(value)

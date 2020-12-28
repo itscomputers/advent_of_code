@@ -4,19 +4,15 @@ require 'year2019/intcode_computer'
 module Year2019
   class Day05 < Solver
     def part_one
-      interface.reset.run(inputs: [1]).output
+      IntcodeComputer.run(program, inputs: [1]).output
     end
 
     def part_two
-      interface.reset.run(inputs: [5]).output
+      IntcodeComputer.run(program, inputs: [5]).output
     end
 
     def program
-      raw_input.chomp.split(",").map(&:to_i)
-    end
-
-    def interface
-      @interface = IntcodeInterface.new program
+      @program ||= raw_input.chomp.split(",").map(&:to_i)
     end
   end
 end
