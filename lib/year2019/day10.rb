@@ -85,9 +85,16 @@ module Year2019
         @group
       end
 
+      def no_more_to_vaporize?
+        group_by_reduced_slope.values.all?(&:empty?)
+      end
+
       def nth_vaporized(number)
-        vaporize! until @vaporized_count >= number
-        raise "already surpassed #{number}" if @vaporized_count > number
+        until @vaporized_count == number
+          raise "already surpassed #{number}" if @vaporized_count > number
+          raise "no more to vaporize" if no_more_to_vaporize?
+          vaporize!
+        end
         @last_vaporized
       end
     end
