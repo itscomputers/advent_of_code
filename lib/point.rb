@@ -1,6 +1,10 @@
 require 'vector'
 
 class Point < Struct.new(:x, :y)
+  def self.rotate(array, direction)
+    new(*array).rotate(direction).to_a
+  end
+
   def inspect
     "(#{x}, #{y})"
   end

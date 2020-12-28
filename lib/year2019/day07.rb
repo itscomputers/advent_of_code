@@ -62,7 +62,9 @@ module Year2019
 
       def output_signal
         until @interfaces.all? { |interface| interface.computer.halted? }
-          interface.run_interactive { input }
+          interface.run_interactive do |computer|
+            computer.add_input(input).advance
+          end
           @index += 1
         end
         interface_at(4).output
