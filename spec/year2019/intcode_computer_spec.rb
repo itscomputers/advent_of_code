@@ -6,11 +6,11 @@ describe IntcodeComputer do
   let(:opcode) { 1 }
 
   def changes(index:, from:, to:)
-    expect { subject }.to change { computer.send :get, index }.from(from).to(to)
+    expect { subject }.to change { computer.get index }.from(from).to(to)
   end
 
   def does_not_change(index:)
-    expect { subject }.to_not change { computer.send :get, index }
+    expect { subject }.to_not change { computer.get index }
   end
 
   let(:memory) { computer.advance.memory }

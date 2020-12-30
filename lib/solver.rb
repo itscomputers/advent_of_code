@@ -1,4 +1,4 @@
-require 'grid_parser'
+require 'grid'
 
 class Solver
   def inspect
@@ -28,10 +28,6 @@ class Solver
 
   def parse_line(line)
     line
-  end
-
-  def grid_parser
-    GridParser.new(lines)
   end
 
   def solve(part:)

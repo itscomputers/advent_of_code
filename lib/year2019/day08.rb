@@ -48,9 +48,12 @@ module Year2019
       end
 
       def display
-        decoded.chars.each_slice(@width).map do |row|
-          row.join("").gsub(/[01]/, "0" => ".", "1" => "#")
-        end.join("\n")
+        Grid.display(
+          decoded.chars.each_slice(@width),
+          :type => :rows,
+          "0" => " ",
+          "1" => "#",
+        )
       end
     end
 

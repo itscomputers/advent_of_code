@@ -61,11 +61,7 @@ module Year2019
       end
 
       def display
-        Range.new(*@colors.keys.map(&:last).minmax).map do |y|
-          Range.new(*@colors.keys.map(&:first).minmax).map do |x|
-            @colors[[x, y]] == 1 ? "#" : " "
-          end.join("")
-        end.join("\n")
+        Grid.display @colors, :type => :hash, "0" => " ", "1" => "#"
       end
     end
   end

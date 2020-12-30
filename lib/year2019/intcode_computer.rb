@@ -53,7 +53,7 @@ class IntcodeComputer
       advance
       block.call self unless block.nil?
     end
-    self
+    output
   end
 
   def next_input(&block)
@@ -70,8 +70,6 @@ class IntcodeComputer
     self
   end
 
-  private
-
   #---------------------------
   # state management
 
@@ -83,6 +81,8 @@ class IntcodeComputer
   def get(index)
     @memory[index] || 0
   end
+
+  private
 
   def set_address(index)
     @address = index

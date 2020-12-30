@@ -16,7 +16,7 @@ module Year2019
     end
 
     def asteroids
-      @asteroids ||= grid_parser.parse_as_set char: "#"
+      @asteroids ||= Grid.parse(lines, as: 'set') { "#" }
     end
 
     def monitoring_station

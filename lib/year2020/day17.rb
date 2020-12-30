@@ -1,6 +1,5 @@
 require 'solver'
 require 'game_of_life'
-require 'grid_parser'
 
 module Year2020
   class Day17 < Solver
@@ -9,18 +8,18 @@ module Year2020
     end
 
     def grid(dimensions)
-      Grid.new(dimensions: dimensions).activate!(*initial_points(dimensions))
+      MultiDimensionalGameOfLife.new(dimensions: dimensions).activate!(*initial_points(dimensions))
     end
 
     def points
-      @initial_points ||= grid_parser.parse_as_set(char: "#")
+      @initial_points ||= Grid.parse(lines, as: 'set') { "#" }
     end
 
     def initial_points(dimensions)
       points.map { |point| [*point, *Array.new(dimensions - 2) { 0 }] }
     end
 
-    class Grid < GameOfLife
+    class MultiDimensionalGameOfLife < GameOfLife
       def initialize(dimensions:)
         @dimensions = dimensions
         super

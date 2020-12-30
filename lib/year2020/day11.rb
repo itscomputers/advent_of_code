@@ -11,7 +11,7 @@ module Year2020
     end
 
     def location_lookup
-      @location_lookup ||= grid_parser.parse_as_hash do |point, char|
+      @location_lookup ||= Grid.parse(lines, as: 'hash') do |point, char|
         Location.new(point, char)
       end
     end

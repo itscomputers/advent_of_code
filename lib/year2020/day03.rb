@@ -18,7 +18,7 @@ module Year2020
     end
 
     def trees
-      @trees ||= grid_parser.parse_as_set(char: "#")
+      @trees ||= Grid.parse(lines, as: 'set') { "#" }
     end
 
     def tree_count(slope)
