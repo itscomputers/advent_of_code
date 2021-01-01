@@ -10,7 +10,7 @@ describe Year2019::Day08 do
 
   describe 'part 2' do
     subject { day.solve part: 2 }
-    it { is_expected.to eq "\n.#\n#." }
+    it { is_expected.to eq "\n #\n# " }
   end
 end
 
