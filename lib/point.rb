@@ -5,6 +5,17 @@ class Point < Struct.new(:x, :y)
     new(*array).rotate(direction).to_a
   end
 
+  def self.neighbors_of(array, strict: true)
+    directions = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+    unless strict
+      directions += [[1, 1], [1, -1], [-1, 1], [-1, -1]]
+    end
+
+    directions.map do |direction|
+      (new(*array) + new(*direction)).to_a
+    end
+  end
+
   def inspect
     "(#{x}, #{y})"
   end
