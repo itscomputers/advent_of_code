@@ -7,6 +7,10 @@ module Year2019
       vault.shortest_path_length
     end
 
+    def part_two
+      vault.shortest_partitioned_path_length
+    end
+
     def vault
       @vault ||= Vault.new lines
     end

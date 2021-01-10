@@ -12,13 +12,23 @@ class Tree
   end
 
   def common_ancestor(*nodes)
-    nodes.map(&:ancestors).reduce(:&).first
+    nodes.map { |node| [node, *node.ancestors] }.reduce(:&).first
   end
 
   def distance(node, other)
     return 0 if node == other
     ancestor = common_ancestor node, other
-    [node, other].sum { |n| n.ancestors.index(ancestor) }
+    if ancestor == node
+      other.ancestors.index(node)
+    elsif ancestor == other
+      node.ancestors.index(other)
+    else
+      [node, other].sum { |n| n.ancestors.index(ancestor) }
+    end
+  end
+
+  def leaves
+    @leaves ||= nodes.select(&:is_leaf?)
   end
 
   class Node < Struct.new(:label)
@@ -47,7 +57,7 @@ class Tree
 
     def descendants
       return [] if is_leaf?
-      @descendants ||= [*children, *children.descendants]
+      @descendants ||= [*children, *children.map(&:descendants)]
     end
   end
 

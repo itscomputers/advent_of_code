@@ -15,6 +15,10 @@ class Vector
     array.sum { |coord| coord.abs }
   end
 
+  def self.distance(array, other)
+    norm subtract(array, other)
+  end
+
   def self.scale(array, number)
     array.map { |coord| coord * number }
   end
