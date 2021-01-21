@@ -1,5 +1,4 @@
-#require 'year2019/day18'
-require 'year2019/day18b'
+require 'year2019/day18'
 
 describe Year2019::Day18 do
   let(:day) { Year2019::Day18.new }

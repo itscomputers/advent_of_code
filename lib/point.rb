@@ -5,6 +5,10 @@ class Point < Struct.new(:x, :y)
     new(*array).rotate(direction).to_a
   end
 
+  def self.distance(array, other)
+    new(*array).distance(other)
+  end
+
   def self.neighbors_of(array, strict: true)
     directions = [[0, 1], [0, -1], [1, 0], [-1, 0]]
     unless strict
@@ -38,6 +42,10 @@ class Point < Struct.new(:x, :y)
 
   def norm
     Vector.norm to_a
+  end
+
+  def distance(other)
+    Vector.distance to_a, other.to_a
   end
 
   def rotate(direction)

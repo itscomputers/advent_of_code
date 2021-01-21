@@ -45,6 +45,10 @@ module Year2019
       root_points_by_char.keys
     end
 
+    def point_for(char)
+      points_by_char[char] || root_points_by_char[char]
+    end
+
     def modified_lookup
       @modified_lookup ||= { **lookup, **modified_points }.reject { |pt, char| char == "#" }
     end
@@ -74,7 +78,36 @@ module Year2019
     end
 
     def edge_lookup
-      edge_lookup_from(lookup, trees, ["@"])
+      # original was edge_lookup_from(lookup, trees, ["@"]), which makes the
+      # specs pass but fails by 10 on the puzzle input
+      #
+      # edge_lookup_from(lookup, trees, ["@"]) gives a different value for the
+      # puzzle input than the code below, but the code below yields the correct
+      # answer for the puzzle input.  need to investigate
+
+      return @edge_lookup unless @edge_lookup.nil?
+      @edge_lookup = { "@" => {}, **modified_edge_lookup }
+
+      root_chars.each do |char|
+        transformed_hash = modified_edge_lookup[char].transform_values do |val|
+          val + Vector.distance(start_point, point_for(char))
+        end
+
+        @edge_lookup["@"] = { **@edge_lookup["@"], **transformed_hash }
+        @edge_lookup.delete char
+      end
+
+      root_chars.combination(2).flat_map { |arr| arr.permutation.to_a }.each do |(char, other_char)|
+        distance = Vector.distance point_for(char), point_for(other_char)
+        modified_edge_lookup[other_char].each do |ch, dist|
+          @edge_lookup[ch] = {
+            **@edge_lookup[ch],
+            **modified_edge_lookup[char].transform_values { |val| val + dist + distance },
+          }
+        end
+      end
+
+      @edge_lookup
     end
 
     def modified_edge_lookup
