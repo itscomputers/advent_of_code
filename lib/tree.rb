@@ -19,11 +19,11 @@ class Tree
     return 0 if node == other
     ancestor = common_ancestor node, other
     if ancestor == node
-      other.ancestors.index(node)
+      other.ancestors.index(node) + 1
     elsif ancestor == other
-      node.ancestors.index(other)
+      node.ancestors.index(other) + 1
     else
-      [node, other].sum { |n| n.ancestors.index(ancestor) }
+      distance(node, ancestor) + distance(ancestor, other)
     end
   end
 
