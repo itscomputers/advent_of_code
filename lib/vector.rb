@@ -1,4 +1,4 @@
-class Vector
+module Vector
   def self.add(array, other)
     array.zip(other).map(&:sum)
   end
