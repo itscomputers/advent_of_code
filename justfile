@@ -1,8 +1,3 @@
-setup year day:
-  touch lib/year{{year}}/day{{day}}.rb
-  touch lib/year{{year}}/inputs/{{day}}.txt
-  touch spec/year{{year}}/day{{day}}_spec.rb
-
 test_all year:
   rspec spec/year{{year}}
 
@@ -18,3 +13,7 @@ solve year day:
 
 save_input year day input:
   echo "{{input}}" > lib/year{{year}}/inputs/{{day}}.txt
+
+setup year day:
+  echo "require \"solver\"\n\nmodule Year{{year}}\n  class Day{{day}} < Solver\n  end\nend" > lib/year{{year}}/day{{day}}.rb
+  echo "require \"year{{year}}/day{{day}}\"\n\ndescribe Year{{year}}::Day{{day}} do\n let(:day) { Year{{year}}::Day{{day}}.new }\nend" > spec/year{{year}}/day{{day}}_spec.rb
