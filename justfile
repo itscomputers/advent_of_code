@@ -14,6 +14,10 @@ solve year day:
 save_input year day input:
   echo "{{input}}" > lib/year{{year}}/inputs/{{day}}.txt
 
-setup year day:
+setup year day: (_save_day year day) (_save_spec year day) (open year day)
+
+_save_day year day:
   echo "require \"solver\"\n\nmodule Year{{year}}\n  class Day{{day}} < Solver\n    def solve(part:)\n    end\n  end\nend" > lib/year{{year}}/day{{day}}.rb
+
+_save_spec year day:
   echo "require \"year{{year}}/day{{day}}\"\n\ndescribe Year{{year}}::Day{{day}} do\n  let(:day) { Year{{year}}::Day{{day}}.new }\n  before do\n    allow(day).to receive(:lines).and_return []\n  end\nend" > spec/year{{year}}/day{{day}}_spec.rb
