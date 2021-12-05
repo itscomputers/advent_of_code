@@ -4,17 +4,21 @@ module Year2021
   class Day04 < Solver
     def solve(part:)
       case part
-      when 1 then Bingo.new(numbers, boards).play_first.winning_score
-      when 2 then Bingo.new(numbers, boards).play_last.winning_score
+      when 1 then bingo.first_board.score
+      when 2 then bingo.last_board.score
       end
     end
 
     def numbers
-      @numbers ||= lines.first.split(",")
+      @numbers ||= lines.first.split(",").map(&:to_i)
     end
 
     def boards
       @boards ||= lines.drop(1).each_slice(6).map { |slice| Board.new(slice.drop(1)) }
+    end
+
+    def bingo
+      @bingo ||= Bingo.new(numbers, boards)
     end
 
     class Bingo
@@ -36,22 +40,21 @@ module Year2021
         end
       end
 
-      def play_first
-        play_turn until @boards.any?(&:complete?)
-        @winning_board = @boards.select(&:complete?).first
-        self
+      def first_board
+        @first_board ||= begin
+          play_turn until @boards.any?(&:complete?)
+          @boards.select(&:complete?).first
+        end
       end
 
-      def play_last
-        play_first
-        play_turn until @boards.reject(&:complete?).size == 1
-        @winning_board = @boards.reject(&:complete?).first
-        play_turn until @winning_board.complete?
-        self
-      end
-
-      def winning_score
-        @winning_board.score
+      def last_board
+        @last_board ||= begin
+          first_board
+          play_turn until @boards.one?(&:incomplete?)
+          boards.select(&:incomplete?).first.tap do |board|
+            play_turn until board.complete?
+          end
+        end
       end
     end
 
@@ -59,13 +62,17 @@ module Year2021
       attr_reader :rows, :cols
 
       def initialize(lines)
-        @values = lines.flat_map { |line| line.gsub("  ", " ").split(" ") }
+        @values = lines.flat_map { |line| line.gsub("  ", " ").split(" ").map(&:to_i) }
         @rows = [[], [], [], [], []]
         @cols = [[], [], [], [], []]
       end
 
       def inspect
-        @values.each_slice(5).map { |row| row.join(" ") }.join("\n")
+        [
+          "<Board",
+          @values.each_slice(5).map { |row| "  " + row.map { |val| val.nil? ? "x" : val }.join(" ") }.join("\n"),
+          ">"
+        ].join("\n")
       end
 
       def call(number)
@@ -78,14 +85,19 @@ module Year2021
         @rows[row] << number
         @cols[col] << number
         @values[index] = nil
+        @number = number
       end
 
       def complete?
-        @complete ||= ([*@rows, *@cols].map(&:size).max == 5)
+        @complete ||= [*@rows, *@cols].any? { |row| row.size == 5 }
+      end
+
+      def incomplete?
+        !complete?
       end
 
       def score
-        @values.compact.map(&:to_i).sum * [*@rows, *@cols].max_by(&:size).last.to_i
+        @values.compact.sum * @number
       end
     end
   end
