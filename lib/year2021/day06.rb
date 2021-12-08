@@ -16,20 +16,20 @@ module Year2021
     end
 
     def lantern_fish_school
-      LanternFishSchool.new(lines.first)
+      LanternFishSchool.new(raw_input)
     end
 
     class LanternFishSchool
       def initialize(fish_string)
-        @timers = 9.times.map { |index| fish_string.count(index.to_s) }
+        @fishes = 9.times.map { |index| fish_string.count(index.to_s) }
       end
 
       def advance
-        @timers = [*@timers.drop(1).take(6), @timers[0] + @timers[7], @timers.last, @timers.first]
+        @fishes = [*@fishes.drop(1).take(6), @fishes[0] + @fishes[7], @fishes.last, @fishes.first]
       end
 
       def size
-        @timers.sum
+        @fishes.sum
       end
     end
   end

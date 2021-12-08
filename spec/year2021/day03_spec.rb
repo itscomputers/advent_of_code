@@ -3,20 +3,20 @@ require "year2021/day03"
 describe Year2021::Day03 do
   let(:day) { Year2021::Day03.new }
   before do
-    allow(day).to receive(:lines).and_return [
-      "00100",
-      "11110",
-      "10110",
-      "10111",
-      "10101",
-      "01111",
-      "00111",
-      "11100",
-      "10000",
-      "11001",
-      "00010",
-      "01010",
-    ]
+    allow(day).to receive(:raw_input).and_return <<~RAW
+      00100
+      11110
+      10110
+      10111
+      10101
+      01111
+      00111
+      11100
+      10000
+      11001
+      00010
+      01010
+    RAW
   end
 
   describe "part 1" do
