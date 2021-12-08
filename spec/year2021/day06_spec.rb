@@ -3,7 +3,7 @@ require "year2021/day06"
 describe Year2021::Day06 do
   let(:day) { Year2021::Day06.new }
   before do
-    allow(day).to receive(:lines).and_return ["3,4,3,1,2"]
+    allow(day).to receive(:raw_input).and_return "3,4,3,1,2"
   end
 
   describe "part 1" do
