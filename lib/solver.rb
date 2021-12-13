@@ -1,6 +1,10 @@
 require 'grid'
 
 class Solver
+  def initialize(raw_input=nil)
+    @raw_input = raw_input
+  end
+
   def inspect
     "<Solver #{self.class.to_s}>"
   end
