@@ -1,6 +1,5 @@
 require "solver"
 require "grid"
-require "set"
 
 module Year2021
   class Day13 < Solver
@@ -69,7 +68,7 @@ module Year2021
       end
 
       def display
-        Grid.display(points.to_set, :type => :set, "0" => " ", "1" => "#")
+        Grid.display(points, :type => :array, "0" => ".", "1" => "#")
       end
     end
   end
