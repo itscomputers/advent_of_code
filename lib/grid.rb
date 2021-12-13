@@ -32,12 +32,16 @@ module Grid
     end
   end
 
-  def self.display_set(set)
-    y_range(set).map do |y|
-      x_range(set).map do |x|
-        set.include?([x, y]) ? 1 : 0
+  def self.display_array(array)
+    y_range(array).map do |y|
+      x_range(array).map do |x|
+        array.include?([x, y]) ? 1 : 0
       end.join("")
     end.join("\n")
+  end
+
+  def self.display_set(set)
+    display_array(set)
   end
 
   def self.display_hash(hash)

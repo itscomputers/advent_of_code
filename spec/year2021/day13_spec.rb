@@ -31,12 +31,18 @@ describe Year2021::Day13 do
   describe "part 1" do
     subject { day.solve(part: 1) }
     it { is_expected.to eq 17 }
-
-    it { expect(Grid.display(day.transparent_paper.apply_fold(day.folds.first).points.to_set, :type => :set, "0" => ".", "1" => "#")).to eq "" }
   end
 
-  describe "part 1" do
-    subject { day.solve(part: 1) }
-    it { is_expected.to eq nil }
+  describe "part 2" do
+    subject { day.solve(part: 2) }
+    it do
+      expect(subject.strip).to eq <<~RAW.strip
+        #####
+        #...#
+        #...#
+        #...#
+        #####
+      RAW
+    end
   end
 end
