@@ -1,10 +1,17 @@
-require 'binary_heap'
+require "binary_heap"
+require "point"
+require "set"
 
 class AStar
-  def initialize(graph, start, goal: nil, heuristic: nil)
+  def initialize(graph, start, static_goal: nil, goal: nil, heuristic: nil)
     @graph = graph
-    @goal = goal
-    @heuristic = heuristic
+    if static_goal.nil?
+      @goal = goal
+      @heuristic = heuristic
+    else
+      @goal = lambda { |node| node == static_goal }
+      @heuristic = lambda { |node| Point.distance(node, static_goal) }
+    end
     @frontier_nodes = Set.new([start])
     @frontier = MinBinaryHeap.new << path_node_for(start).tap do |path_node|
       path_node.cost = 0
