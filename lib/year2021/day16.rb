@@ -16,26 +16,31 @@ module Year2021
     class Packet
       attr_reader :binary, :version, :type_id, :subpackets
 
-      def self.buffer_for(hex)
-        if hex.chars.first == "0"
-          return "0000" + buffer_for(hex[1..])
-        end
-
-        case hex.chars.first.to_i(16)
-          when 0 then "0000"
-          when 1 then "000"
-          when 2..3 then "00"
-          when 4..7 then "0"
-          else ""
-        end
-      end
+      HEX_MAP = {
+        "0" => "0000",
+        "1" => "0001",
+        "2" => "0010",
+        "3" => "0011",
+        "4" => "0100",
+        "5" => "0101",
+        "6" => "0110",
+        "7" => "0111",
+        "8" => "1000",
+        "9" => "1001",
+        "A" => "1010",
+        "B" => "1011",
+        "C" => "1100",
+        "D" => "1101",
+        "E" => "1110",
+        "F" => "1111",
+      }
 
       def self.for_hex(hex)
-        for_binary([buffer_for(hex), hex.to_i(16).to_s(2)].join)
+        for_binary(hex.chars.map { |char| HEX_MAP[char] }.join)
       end
 
       def self.for_binary(binary)
-        return EmptyPacket.new(binary) if binary.length < 6
+        return EmptyPacket.new(binary) if binary.chars.uniq == ["0"]
 
         version = binary.slice(0, 3).to_i(2)
         type_id = binary.slice(3, 3).to_i(2)
@@ -43,6 +48,16 @@ module Year2021
 
         return LiteralPacket.new(*params) if type_id == 4
         OperatorPacket.new(*params)
+      end
+
+      def inspect
+        [
+          "<",
+          self.class.to_s.split("::").last ,
+          " #{@type_id}->#{value}",
+          subpackets.empty? ? nil : " (#{subpackets.map(&:inspect).join(", ")})",
+          ">"
+        ].compact.join
       end
 
       def version_sum
@@ -112,7 +127,7 @@ module Year2021
       end
 
       def value
-        case @type_id
+        @value ||= case @type_id
         when 0 then subpackets.sum(&:value)
         when 1 then subpackets.map(&:value).reduce(1) { |acc, value| acc * value }
         when 2 then subpackets.min_by(&:value).value
