@@ -69,119 +69,13 @@ describe Year2021::Day16 do
       let(:raw_input) { "9C0141080250320F1802104A08" }
       it { is_expected.to eq 1 }
     end
-
-    describe "complex example 1" do
-      <<~PACKET
-        <OperatorPacket 2 (
-          <OperatorPacket 2 (
-            <OperatorPacket 2 (
-              <LiteralPacket 4>
-            )>
-          )>
-        )>
-        min of (
-          min of (
-            min of (
-              15
-            )
-          )
-        )
-      PACKET
-      let(:raw_input) { "8A004A801A8002F478" }
-      it { is_expected.to eq 15 }
-    end
-
-    describe "complex example 2" do
-      <<~PACKET
-        <OperatorPacket 0 (
-          <OperatorPacket 0 (
-            <LiteralPacket 4>
-            <LiteralPacket 4>
-            <OperatorPacket 0 (
-              <LiteralPacket 4>
-              <LiteralPacket 4>
-            )>
-          )>
-          <EmptyPacket>
-        )>
-        sum of (
-          sum of (
-            10
-            11
-            sum of (
-              12
-              13
-            )
-          )
-          0
-        )
-      PACKET
-      let(:raw_input) { "620080001611562C8802118E34" }
-      it { is_expected.to eq 46 }
-    end
-
-    describe "complex example 3" do
-      <<~PACKET
-        <OperatorPacket 0 (
-          <OperatorPacket 0 (
-            <LiteralPacket 4>,
-            <LiteralPacket 4>,
-            <OperatorPacket 0 (
-              <LiteralPacket 4>,
-              <LiteralPacket 4>
-            )>
-          )>
-        )>
-        sum of (
-          sum of (
-            10
-            11
-            sum of (
-              12
-              13
-            )
-          )
-        )
-      PACKET
-      let(:raw_input) { "C0015000016115A2E0802F182340" }
-      it { is_expected.to eq 46 }
-    end
-
-    describe "complex example 4" do
-      <<~PACKET
-        <OperatorPacket 0 (
-          <OperatorPacket 0 (
-            <OperatorPacket 0 (
-              <LiteralPacket 4>,
-              <LiteralPacket 4>,
-              <LiteralPacket 4>,
-              <LiteralPacket 4>,
-              <LiteralPacket 4>
-            )>
-          )>
-        )>
-        sum of (
-          sum of (
-            sum of (
-              6
-              6
-              12
-              15
-              15
-            )
-          )
-        )
-      PACKET
-      let(:raw_input) { "A0016C880162017C3686B18A3D4780" }
-      it { is_expected.to eq 54 }
-    end
   end
 
   describe "packets" do
-    let(:packet) { Year2021::Day16::Packet.new(Year2021::Day16::BitStream.new(hex, type: :hex)) }
+    let(:packet) { day.packet }
 
     describe "literal packet" do
-      let(:hex) { "D2FE28" }
+      let(:raw_input) { "D2FE28" }
 
       it "has version 6" do
         expect(packet.version).to eq 6
@@ -202,7 +96,7 @@ describe Year2021::Day16 do
     end
 
     describe "operator packet with length type id 0" do
-      let(:hex) { "38006F45291200" }
+      let(:raw_input) { "38006F45291200" }
 
       it "has version 1" do
         expect(packet.version).to eq 1
@@ -218,7 +112,7 @@ describe Year2021::Day16 do
     end
 
     describe "operator packet with length type id 1" do
-      let(:hex) { "EE00D40C823060" }
+      let(:raw_input) { "EE00D40C823060" }
 
       it "has version 7" do
         expect(packet.version).to eq 7
