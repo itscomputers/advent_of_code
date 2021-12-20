@@ -4,69 +4,58 @@ require "vector"
 module Year2021
   class Day17 < Solver
     def solve(part:)
-      search
+      case part
+      when 1 then y_max
+      when 2 then successful_launch_count
+      end
     end
 
     def target_area
       @target_area ||= TargetArea.from(lines.first)
     end
 
-    class Search
-      def initialize(target_area)
-        @target_area = target_area
-      end
-
-      def x(vx, step)
-        return vx * (step + 1) - triangular(step) if step < vx
-        triangular(vx)
-      end
-
-      def y(vy, step)
-        vy * (step + 1) - triangular(step)
-      end
-
-      def point(velocity, step)
-        vx, vy = velocity
-        [x(vx, step), y(vy, step)]
-      end
-
-      def triangular(number)
-        (number * (number + 1)) / 2
-      end
-
-      def vx_min
-        (-1 + Math.sqrt(1 + 8 * triangular(x_range.min)))
-      end
-
-      def vx_max
-        x_range.max
-      end
-
-      def x_range
-        @target_area.x_range
-      end
+    def successful_launch?(velocity)
+      !StepRange.new(velocity, *target_area.ranges).empty?
     end
 
-    class QuadraticSolutions
-      def initialize(a, b, c)
-        @a = a
-        @b = b
-        @c = c
-      end
+    def v_y_min
+      @v_y_min ||= target_area.y_range.min
+    end
 
-      def discriminant
-        @b**2 - 4 * @a * @c
-      end
+    def v_y_max
+      @v_y_max ||= -target_area.y_range.min
+    end
 
-      def solutions
-        [
-          (-@b + Math.sqrt(discriminant)) / 2,
-          (-@b - Math.sqrt(discriminant)) / 2,
-        ]
-      end
+    def v_x_min
+      @v_x_min ||= QuadraticFormula.new(1, 1, -2 * target_area.x_range.min).solutions.last.ceil
+    end
 
-      def positive_solutions
-        solutions.select { |solution| solution > 0 }
+    def v_x_max
+      @v_x_max ||= target_area.x_range.max
+    end
+
+    def v_x
+      @v_x
+    end
+
+    def y_max
+      v_y = v_y_max
+      loop do
+        break if (v_x_min..v_x_max).any? do |v_x|
+          successful_launch?([v_x, v_y]).tap do |bool|
+            @v_x = v_x if bool
+          end
+        end
+        v_y = v_y - 1
+      end
+      (v_y * (v_y + 1)) / 2
+    end
+
+    def successful_launch_count
+      (v_y_min..v_y_max).sum do |v_y|
+        (v_x_min..v_x_max).sum do |v_x|
+          successful_launch?([v_x, v_y]) ? 1 : 0
+        end
       end
     end
 
@@ -88,47 +77,93 @@ module Year2021
         @y_range = y_range
       end
 
-      def include?(point)
-        @x_range.include?(point.first) && @y_range.include?(point.last)
-      end
-
-      def out_of_range?(point)
-        @y_range.min > point.last
+      def ranges
+        [@x_range, @y_range]
       end
     end
 
-    class Launcher
-      def initialize(velocity, target_area)
-        @point = [0, 0]
-        @velocity = velocity
-        @target_area = target_area
+    class StepRange
+      def initialize(velocity, x_range, y_range)
+        @v_x, @v_y = velocity
+        @x_min = x_range.min
+        @x_max = x_range.max
+        @y_min = y_range.min
+        @y_max = y_range.max
       end
 
-      def launch
-        advance until in_target_area? || out_of_range?
-        self
-      end
-
-      def advance
-        @point = Vector.add(@point, @velocity)
-        @velocity = Vector.add(@velocity, [drag, -1])
-      end
-
-      def drag
-        case @velocity.first
-        when 1.. then -1
-        when ..-1 then 1
-        else 0
+      def lower_for_x
+        if @v_x * (@v_x + 1) < 2 * @x_min
+          nil
+        else
+          solutions_for_x_min.first.ceil
         end
       end
 
-      def in_target_area?
-        @target_area.include?(@point)
+      def upper_for_x
+        if @v_x * (@v_x + 1) < 2 * @x_max
+          nil
+        else
+          solutions_for_x_max.first.floor
+        end
       end
-      alias_method :successful?, :in_target_area?
 
-      def out_of_range?
-        @target_area.out_of_range?(@point)
+      def lower_for_y
+        solutions_for_y_max.last.ceil
+      end
+
+      def upper_for_y
+        solutions_for_y_min.last.floor
+      end
+
+      def empty?
+        return true if lower_for_x.nil?
+        return true if lower_for_y > upper_for_y
+        return true if lower_for_x > upper_for_y
+        return false if upper_for_x.nil?
+        lower_for_y > upper_for_x
+      end
+
+      def solutions_for_x_min
+        @solutions_for_x_min ||= QuadraticFormula.solutions_for(@v_x, @x_min)
+      end
+
+      def solutions_for_x_max
+        @solutions_for_x_max ||= QuadraticFormula.solutions_for(@v_x, @x_max)
+      end
+
+      def solutions_for_y_min
+        @solutions_for_y_min ||= QuadraticFormula.solutions_for(@v_y, @y_min)
+      end
+
+      def solutions_for_y_max
+        @solutions_for_y_max ||= QuadraticFormula.solutions_for(@v_y, @y_max)
+      end
+    end
+
+    class QuadraticFormula
+      def self.solutions_for(velocity, value)
+        new(1, -2 * velocity - 1, 2 * value).solutions
+      end
+
+      def initialize(a, b, c)
+        @a = a
+        @b = b
+        @c = c
+      end
+
+      def discriminant
+        @b**2 - 4 * @a * @c
+      end
+
+      def solutions
+        [
+          (-@b + Math.sqrt(discriminant)) / 2,
+          (-@b - Math.sqrt(discriminant)) / 2,
+        ].sort
+      end
+
+      def positive_solutions
+        solutions.select { |solution| solution > 0 }
       end
     end
   end

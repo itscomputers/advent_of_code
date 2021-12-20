@@ -11,7 +11,12 @@ describe Year2021::Day17 do
 
   describe "part 1" do
     subject { day.solve(part: 1) }
-    it { is_expected.to eq 0 }
+    it { is_expected.to eq 45 }
+  end
+
+  describe "part 2" do
+    subject { day.solve(part: 2) }
+    it { is_expected.to eq 112 }
   end
 
   describe "successful_launch?" do
@@ -32,8 +37,8 @@ describe Year2021::Day17 do
       it { is_expected.to be true }
     end
 
-    context "when velocity is [17, 4]" do
-      let(:velocity) { [17, 4] }
+    context "when velocity is [17, -4]" do
+      let(:velocity) { [17, -4] }
       it { is_expected.to be false }
     end
   end
