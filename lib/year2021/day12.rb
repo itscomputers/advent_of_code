@@ -1,163 +1,138 @@
 require "solver"
 require "set"
+require "tree"
 
 module Year2021
   class Day12 < Solver
     def solve(part:)
       case part
-      when 1 then cave_graph.paths.search.path_count
-      when 2 then cave_graph.permissive_paths.search.path_count
+      when 1 then path_finder.path_count
+      when 2 then permissive_path_finder.path_count
       end
     end
 
-    def cave_graph
-      @cave_graph ||= CaveGraph.build_from(lines)
+    def paths
+      Paths.from_lines(lines)
     end
 
-    class CaveGraph
-      REGEX = /([\w]+)-([\w]+)/
+    def path_finder
+      PathFinder.from_lines(lines)
+    end
 
-      def self.build_from(lines)
-        new.tap do |graph|
-          lines.each do |line|
-            label, other_label = REGEX.match(line).to_a.drop(1)
-            graph.node_for(label).add_child(graph.node_for(other_label))
-            graph.node_for(other_label).add_child(graph.node_for(label))
-          end
-        end
+    def permissive_path_finder
+      PathFinder.from_lines(lines, permissive: true)
+    end
+
+    class PathFinder
+      def self.from_lines(lines, permissive: false)
+        new(
+          lines.reduce(Hash.new { |h, k| h[k] = [] }) do |hash, line|
+            node, other = line.split("-")
+            hash[node] << other
+            hash[other] << node
+            hash
+          end,
+          permissive: permissive,
+        )
       end
 
-      def initialize
-        @cave_lookup = Hash.new
+      attr_reader :paths
+
+      def initialize(edge_hash, permissive:)
+        @edge_hash = edge_hash
+        path_class = permissive ? PermissivePath : Path
+        @paths = [path_class.new(["start"], @edge_hash)]
       end
 
-      def node_for(label)
-        @cave_lookup[label] ||= Cave.new(label)
+      def inspect
+        "<PathFinder #{@paths.map(&:inspect).join("; ")}>"
       end
 
-      def caves
-        @cave_lookup.values
+      def to_s
+        inspect
       end
 
-      def paths
-        @paths ||= Paths.new(self, source: "start", target: "end", permissive: false)
+      def advance
+        terminal, open = @paths.partition(&:terminal?)
+        @paths = [*terminal, *open.flat_map(&:branch_paths)]
+        self
       end
 
-      def permissive_paths
-        @permissive_paths ||= Paths.new(self, source: "start", target: "end", permissive: true)
+      def path_count
+        advance until @paths.all?(&:terminal?)
+        @paths.count
       end
 
-      class Cave
-        attr_reader :label, :children
+      class Path
+        attr_reader :nodes, :visited, :small_cave
 
-        def initialize(label)
-          @label = label
-          @children = Set.new
-          @paths_lookup = {}
+        def initialize(nodes, edge_hash, visited: Set.new, small_cave: nil)
+          @nodes = nodes
+          @edge_hash = edge_hash
+          @visited = visited
+          @small_cave = small_cave
         end
 
         def inspect
-          "<Cave #{@label} -> #{@children.map(&:label).join(", ")}>"
+          "#{@nodes.join(",")}"
         end
 
-        def add_child(cave)
-          @children.add(cave)
+        def to_s
+          inspect
+        end
+
+        def terminal?
+          @nodes.last == "end"
+        end
+
+        def frontier
+          (@edge_hash[@nodes.last] || []).reject(&method(:invalid_node?))
+        end
+
+        def branch_paths
+          frontier.map(&method(:branch_path)).compact
+        end
+
+        def small_cave(node)
+          return @small_cave unless @small_cave.nil?
+          return node if node.downcase? && @visited.include?(node)
+          nil
+        end
+
+        def branch_path(node)
+          self.class.new(
+            [*@nodes, node],
+            @edge_hash,
+            visited: branch_visited(node),
+            small_cave: small_cave(node),
+          )
+        end
+
+        def branch_visited(node)
+          add_to_visited?(node) ? @visited + [node] : @visited
+        end
+
+        def invalid_node?(node)
+          node == "start" || (node.downcase? && @visited.include?(node))
+        end
+
+        def add_to_visited?(node)
+          node.downcase?
         end
       end
 
-      class Paths
-        attr_reader :frontier, :terminal
-
-        def initialize(graph, source:, target:, permissive:)
-          @graph = graph
-          @target = target
-
-          path = permissive ?
-            PermissivePath.new([source]) :
-            Path.new([source])
-
-          @frontier = [path]
-          @terminal = Set.new([])
-        end
-
-        def inspect
-          "<Paths frontier: #{@frontier.size}, terminal: #{@terminal.size}>"
-        end
-
-        def path_count
-          @terminal.size
-        end
-
-        def search
-          advance until @frontier.empty?
-          self
-        end
-
-        def advance
-          terminal, frontier = @frontier.partition(&:terminal?)
-          frontier = frontier.flat_map do |path|
-            @graph.node_for(path.last).children.map do |child|
-              path.with?(child.label)
-            end.compact
-          end.uniq
-          @frontier = frontier
-          @terminal += terminal
-          self
-        end
-
-        class Path
-          attr_reader :array
-
-          def initialize(array)
-            @array = array
-          end
-
-          def last
-            @array.last
-          end
-
-          def terminal?
-            last == "end"
-          end
-
-          def with?(value)
-            return if value == "start"
-            return if duplicate?(value)
-            Path.new([*@array, value])
-          end
-
-          def duplicate?(value)
-            value.downcase? && @array.include?(value)
-          end
-
-          def eql?(other)
-            @array == other.array
-          end
-
-          def ==(other)
-            eql?(other)
-          end
-
-          def hash
-            @array.hash
-          end
-        end
-
-        class PermissivePath < Path
-          def initialize(array)
-            super(array)
-            @can_visit_duplicate = true
-          end
-
-          def with?(value)
-            return if value == "start"
-
-            duplicate?(value).tap do |duplicate|
-              return if duplicate && !@can_visit_duplicate
-              @can_visit_duplicate = false if duplicate
+      class PermissivePath < Path
+        def invalid_node?(node)
+          if node == "start"
+            true
+          elsif node.downcase? && @visited.include?(node)
+            if @small_cave.nil?
+              false
+            else
+              true
             end
-
-            PermissivePath.new([*@array, value])
+          else
+            false
           end
         end
       end
@@ -170,3 +145,4 @@ class String
     self == downcase
   end
 end
+

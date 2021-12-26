@@ -1,7 +1,7 @@
 require "year2021/day12"
 
 describe Year2021::Day12 do
-  let(:day) { Year2021::Day12.new }
+  let(:day) { Year2021::Day12.new(raw_input) }
   let(:raw_input) do
     <<~RAW
       start-A
@@ -12,10 +12,6 @@ describe Year2021::Day12 do
       A-end
       b-end
     RAW
-  end
-
-  before do
-    allow(day).to receive(:raw_input).and_return raw_input
   end
 
   describe "example 1" do
