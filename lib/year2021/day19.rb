@@ -5,7 +5,10 @@ require "vector"
 module Year2021
   class Day19 < Solver
     def solve(part:)
-      beacons.size
+      case part
+      when 1 then beacons.size
+      when 2 then furthest_scanner_distance
+      end
     end
 
     def scanners
@@ -28,6 +31,14 @@ module Year2021
           Vector.add(scanner.position, beacon)
         end
       end.uniq
+    end
+
+    def furthest_scanner_distance
+      find_scanners
+      scanners
+        .combination(2)
+        .map { |pair| Vector.distance(*pair.map(&:position)) }
+        .max
     end
 
     class ScannerFinder
@@ -121,7 +132,6 @@ module Year2021
       attr_reader :oriented, :unoriented
 
       def initialize(oriented, unoriented)
-        raise StandardError("#{oriented} is not oriented") if oriented.position.nil?
         @oriented = oriented
         @unoriented = unoriented
       end
@@ -147,19 +157,12 @@ module Year2021
         ReflectivePermutation.for(oriented_diff, unoriented_diff)
       end
 
-      def reflective_permutations
-        @reflective_permutations ||= unoriented_diffs.reduce(Hash.new { |h, k| h[k] = [] }) do |hash, diff|
-          hash[reflective_permutation_for(diff)] << diff
-          hash
-        end.tap { |hash| puts hash.transform_values(&:size) }
-      end
-
       def reflective_permutation
-        reflective_permutations.keys.find { |rp| rp.reflection == 1 }.tap { |rp| return rp unless rp.nil? }
-        @reflective_permutation ||= reflective_permutations
-          .select { |_key, value| value.size > 30 }
-          .min_by { |_key, value| value.size }
-          .first
+        unoriented_diffs.each do |diff|
+          reflective_permutation_for(diff).tap do |rp|
+            return rp if rp.sign == 1
+          end
+        end
       end
 
       def orient!
@@ -234,6 +237,12 @@ module Year2021
 
       def inspect
         "<ReflectivePermutation #{@permutation}, #{@reflection}>"
+      end
+
+      def sign
+        permutation_sign = [:e, :r, :s].include?(@permutation) ? 1 : -1
+        reflection_sign = REFLECTION[@reflection].reduce(:*)
+        permutation_sign * reflection_sign
       end
 
       def signature
