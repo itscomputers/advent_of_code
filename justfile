@@ -1,3 +1,6 @@
+console:
+  irb -I lib
+
 test_all year:
   rspec spec/year{{year}}
 

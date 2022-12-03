@@ -12,21 +12,25 @@ module Year2022
     end
 
     class Round
-      def initialize(their_shape, input)
-        @their_shape = their_shape
+      def initialize(opp_shape, input)
+        @opp_shape = opp_shape
         @input = input
       end
 
+      def opp_index
+        %w(A B C).index(@opp_shape)
+      end
+
+      def index
+        @index ||= %w(X Y Z).index(@input)
+      end
+
       def number
-        %w(X Y Z).index(@input) + 1
+        index + 1
       end
 
       def outcome
-        case @their_shape
-        when "A" then %w(Z X Y).index(@input) * 3
-        when "B" then %w(X Y Z).index(@input) * 3
-        when "C" then %w(Y Z X).index(@input) * 3
-        end
+        3 * %w(Z X Y).cycle(3).drop(opp_index).index(@input)
       end
 
       def score
@@ -36,15 +40,11 @@ module Year2022
 
     class RoundV2 < Round
       def outcome
-        @outcome ||= %w(X Y Z).index(@input) * 3
+        index * 3
       end
 
       def number
-        case outcome
-        when 0 then %w(B C A).index(@their_shape) + 1
-        when 3 then %w(A B C).index(@their_shape) + 1
-        when 6 then %w(C A B).index(@their_shape) + 1
-        end
+        1 + %w(B C A).cycle(3).drop(2 * index).index(@opp_shape)
       end
     end
   end
