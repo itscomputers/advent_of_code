@@ -22,15 +22,12 @@ module Year2022
         @moves = moves
       end
 
-      def execute_move
-        @moves.shift.tap do |move|
-          move.count.times { target(move).push(source(move).pop) }
-        end
-        self
+      def execute(move)
+        move.count.times { target(move).push(source(move).pop) }
       end
 
       def execute_moves
-        execute_move until @moves.empty?
+        execute(@moves.shift) until @moves.empty?
         self
       end
 
@@ -48,10 +45,8 @@ module Year2022
     end
 
     class CargoCrane9001 < CargoCrane9000
-      def execute_move
-        @moves.shift.tap do |move|
-          target(move).push(*source(move).pop(move.count))
-        end
+      def execute(move)
+        target(move).push(*source(move).pop(move.count))
       end
     end
 
