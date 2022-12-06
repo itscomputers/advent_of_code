@@ -16,11 +16,19 @@ class Graph
   end
 
   def neighbors(value)
-    node(value).neighbors
+    node(value).neighbors.map(&:value)
   end
 
   def distance(value, other)
-    node(value).weight(other)
+    node(value).weight(node(other))
+  end
+
+  def closest_neighbor(value)
+    node(value).closest_neighbor.value
+  end
+
+  def shortest_distance(value)
+    node(value).shortest_distance
   end
 
   def adjacent?(value, other)
@@ -44,12 +52,24 @@ class Graph
       edges.values.map(&:target)
     end
 
-    def has_neighbor?(value)
-      edges.key?(value)
+    def has_neighbor?(other)
+      edges.key?(other.value)
     end
 
-    def weight(value)
-      edges[value]&.weight
+    def weight(other)
+      edges[other.value]&.weight
+    end
+
+    def min_edge
+      @min_edge ||= edges.values.min_by(&:weight)
+    end
+
+    def shortest_distance
+      min_edge&.weight
+    end
+
+    def closest_neighbor
+      min_edge&.target
     end
   end
 

@@ -29,7 +29,7 @@ describe Year2021::Day15 do
 
   describe "enlarged grid" do
     let(:raw_input) { "8" }
-    subject { day.enlarged_grid }
+    subject { day.cavern_graph(part: 2).instance_variable_get(:@grid) }
     it do
       expect(Grid.display(subject, type: :hash)).to eq <<~DISPLAY.chomp
         89123
