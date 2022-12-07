@@ -1,4 +1,6 @@
 class Graph
+  attr_reader :node_lookup
+
   def initialize
     @node_lookup = Hash.new
   end
@@ -35,6 +37,16 @@ class Graph
     node(value).has_neighbor?(other)
   end
 
+  def to_h
+    @as_hash ||= nodes.reduce(Hash.new) do |hash, node|
+      hash[node.value] = node.edges.reduce(Hash.new) do |inner_hash, (key, edge)|
+        inner_hash[key] = edge.weight
+        inner_hash
+      end
+      hash
+    end
+  end
+
   class Node < Struct.new(:value)
     def inspect
       "<Graph::Node #{value}>"
@@ -42,6 +54,10 @@ class Graph
 
     def edges
       @edges ||= Hash.new
+    end
+
+    def edges=(value)
+      @edges = value
     end
 
     def add_edge(node, weight)
@@ -77,6 +93,7 @@ class Graph
     def inspect
       "<Graph::Edge #{source.value} --#{weight}--> #{target.value}>"
     end
+    alias_method :to_s, :inspect
   end
 
   class DirectedGraphBuilder

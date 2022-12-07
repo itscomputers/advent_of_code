@@ -6,192 +6,155 @@ require 'a_star'
 
 module Year2019
   class Day18 < Solver
-    def part_one
-      minimum_path_length
+    def solve(part:)
+      key_graph(part: part).a_star.execute.min_path_cost
     end
 
-    def part_two
-      modified_minimum_path_length
-    end
-
-    def lookup
-      @lookup ||= Grid.parse(lines, as: :hash) do |point, char|
-        char != "#" ? char : nil
+    def symbol_lookup
+      @symbol_lookup ||= Grid.parse(lines, as: :hash) do |point, char|
+        case char
+        when "#" then nil
+        when "." then point.to_a.join(",")
+        else char
+        end
       end.compact
     end
 
-    def points_by_char
-      @points_by_char ||= lookup.invert.tap { |hash| hash.delete "." }
-    end
-
-    def start_point
-      points_by_char["@"]
-    end
-
-    def root_points_by_char
-      @root_points ||= {
-        "$" => Vector.add(start_point, [-1, -1]),
-        "%" => Vector.add(start_point, [1, -1]),
-        "^" => Vector.add(start_point, [-1, 1]),
-        "&" => Vector.add(start_point, [1, 1]),
-      }
-    end
-
-    def root_points
-      root_points_by_char.invert
-    end
-
-    def root_chars
-      root_points_by_char.keys
-    end
-
-    def point_for(char)
-      points_by_char[char] || root_points_by_char[char]
-    end
-
     def modified_lookup
-      @modified_lookup ||= { **lookup, **modified_points }.reject { |pt, char| char == "#" }
-    end
-
-    def modified_points
-      start = lookup.key("@")
-      {
-        start => "#",
-        Vector.add(start_point, [0, 1]) => "#",
-        Vector.add(start_point, [0, -1]) => "#",
-        Vector.add(start_point, [1, 0]) => "#",
-        Vector.add(start_point, [-1, 0]) => "#",
-        **root_points,
+      start_point = symbol_lookup.invert.dig("@")
+      root_points = {
+        Vector.add(start_point, [-1, -1]) => "$",
+        Vector.add(start_point, [1, -1]) => "%",
+        Vector.add(start_point, [-1, 1]) => "^",
+        Vector.add(start_point, [1, 1]) => "&",
       }
+      deleted_points = [
+        Vector.add(start_point, [0, 1]),
+        Vector.add(start_point, [0, -1]),
+        Vector.add(start_point, [1, 0]),
+        Vector.add(start_point, [-1, 0]),
+      ]
+      {**symbol_lookup, **root_points }.reject do |point, _|
+        deleted_points.include?(point)
+      end
     end
 
-    def trees
-      TreesBuilder.new(lookup, ["@"]).build_trees
+    def graph
+      GraphBuilder.new(symbol_lookup).reduce!.graph
     end
 
-    def subtrees
-      TreesBuilder.new(modified_lookup, root_chars).build_trees
+    def modified_graph
+      GraphBuilder.new(modified_lookup).reduce!.graph
     end
 
-    def relevant_nodes_on(tree, lookup)
-      tree.nodes.reject { |node| lookup[node.label] == "." }
+    def key_graph(part:)
+      case part
+      when 1 then KeyGraph.new(graph)
+      when 2 then ModifiedKeyGraph.new(modified_graph)
+      end
     end
 
-    def edge_lookup
-      # original was edge_lookup_from(lookup, trees, ["@"]), which makes the
-      # specs pass but fails by 10 on the puzzle input
-      #
-      # edge_lookup_from(lookup, trees, ["@"]) gives a different value for the
-      # puzzle input than the code below, but the code below yields the correct
-      # answer for the puzzle input.  need to investigate
-
-      return @edge_lookup unless @edge_lookup.nil?
-      @edge_lookup = { "@" => {}, **modified_edge_lookup }
-
-      root_chars.each do |char|
-        transformed_hash = modified_edge_lookup[char].transform_values do |val|
-          val + Vector.distance(start_point, point_for(char))
-        end
-
-        @edge_lookup["@"] = { **@edge_lookup["@"], **transformed_hash }
-        @edge_lookup.delete char
+    class GraphBuilder
+      def initialize(symbol_lookup)
+        @symbol_lookup = symbol_lookup
       end
 
-      root_chars.combination(2).flat_map { |arr| arr.permutation.to_a }.each do |(char, other_char)|
-        distance = Vector.distance point_for(char), point_for(other_char)
-        modified_edge_lookup[other_char].each do |ch, dist|
-          @edge_lookup[ch] = {
-            **@edge_lookup[ch],
-            **modified_edge_lookup[char].transform_values { |val| val + dist + distance },
-          }
-        end
+      def graph
+        @graph ||= Graph::SimpleDirectedGraphBuilder.new(
+          @symbol_lookup.reduce(Hash.new) do |hash, (point, char)|
+            hash[char] = Point.neighbors_of(point).map do |neighbor_point|
+              @symbol_lookup.dig(neighbor_point)
+            end.compact
+            hash
+          end,
+        ).build
       end
 
-      @edge_lookup
+      def reduce!
+        graph.node_lookup.delete_if do |key, _|
+          key.match(/\d+,\d+/)
+        end
+        graph.node_lookup.values.each do |node|
+          EdgeReducer.new(node).reduce
+        end
+        self
+      end
     end
 
-    def modified_edge_lookup
-      @modified_edge_lookup ||= edge_lookup_from(modified_lookup, subtrees, root_chars)
-    end
+    class EdgeReducer
+      def initialize(node)
+        @node = node
+        @visited = Set.new([node])
+        @edges = Hash.new
+        @frontier = node.edges.values
+      end
 
-    def edge_lookup_from(lookup, trees, root_values)
-      trees.values.reduce(Hash.new { |h, k| h[k] = {} }) do |hash, tree|
-        relevant_nodes_on(tree, lookup).combination(2).each do |pair|
-          distance = tree.distance *pair
-          pair.permutation.each do |node, other|
-            unless root_values.include? lookup[other.label]
-              hash[lookup[node.label]][lookup[other.label]] = distance
-            end
+      def advance
+        edge = @frontier.shift
+        @visited.add(edge.target)
+
+        unless edge.target.value.match(/\d+,\d+/)
+          @edges[edge.target.value] = edge
+          return
+        end
+
+        edge.target.edges.values
+          .reject { |neighbor_edge| @visited.include?(neighbor_edge.target) }
+          .each do |neighbor_edge|
+            new_edge = Graph::Edge.new(
+              @node,
+              neighbor_edge.target,
+              edge.weight + neighbor_edge.weight,
+            )
+            @frontier << new_edge
           end
-        end
-        hash
+        self
       end
-    end
 
-    def key_graph
-      @key_graph ||= KeyGraph.new.tap { |kg| kg.edge_lookup = edge_lookup }
-    end
-
-    def modified_key_graph
-      @modified_key_graph ||= ModifiedKeyGraph.new.tap { |mkg| mkg.edge_lookup = modified_edge_lookup }
-    end
-
-    def keys
-      @keys ||= raw_input.scan /[a-z]/
-    end
-
-    def keys_goal
-      @keys_goal ||= keys.sum { |char| KeyGraph::Node.bit_for(char) }
-    end
-
-    def a_star
-      @a_star ||= AStar.new(
-        key_graph,
-        key_graph.start,
-        goal: lambda { |node| node.keys == keys_goal },
-        heuristic: lambda { |node| (keys_goal - node.keys).to_s(2).count("1") },
-      )
-    end
-
-    def minimum_path_length
-      a_star.search.minimum_path_length
-    end
-
-    def modified_a_star
-      @modified_a_star ||= AStar.new(
-        modified_key_graph,
-        modified_key_graph.start,
-        goal: lambda { |node| node.keys == keys_goal },
-        heuristic: lambda { |node| (keys_goal - node.keys).to_s(2).count("1") },
-      )
-    end
-
-    def modified_minimum_path_length
-      modified_a_star.search.minimum_path_length
+      def reduce
+        advance until @frontier.empty?
+        @node.edges = @edges
+        @node
+      end
     end
 
     class KeyGraph < Graph
-      attr_accessor :edge_lookup
+      def initialize(graph)
+        @graph = graph
+        @node_lookup = Hash.new
+      end
 
-      def neighbors_of(node)
-        if node.key? && !node.unlocked?
-          [node_for([node.char, node.add_key])]
+      def neighbors(key_node)
+        if key_node.key? && !key_node.unlocked?
+          [node([key_node.char, key_node.add_key])]
         else
-          edge_lookup[node.char].keys.map do |neighbor_char|
-            node_for([neighbor_char, node.keys])
-          end.select do |neighbor|
-            neighbor.key? || neighbor.unlocked?
+          @graph.node(key_node.char).neighbors.map do |neighbor|
+            node([neighbor.value, key_node.keys])
+          end.select do |key_neighbor|
+            key_neighbor.key? || key_neighbor.unlocked?
           end
         end
       end
 
-      def distance(node, other)
-        return 0 if node.char == other.char
-        edge_lookup[node.char][other.char]
+      def distance(key_node, other)
+        return 0 if key_node.char == other.char
+        @graph.distance(key_node.char, other.char)
+      end
+
+      def shortest_distance(key_node)
+        @graph.shortest_distance(key_node.char)
       end
 
       def start
-        node_for ["@", 0]
+        node(["@", 0])
+      end
+
+      def keys
+        @graph.nodes.map(&:value).join.scan(/[a-z]/)
+      end
+
+      def a_star
+        @a_star ||= AStar.new(self)
       end
 
       class Node < Graph::Node
@@ -232,34 +195,55 @@ module Year2019
           !key? || unlocked? ? keys : keys ^ bit
         end
       end
+
+      class AStar < AStarGraph
+        def initialize(key_graph)
+          super(key_graph.start, "", graph: key_graph)
+        end
+
+        def keys_goal
+          @keys_goal ||= @graph.keys.sum { |char| Node.bit_for(char) }
+        end
+
+        def heuristic(key_node)
+          (keys_goal - key_node.keys).to_s(2).count("1")
+        end
+
+        def finished?
+          @path_node.node.keys == keys_goal
+        end
+      end
     end
 
     class ModifiedKeyGraph < KeyGraph
-      attr_accessor :edge_lookup
-
-      def neighbors_of(node)
-        node.key_graph_nodes.flat_map.with_index do |key_graph_node, index|
+      def neighbors(key_node)
+        key_node.key_graph_nodes.flat_map.with_index do |key_graph_node, index|
           super(key_graph_node).map do |key_graph_neighbor|
-            node_for([
-              *node.chars.take(index),
+            node([
+              *key_node.chars.take(index),
               key_graph_neighbor.char,
-              *node.chars.drop(index + 1),
+              *key_node.chars.drop(index + 1),
               key_graph_neighbor.keys,
             ])
           end
         end
       end
 
-      def distance(node, other)
-        return 0 if node.chars == other.chars
-        char, other_char = (
-          (node.chars | other.chars) - (node.chars & other.chars)
-        )
-        edge_lookup[char][other_char]
+      def distance(key_node, other)
+        return 0 if key_node.chars == other.chars
+        @graph.distance(*(
+          (key_node.chars | other.chars) - (key_node.chars & other.chars)
+        ))
+      end
+
+      def shortest_distance(key_node)
+        key_node.chars.map do |char|
+          @graph.shortest_distance(char)
+        end.min
       end
 
       def start
-        node_for ["$", "%", "^", "&", 0]
+        node(["$", "%", "^", "&", 0])
       end
 
       class Node < KeyGraph::Node
@@ -274,53 +258,6 @@ module Year2019
         def inspect
           "<#{chars}, keys=#{keys}>"
         end
-      end
-    end
-
-    class TreesBuilder
-      def initialize(lookup, root_values)
-        @lookup = lookup
-        @trees = Hash.new
-        @root_points = root_values.map { |value| lookup.key(value) }
-        @visited = Set.new
-      end
-
-      def build_trees
-        until @root_points.empty?
-          build_tree_for(@root_points.pop).tap do |tree|
-            leaves_for(tree).each do |leaf|
-              @root_points << leaf.label unless @visited.include? leaf.label
-            end
-          end
-        end
-        @trees
-      end
-
-      def build_tree
-        root_point = @root_points.pop
-      end
-
-      def build_tree_for(root_point)
-        return if @trees.key? root_point
-
-        tree = Tree.new
-        frontier = [tree.node_for(root_point)]
-        until frontier.empty?
-          node = frontier.pop
-          @visited.add node.label
-          (Point.neighbors_of(node.label) & @lookup.keys).each do |neighbor|
-            next if @visited.include? neighbor
-            child = tree.node_for neighbor
-            child.parent = node
-            node.add_child child
-            frontier << child unless /[A-Za-z]/.match @lookup[neighbor]
-          end
-        end
-        @trees[root_point] = tree
-      end
-
-      def leaves_for(tree)
-        tree.leaves.select { |leaf| /[A-Za-z]/.match @lookup[leaf.label] }
       end
     end
   end
