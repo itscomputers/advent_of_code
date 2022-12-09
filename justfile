@@ -14,6 +14,9 @@ open year day:
 solve year day:
   ruby -I lib lib/advent.rb {{year}} {{day}}
 
+solve_part year day part:
+  ruby -I lib lib/advent.rb {{year}} {{day}} {{part}}
+
 save_input year day input:
   echo "{{input}}" > lib/year{{year}}/inputs/{{day}}.txt
 

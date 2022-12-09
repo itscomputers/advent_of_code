@@ -3,12 +3,11 @@ require 'tree'
 
 module Year2019
   class Day06 < Solver
-    def part_one
-      tree.nodes.sum { |node| node.ancestors.size }
-    end
-
-    def part_two
-      tree.distance(*labels.map { |label| tree.node_for label })
+    def solve(part:)
+      case part
+      when 1 then tree.nodes.sum { |node| node.ancestors.size }
+      when 2 then tree.distance(*labels.map { |label| tree.node_for(label) }) - 2
+      end
     end
 
     def labels
