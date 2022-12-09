@@ -6,8 +6,8 @@ module Year2021
   class Day20 < Solver
     def solve(part:)
       case part
+      when 1 then pixel_count(iteration: 2)
       when 2 then pixel_count(iteration: 50)
-#     when 1 then pixel_count(iteration: 2)
       end
     end
 
@@ -47,7 +47,7 @@ module Year2021
     end
 
     def pixel_count(iteration:)
-      iteration.times { |i| enhance!(buffer: 2 * iteration + 1).tap { puts "iteration: #{i + 1}" } }
+      iteration.times { |i| enhance!(buffer: 2 * iteration + 1) }
       grid.count do |point, value|
         point.all? { |t| t.between?(-iteration, 99 + iteration) } && value == "#"
       end
