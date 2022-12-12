@@ -20,6 +20,8 @@ class AStarSimple
 
   def heuristic(node)
     node.shortest_distance || 1
+  rescue NoMethodError
+    1
   end
 
   def finished?
@@ -110,6 +112,8 @@ class AStarGraph < AStarSimple
 
   def heuristic(node)
     @graph.shortest_distance(node) || 1
+  rescue NoMethodError
+    1
   end
 
   def distance(node)
