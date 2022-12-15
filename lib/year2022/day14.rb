@@ -98,9 +98,11 @@ module Year2022
       end
 
       def points_between(pair)
-        xmin, xmax = pair.map(&:first).sort
-        ymin, ymax = pair.map(&:last).sort
-        (xmin..xmax).flat_map { |x| (ymin..ymax).map { |y| [x, y] } }
+        Range.new(*pair.map(&:first).sort).flat_map do |x|
+          Range.new(*pair.map(&:last).sort).map do |y|
+            [x, y]
+          end
+        end
       end
     end
   end
