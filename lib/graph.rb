@@ -97,9 +97,9 @@ class Graph
   end
 
   class DirectedGraphBuilder
-    def initialize(hash)
+    def initialize(hash, graph: nil)
       @hash = hash
-      @graph = Graph.new
+      @graph = graph || Graph.new
     end
 
     def build

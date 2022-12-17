@@ -121,3 +121,11 @@ class MinBinaryHeap < BinaryHeap
   end
 end
 
+class MaxBinaryHeap < BinaryHeap
+  private
+
+  def compare(element, other)
+    element < other
+  end
+end
+
