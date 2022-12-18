@@ -6,8 +6,6 @@ describe Year2022::Day17 do
     allow(day).to receive(:raw_input).and_return <<~RAW_INPUT
       >>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>
     RAW_INPUT
-    allow(day).to receive(:offset).and_return 15
-    allow(day).to receive(:period).and_return 35
   end
 
   describe "part 1" do
