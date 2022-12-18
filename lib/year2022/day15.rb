@@ -3,12 +3,13 @@ require "point"
 require "solver"
 require "set"
 require "vector"
+require "range_monkeypatch"
 
 module Year2022
   class Day15 < Solver
     def solve(part:)
       case part
-      when 1 then horizontal_sensor_field.non_beacon_values.size
+      when 1 then horizontal_sensor_field.non_beacon_count
       when 2 then distress_signal
       end
     end
@@ -29,15 +30,15 @@ module Year2022
       HorizontalSensorField.new(sensors, y_value)
     end
 
-    def beacon_point
-      BeaconSearch.new(sensors, distress_signal_range).search
+    def beacon_search
+      BeaconSearchV2.new(sensors, distress_signal_range)
     end
 
     def distress_signal
-      Vector.dot(beacon_point, [4000000, 1])
+      Vector.dot(beacon_search.beacon, [4000000, 1])
     end
 
-    class BeaconSearch
+    class BeaconSearch # ~60s
       def initialize(sensors, range)
         @sensors = sensors
         @range = range
@@ -53,9 +54,9 @@ module Year2022
         end
       end
 
-      def search
-        @sensors.each do |sensor|
-          puts "sensor: #{sensor.circle.center}, #{sensor.circle.radius}"
+      def beacon
+        @sensors.each.with_index do |sensor, index|
+          puts "searching around sensor #{index} w/ radius=#{sensor.radius}"
           search_around(sensor).tap do |point|
             return point unless point.nil?
           end
@@ -63,28 +64,58 @@ module Year2022
       end
     end
 
-    class HorizontalSensorField
-      def initialize(sensors, y_value)
+    class BeaconSearchV2 # ~90s, ~35s (reverse search)
+      def initialize(sensors, limiting_value)
         @sensors = sensors
-        @y_value = y_value
+        @limiting_value = limiting_value
       end
 
-      def values
-        @sensors.reduce(Set.new) do |set, sensor|
-          range = sensor.circle.x_range(y_value: @y_value)
-          range.nil? ? set : set | range.to_a
+      def beacon
+        @beacon_point ||= (0..@limiting_value).each do |y_value|
+          y_value = @limiting_value - y_value
+          puts "searching at y = #{y_value}" if y_value % 100000 == 0
+          HorizontalSensorField.new(
+            @sensors,
+            y_value,
+            limiting_value: @limiting_value,
+          ).tap do |sensor_field|
+            if sensor_field.ranges.size == 2
+              x_value = sensor_field.ranges.first.max + 1
+              return [x_value, y_value]
+            end
+          end
+        end
+      end
+    end
+
+    class HorizontalSensorField
+      def initialize(sensors, y_value, limiting_value: nil)
+        @sensors = sensors
+        @y_value = y_value
+        @limiting_value = limiting_value
+      end
+
+      def ranges
+        @ranges ||= @sensors
+          .map { |sensor| sensor.circle.x_range(y_value: @y_value) }
+          .compact
+          .reduce([]) { |acc, range| range.unions(acc) }
+      end
+
+      def beacon_count
+        @sensors.map(&:beacon).uniq.sum { |beacon| beacon.last == @y_value ? 1 : 0 }
+      end
+
+      def value_count
+        @value_count ||= ranges.sum do |range|
+          @limiting_value.nil? ?
+            range.size :
+            range.intersection(0..@limiting_value).size
         end
       end
 
-      def beacon_values
-        @sensors
-          .map(&:beacon)
-          .select { |beacon| beacon.last == @y_value }
-          .map(&:first)
-      end
-
-      def non_beacon_values
-        (values - beacon_values)
+      def non_beacon_count
+        value_count - beacon_count
       end
     end
 
