@@ -1,8 +1,18 @@
 require 'vector'
 
 class Point < Struct.new(:x, :y)
-  def self.rotate(array, direction)
-    new(*array).rotate(direction).to_a
+  def self.rotate(array, direction, center: nil)
+    if center.nil?
+      new(*array).rotate(direction).to_a
+    else
+      Vector.add(
+        center,
+        rotate(
+          Vector.subtract(center, array),
+          direction,
+        ),
+      )
+    end
   end
 
   def self.distance(array, other)
