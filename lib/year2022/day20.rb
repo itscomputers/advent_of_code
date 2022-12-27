@@ -3,7 +3,7 @@ require "solver"
 module Year2022
   class Day20 < Solver
     def solve(part:)
-      file(part: part).decrypt.grove_coordinates.sum
+      file(part: part).mix.grove_coordinates.sum
     end
 
     def file(part: 1)
@@ -30,32 +30,28 @@ module Year2022
         sequence_value_at(@sequence_index)
       end
 
-      def shift
-        (@index + offset - 1) / @size
-      end
-
       def destination
-        (@index + offset + shift) % @size
+        1 + (@index + offset - 1) % (@size - 1)
       end
 
-      def mix
-        @indices = @indices.move_value(from: @index, to: destination)
+      def move_next
+        @indices.insert(destination, @indices.delete_at(@index))
         @sequence_index += 1
         set_index
         self
       end
 
-      def decrypt
-        mix until @sequence_index == @size
+      def mix
+        move_next until @sequence_index == @size
         self
-      end
-
-      def state
-        @indices.map(&method(:sequence_value_at))
       end
 
       def set_index
         @index = @indices.index(@sequence_index)
+      end
+
+      def state
+        @indices.map(&method(:sequence_value_at))
       end
 
       def grove_coordinates
@@ -76,35 +72,10 @@ module Year2022
         set_index
       end
 
-      def decrypt
-        puts "initial state #{state}"
-        10.times do |i|
-          super
-          reset_indices
-          puts "state after #{i + 1} mixings: #{state}"
-        end
+      def mix
+        10.times { |i| super and reset_indices }
         self
       end
-    end
-  end
-end
-
-class Array
-  def move_value(from:, to:)
-    case from <=> to
-    when 0 then self
-    when 1 then [
-      *take(to),
-      self[from],
-      *drop(to).take(from - to),
-      *drop(from + 1),
-    ]
-    when -1 then [
-      *take(from),
-      *drop(from + 1).take(to - from),
-      self[from],
-      *drop(to + 1),
-    ]
     end
   end
 end

@@ -24,25 +24,8 @@ describe Year2022::Day20 do
     it { is_expected.to eq 1623178306 }
   end
 
-  describe "move_value" do
-    let(:array) { (0..7).to_a }
-    subject { array.move_value(from: index, to: destination) }
-
-    (0..7).to_a.product((0..7).to_a).each do |data|
-      context "when index is #{data.first} and destination is #{data.last}" do
-        let(:index) { data.first }
-        let(:destination) { data.last }
-
-        it "has the all the values and the right value at the destination" do
-          is_expected.to match_array array
-          expect(subject[destination]).to eq array[index]
-        end
-      end
-    end
-  end
-
-  describe "state after mixing" do
-    let(:file) { day.file.tap { |f| mix_count.times { f.mix } } }
+  describe "state after each move" do
+    let(:file) { day.file.tap { |f| mix_count.times { f.move_next } } }
     subject { file.state }
 
     context "no mixing" do
@@ -87,7 +70,7 @@ describe Year2022::Day20 do
   end
 
   describe "grove_coordinates" do
-    subject { day.file.decrypt.grove_coordinates }
+    subject { day.file.mix.grove_coordinates }
     it { is_expected.to eq [4, -3, 2] }
   end
 end
