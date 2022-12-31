@@ -186,7 +186,7 @@ describe Year2022::Day22 do
             ],
           ]
         end,
-        *(0..3).zip((4..7).to_a.reverse).map do |(y, cx)|
+        *(0..3).zip((4..7).to_a).map do |(y, cx)|
           [
             [[8, y], [-1, 0]],
             [[cx, 4], [0, 1]],
