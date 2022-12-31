@@ -32,41 +32,94 @@ module Year2022
     end
 
     def path(part:)
-      case part
-      when 1 then Path.new(start, grid, movements)
-      when 2 then CubePath.new([cube_face_size, 0], cube_grid, movements)
-      end
+      Path.new(start, grid, movements, edge_mapping_for(part: part), size)
     end
 
     def edge_mapping
-
-    end
-
-    def cube_face_size
-      @cube_face_size ||= 50
-    end
-
-    def cube_face_mapping
-      @cube_face_mapping ||= {
-        [0, 2] => [[0, -2], 2],
-        [0, 3] => [[1, 0], 3],
+      {
+        [[1, 0], [-1, 0]] => {
+          1 => [[2, 0], [-1, 0]],
+          2 => [[0, 2], [1, 0]],
+        },
+        [[1, 0], [0, -1]] => {
+          1 => [[1, 2], [0, -1]],
+          2 => [[0, 3], [1, 0]],
+        },
+        [[2, 0], [1, 0]] => {
+          1 => [[1, 0], [1, 0]],
+          2 => [[1, 2], [-1, 0]],
+        },
+        [[2, 0], [0, -1]] => {
+          1 => [[2, 0], [0, -1]],
+          2 => [[0, 3], [0, -1]],
+        },
+        [[2, 0], [0, 1]] => {
+          1 => [[2, 0], [0, 1]],
+          2 => [[1, 1], [-1, 0]],
+        },
+        [[1, 2], [-1, 0]] => {
+          1 => [[1, 2], [-1, 0]],
+          2 => [[0, 2], [0, 1]],
+        },
+        [[1, 2], [1, 0]] => {
+          1 => [[1, 2], [1, 0]],
+          2 => [[2, 0], [0, -1]],
+        },
+        [[0, 2], [-1, 0]] => {
+          1 => [[1, 2], [-1, 0]],
+          2 => [[1, 0], [1, 0]],
+        },
+        [[0, 2], [0, -1]] => {
+          1 => [[0, 3], [0, -1]],
+          2 => [[1, 1], [1, 0]],
+        },
+        [[1, 2], [1, 0]] => {
+          1 => [[0, 2], [1, 0]],
+          2 => [[2, 0], [-1, 0]],
+        },
+        [[1, 2], [0, 1]] => {
+          1 => [[1, 0], [0, 1]],
+          2 => [[0, 3], [-1, 0]],
+        },
+        [[0, 3], [-1, 0]] => {
+          1 => [[0, 3], [-1, 0]],
+          2 => [[1, 0], [0, 1]],
+        },
+        [[0, 3], [0, 1]] => {
+          1 => [[0, 2], [0, 1]],
+          2 => [[2, 0], [-1, 0]],
+        },
+        [[0, 3], [1, 0]] => {
+          1 => [[0, 3], [1, 0]],
+          2 => [[1, 2], [0, -1]],
+        },
       }
     end
 
-    def cube_grid
-      CubeGrid.build(grid, cube_face_mapping, cube_face_size)
+    def edge_mapping_for(part:)
+      edge_mapping.map { |key, value| [key, value[part]] }.to_h
+    end
+
+    def size
+      50
     end
 
     class Path
-      def initialize(start, grid, movements)
-        @position = start
+      def initialize(start, grid, movements, mapping, size)
+        @mapping = mapping
+        @size = size
         @grid = grid
         @movements = movements
-        @direction = [1, 0]
+        @directed_point = DirectedPoint.new(start, [1, 0])
+        @path = Hash.new
       end
 
       def inspect
-        "<Path pos=#{@position} dir=#{@direction} move=#{@movement}>"
+        "<Path pos=#{@position} dir=#{@direction} move=#{movement}>"
+      end
+
+      def display
+        puts "\n------------\n#{Grid.display({**@grid, **@path}, type: :hash)}\n------------\n"
       end
 
       def movement
@@ -74,28 +127,35 @@ module Year2022
       end
 
       def move_forward
-        @position = line_of_sight.take(movement + 1).last
+        @directed_point = directed_line_of_sight.last
         @movement = nil
       end
 
       def turn
-        @direction = Point.rotate(@direction, movement == "R" ? :cw : :ccw)
+        @directed_point.direction = Point.rotate(
+          @directed_point.direction,
+          movement == "R" ? :cw : :ccw,
+        )
         @movement = nil
       end
 
       def move_next
         return self if movement.nil?
         movement.is_a?(Integer) ? move_forward : turn
+        @path[@directed_point.point] = direction_str
         self
       end
 
       def move_all
         move_next until @movements.empty?
+#       display
+        puts "point: #{@directed_point.point}"
+        puts "direction: #{@directed_point.direction}"
         self
       end
 
       def direction_int
-        [[1, 0], [0, 1], [-1, 0], [0, -1]].index(@direction)
+        [[1, 0], [0, 1], [-1, 0], [0, -1]].index(@directed_point.direction)
       end
 
       def direction_str
@@ -104,25 +164,135 @@ module Year2022
 
       def password
         Vector.dot(
-          [*@position.map { |coord| coord + 1 }, direction_int],
+          [*@directed_point.point.map { |coord| coord + 1 }, direction_int],
           [4, 1000, 1],
         )
       end
 
-      def file(position: @position, direction: @direction)
-        @grid.keys.select do |point|
-          case direction.first.abs
-          when 0 then point.first == position.first
-          when 1 then point.last == position.last
+      def directed_line_of_sight
+        movement.times.reduce([@directed_point]) do |array, _|
+          directed_point = next_directed_point(array.last)
+          return array if @grid[directed_point.point] == "#"
+          @path[directed_point.point] = {
+            [1, 0] => ">",
+            [-1, 0] => "<",
+            [0, 1] => "v",
+            [0, -1] => "^",
+          }[directed_point.direction]
+          [*array, directed_point]
+        end
+      end
+
+      def next_directed_point(directed_point)
+        NextPointBuilder.new(directed_point, @mapping, @size).build
+      end
+
+      class NextPointBuilder
+        def initialize(directed_point, mapping, size)
+          @directed_point = directed_point
+          @full_mapping = mapping
+          @size = size
+        end
+
+        def zone
+          @zone ||= Zone.new(
+            @directed_point.point.map { |coord| coord / @size },
+            @size,
+          )
+        end
+
+        def mapping
+          @full_mapping[[zone.position, direction]]
+        end
+
+        def point
+          @directed_point.point
+        end
+
+        def rel_x
+          point.first % @size
+        end
+
+        def rel_y
+          point.last % @size
+        end
+
+        def direction
+          @directed_point.direction
+        end
+
+        def next_zone
+          @next_zone ||= mapping.nil? ?
+            nil :
+            Zone.new(mapping.first, @size)
+        end
+
+        def next_direction
+          mapping&.last
+        end
+
+        def use_default?
+          return true if mapping.nil?
+          case direction
+          when [1, 0] then point.first != zone.right
+          when [-1, 0] then point.first != zone.left
+          when [0, 1] then point.last != zone.bottom
+          when [0, -1] then point.last != zone.top
+          end
+        end
+
+        def next_point
+          case [direction, next_direction]
+          when [[1, 0], [1, 0]] then [next_zone.left, point.last]
+          when [[1, 0], [-1, 0]] then [next_zone.right, next_zone.bottom - rel_y]
+          when [[1, 0], [0, 1]] then [next_zone.right - rel_y, next_zone.top]
+          when [[1, 0], [0, -1]] then [next_zone.right - rel_y, next_zone.bottom]
+
+          when [[-1, 0], [1, 0]] then [next_zone.left, next_zone.bottom - rel_y]
+          when [[-1, 0], [-1, 0]] then [next_zone.right, point.last]
+          when [[-1, 0], [0, 1]] then [next_zone.right - rel_y, next_zone.top]
+          when [[-1, 0], [0, -1]] then [next_zone.right - rel_y, next_zone.bottom]
+
+          when [[0, 1], [1, 0]] then [next_zone.left, next_zone.bottom - rel_x]
+          when [[0, 1], [-1, 0]] then [next_zone.right, next_zone.bottom - rel_x]
+          when [[0, 1], [0, 1]] then [point.first, next_zone.top]
+          when [[0, 1], [0, -1]] then [next_zone.right - rel_x, next_zone.bottom]
+
+          when [[0, -1], [1, 0]] then [next_zone.left, next_zone.bottom - rel_x]
+          when [[0, -1], [-1, 0]] then [next_zone.right, next_zone.bottom - rel_x]
+          when [[0, -1], [0, -1]] then [point.first, next_zone.bottom]
+          when [[0, -1], [0, 1]] then [next_zone.right - rel_x, next_zone.top]
+          end
+        end
+
+        def build
+          return @directed_point.default_next if use_default?
+          DirectedPoint.new(next_point, next_direction)
+        end
+
+        class Zone < Struct.new(:position, :size)
+          def top
+            position.last * size
+          end
+
+          def bottom
+            (position.last + 1) * size - 1
+          end
+
+          def left
+            position.first * size
+          end
+
+          def right
+            (position.first + 1) * size - 1
           end
         end
       end
 
-      def line_of_sight
-        (@direction.sum == 1 ? file : file.reverse)
-          .cycle(2)
-          .drop_while { |point| point != @position }
-          .take_while { |point| @grid[point] == "." }
+      class DirectedPoint < Struct.new(:point, :direction)
+        def default_next
+          DirectedPoint.new(Vector.add(point, direction), direction)
+        end
       end
     end
 
