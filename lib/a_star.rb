@@ -10,12 +10,16 @@ class AStarSimple
     @goal = goal
 
     @frontier_nodes = Set.new([@start])
-    @frontier = MinBinaryHeap.new << path_node_for(@start).tap do |p_node|
+    @frontier = MinBinaryHeap.new << start_path_node
+
+    @path_found = false
+  end
+
+  def start_path_node
+    path_node_for(@start).tap do |p_node|
       p_node.cost = 0
       p_node.priority = heuristic(@start)
     end
-
-    @path_found = false
   end
 
   def heuristic(node)

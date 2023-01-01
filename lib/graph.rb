@@ -1,3 +1,29 @@
+class BaseGraph
+  def neighbors(value)
+    raise NotImplemented
+  end
+
+  def distance(value, neighbor)
+    raise NotImplemented
+  end
+
+  class Builder
+    def initialize(inputs, graph:)
+      @inputs = inputs
+      @graph = graph
+    end
+
+    def build
+      @inputs.each(&method(:process))
+      @graph
+    end
+
+    def process(input)
+      raise NotImplemented
+    end
+  end
+end
+
 class Graph
   attr_reader :node_lookup
 
