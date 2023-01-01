@@ -1,5 +1,6 @@
 require "grid"
 require "point"
+require "set"
 require "solver"
 require "vector"
 
@@ -12,34 +13,30 @@ module Year2022
       end
     end
 
+    def elf_positions
+      Grid.parse(lines, as: :set) { "#" }
+    end
+
     def elf_grid
-      @elf_grid ||= ElfGrid.new(Grid.parse(lines, as: :hash))
+      @elf_grid ||= ElfGrid.new(elf_positions)
     end
 
     class ElfGrid
       attr_reader :round
 
-      def initialize(grid)
-        @grid = grid
+      def initialize(elf_positions)
+        @elf_positions = elf_positions
         @round = 0
         @directions = [[0, -1], [0, 1], [-1, 0], [1, 0]]
         @stable = false
-      end
-
-      def inspect
-        "<ElfGrid round=#{@round} empty=#{empty_count}>"
-      end
-
-      def display
-        puts "\n-----\n\n#{Grid.display(@grid, type: :hash, " " => ".")}\n\n--------\nround: #{@round}"
       end
 
       def execute_round
         proposed_moves_by_elf.select do |new_position, elf_positions|
           if elf_positions.size == 1
             elf_position = elf_positions.first
-            @grid[elf_position] = "."
-            @grid[new_position] = "#"
+            @elf_positions.delete(elf_position)
+            @elf_positions.add(new_position)
           end
         end
         @directions = @directions.cycle(2).drop(1).take(4)
@@ -52,16 +49,12 @@ module Year2022
         self
       end
 
-      def elf_positions
-        @grid.select { |point, char| char == "#" }.keys
-      end
-
       def proposed_move(elf_position)
-        ProposedMoveBuilder.new(elf_position, @grid, @directions).build
+        ProposedMoveBuilder.new(elf_position, @elf_positions, @directions).build
       end
 
       def proposed_moves_by_elf
-        elf_positions.reduce(Hash.new { |h, k| h[k] = [] }) do |hash, elf_position|
+        @elf_positions.reduce(Hash.new { |h, k| h[k] = [] }) do |hash, elf_position|
           new_position = proposed_move(elf_position)
           hash[new_position] << elf_position unless new_position.nil?
           hash
@@ -71,24 +64,24 @@ module Year2022
       end
 
       def empty_count
-        Grid.x_range(@grid.keys).sum do |x|
-          Grid.y_range(@grid.keys).sum do |y|
-            @grid[[x, y]] == "#" ? 0 : 1
+        Grid.x_range(@elf_positions).sum do |x|
+          Grid.y_range(@elf_positions).sum do |y|
+            @elf_positions.include?([x, y]) ? 0 : 1
           end
         end
       end
 
       class ProposedMoveBuilder
-        def initialize(elf_position, grid, directions)
+        def initialize(elf_position, elf_positions, directions)
           @elf_position = elf_position
-          @grid = grid
+          @elf_positions = elf_positions
           @directions = directions
         end
 
         def neighbors
           @neighbors ||= Point
             .neighbors_of(@elf_position, strict: false)
-            .select { |point| @grid[point] == "#" }
+            .select { |point| @elf_positions.include?(point) }
         end
 
         def position(direction)
