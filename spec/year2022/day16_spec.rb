@@ -22,6 +22,11 @@ describe Year2022::Day16 do
     it { is_expected.to eq 1651 }
   end
 
+  describe "part 2" do
+    subject { day.solve(part: 2) }
+    it { is_expected.to eq 1707 }
+  end
+
   describe "flow rates" do
     subject { day.initial_graph.instance_variable_get(:@flow_rate_lookup) }
     let(:expected_flow_rates) { {
@@ -60,41 +65,13 @@ describe Year2022::Day16 do
     subject { day.pruned_graph.instance_variable_get(:@neighbor_lookup) }
     let(:expected_neighbors) { {
       "AA" => {"BB" => 1, "CC" => 2, "DD" => 1, "EE" => 2, "HH" => 5, "JJ" => 2},
-      "BB" => {           "CC" => 1, "DD" => 2, "EE" => 3, "HH" => 6, "JJ" => 3},
-      "CC" => {"BB" => 1,            "DD" => 1, "EE" => 2, "HH" => 5, "JJ" => 4},
-      "DD" => {"BB" => 2, "CC" => 1,            "EE" => 1, "HH" => 4, "JJ" => 3},
-      "EE" => {"BB" => 3, "CC" => 2, "DD" => 1,            "HH" => 3, "JJ" => 4},
-      "HH" => {"BB" => 6, "CC" => 5, "DD" => 4, "EE" => 3,            "JJ" => 7},
-      "JJ" => {"BB" => 3, "CC" => 4, "DD" => 3, "EE" => 4, "HH" => 7           },
+      "BB" => {"BB" => 0, "CC" => 1, "DD" => 2, "EE" => 3, "HH" => 6, "JJ" => 3},
+      "CC" => {"BB" => 1, "CC" => 0, "DD" => 1, "EE" => 2, "HH" => 5, "JJ" => 4},
+      "DD" => {"BB" => 2, "CC" => 1, "DD" => 0, "EE" => 1, "HH" => 4, "JJ" => 3},
+      "EE" => {"BB" => 3, "CC" => 2, "DD" => 1, "EE" => 0, "HH" => 3, "JJ" => 4},
+      "HH" => {"BB" => 6, "CC" => 5, "DD" => 4, "EE" => 3, "HH" => 0, "JJ" => 7},
+      "JJ" => {"BB" => 3, "CC" => 4, "DD" => 3, "EE" => 4, "HH" => 7, "JJ" => 0},
     } }
     it { is_expected.to eq expected_neighbors }
-  end
-
-  describe "valve_graph" do
-    let(:valve_graph) { day.valve_graph }
-
-    describe "root" do
-      let(:root) { valve_graph.root }
-
-      it { expect(root.value).to eq "AA" }
-      it { expect(root.on?).to be true }
-
-      describe "neighbors" do
-        let(:neighbors) { valve_graph.neighbors(root) }
-        it { expect(neighbors.map(&:value)).to match_array %w(BB CC DD EE HH JJ) }
-        it do
-          neighbors.map(&:bitmask).each do |bitmask|
-            expect(bitmask).to eq root.bitmask
-          end
-        end
-
-        %w(BB CC DD EE HH JJ).each do |value|
-          describe "when #{value} is on" do
-            before { root.bitmask = root.bitmask.copy_with(value) }
-            it { expect(neighbors.map(&:value)).to_not include value }
-          end
-        end
-      end
-    end
   end
 end
