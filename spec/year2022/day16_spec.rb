@@ -74,4 +74,23 @@ describe Year2022::Day16 do
     } }
     it { is_expected.to eq expected_neighbors }
   end
+
+  describe Year2022::Day16::ValveTunnel do
+    describe "uniqueness" do
+      let(:path_args) { [["AA", "EE"], 15, 69, 420] }
+      let(:workers) do
+        [["BB", 5], ["CC", 9]].map do |worker_args|
+          described_class::Worker.new(*worker_args)
+        end
+      end
+      let(:path) { described_class::Path.new(workers, *path_args) }
+      let(:other) { described_class::Path.new(workers.reverse, *path_args) }
+
+      it "is considered the same with the workers reversed" do
+        expect(path).to eq other
+        expect(path).to be_eql other
+        expect([path, other].uniq).to eq [path]
+      end
+    end
+  end
 end
