@@ -8,7 +8,7 @@ test year day:
   rspec spec/year{{year}}/day{{day}}_spec.rb
 
 open year day:
-  tmux split-window -h -d "vim spec/year{{year}}/day{{day}}_spec.rb"\; split-window -d -t 1
+  tmux split-window -h -d "vim spec/year{{year}}/day{{day}}_spec.rb"\; split-window -h -t 1
   vim lib/year{{year}}/day{{day}}.rb
 
 solve year day:
