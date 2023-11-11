@@ -1,6 +1,6 @@
 class BinaryHeap
-  def initialize
-    @elements = []
+  def initialize(*elements)
+    @elements = elements
   end
 
   def inspect
