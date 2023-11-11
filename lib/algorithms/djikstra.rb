@@ -16,7 +16,7 @@ module Algorithms
     end
 
     def priority_queue
-      @priority_queue ||= DataStructures::MinBinaryHeap.new(@node)
+      @priority_queue ||= DataStructures::BinaryHeap::Min.new(@node)
     end
 
     def search(target: nil)

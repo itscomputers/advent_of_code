@@ -30,17 +30,6 @@ module Year2020
       bag_lookup[color] ||= Bag.new(color)
     end
 
-    def process_rules!
-      rules.each do |rule|
-        parent = bag_for(rule.parent_color)
-        rule.children_data.each do |hash|
-          child = bag_for(hash[:color])
-          parent.add_child(child, hash[:quantity])
-          child.add_parent(parent)
-        end
-      end
-    end
-
     class Bag < Struct.new(:color)
       def child_lookup
         @child_lookup ||= Hash.new
