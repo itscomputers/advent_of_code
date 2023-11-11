@@ -1,5 +1,21 @@
 module DataStructures
-  class MaxBinaryHeap
+  class BinaryHeap
+    class Min < BinaryHeap
+      private
+
+      def compare(element, other)
+        other <=> element
+      end
+    end
+
+    class Max < BinaryHeap
+      private
+
+      def compare(element, other)
+        element <=> other
+      end
+    end
+
     def initialize(*elements)
       @elements = elements
     end
@@ -36,8 +52,8 @@ module DataStructures
 
     private
 
-    def compare(element, other)
-      element <=> other
+    def compare(_element, _other)
+      raise NotImplementedError
     end
 
     def exchange!(index, other)
@@ -111,14 +127,6 @@ module DataStructures
         exchange!(@index, index)
         @index = index
       end
-    end
-  end
-
-  class MinBinaryHeap < MaxBinaryHeap
-    private
-
-    def compare(element, other)
-      super(other, element)
     end
   end
 end

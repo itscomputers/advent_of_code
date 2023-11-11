@@ -15,7 +15,7 @@ module Year2019
     end
 
     def part_two
-      ModifiededFlawedFrequencyTransmission
+      ModifiedFlawedFrequencyTransmission
         .new(data, 10000)
         .transform(100)
         .inspect
@@ -71,7 +71,7 @@ module Year2019
       end
     end
 
-    class ModifiededFlawedFrequencyTransmission < FlawedFrequencyTransmission
+    class ModifiedFlawedFrequencyTransmission < FlawedFrequencyTransmission
       def initialize(data, multiplier)
         @offset = data.take(7).join("").to_i
         size = multiplier * data.size - @offset
