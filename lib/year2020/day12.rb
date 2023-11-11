@@ -44,7 +44,7 @@ module Year2020
       end
 
       def execute_all
-        execute_next while !@instructions.empty?
+        execute_next until @instructions.empty?
         self
       end
 

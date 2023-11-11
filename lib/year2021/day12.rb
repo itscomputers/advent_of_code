@@ -11,10 +11,6 @@ module Year2021
       end
     end
 
-    def paths
-      Paths.from_lines(lines)
-    end
-
     def path_finder
       PathFinder.from_lines(lines)
     end
