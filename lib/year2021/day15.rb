@@ -1,64 +1,65 @@
 require "solver"
 require "grid"
-require "a_star"
 require "point"
+require "vector"
+require "algorithms/djikstra"
 
 module Year2021
   class Day15 < Solver
     def solve(part:)
-      cavern_graph(part: part).a_star.execute.min_path_cost
+      Algorithms::Djikstra.get_distance(graph(part), [0, 0], target(part))
     end
 
     def grid
       @grid ||= Grid.parse(lines, as: :hash) { |_, ch| ch.to_i }
     end
 
-    def cavern_graph(part:)
-      CavernGraph.new(grid, part: part, size: lines.size)
+    def graph(part)
+      part == 1 ?
+        CavernGraph.new(grid) :
+        EnlargedCavernGraph.new(grid, size: lines.size, multiplier: multiplier(part))
+    end
+
+    def multiplier(part)
+      part == 1 ? 1 : 5
+    end
+
+    def target(part)
+      2.times.map { multiplier(part) * lines.size - 1 }
     end
 
     class CavernGraph
-      def initialize(grid, part:, size:)
+      def initialize(grid, **_options)
         @grid = grid
-        @part = part
-        @size = size
-        @multiplier = part == 1 ? 1 : 5
-        @grid = enlarged_grid if part == 2
       end
 
       def neighbors(node)
         Point.neighbors_of(node).select { |neighbor| @grid.key?(neighbor) }
       end
 
-      def distance(node, neighbor)
+      def distance(_node, neighbor)
         @grid[neighbor]
       end
+    end
 
-      def shortest_distance(node)
-        neighbors(node).map { |neighbor| distance(node, neighbor) }.min
+    class EnlargedCavernGraph < CavernGraph
+      def initialize(grid, multiplier:, size:)
+        @multiplier = multiplier
+        @size = size
+        @grid = enlarge(grid)
       end
 
-      def enlarged_grid
-        (@multiplier * @multiplier).times.reduce(Hash.new) do |hash, index|
-          index_x, index_y = index.divmod(@multiplier)
-          @grid.each do |(x, y), value|
-            point = [
-              x + index_x * @size,
-              y + index_y * @size,
-            ]
-            value = 1 + (value + index_x + index_y - 1) % 9
-            hash[point] = value
+      private
+
+      def enlarge(grid)
+        (@multiplier ** 2).times.reduce(Hash.new) do |hash, index|
+          tile = index.divmod(5)
+          grid.each do |point, value|
+            point = Vector.add(point, Vector.scale(tile, @size))
+            hash[point] = 1 + (value + tile.sum - 1) % 9
           end
           hash
         end
-      end
-
-      def end_goal
-        2.times.map { @multiplier * @size - 1 }
-      end
-
-      def a_star
-        AStarGraph.new([0, 0], end_goal, graph: self)
       end
     end
   end
