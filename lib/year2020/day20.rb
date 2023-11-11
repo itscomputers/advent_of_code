@@ -136,7 +136,7 @@ module Year2020
       end
 
       def north
-        @north ||= tree_indeces @rows.first.chars
+        @north ||= tree_indices @rows.first.chars
       end
 
       def nORTH
@@ -144,7 +144,7 @@ module Year2020
       end
 
       def south
-        @south ||= tree_indeces @rows.last.chars
+        @south ||= tree_indices @rows.last.chars
       end
 
       def sOUTH
@@ -152,7 +152,7 @@ module Year2020
       end
 
       def east
-        @east ||= tree_indeces @rows.map { |row| row.chars.last }
+        @east ||= tree_indices @rows.map { |row| row.chars.last }
       end
 
       def eAST
@@ -160,14 +160,14 @@ module Year2020
       end
 
       def west
-        @west ||= tree_indeces @rows.map { |row| row.chars.first }
+        @west ||= tree_indices @rows.map { |row| row.chars.first }
       end
 
       def wEST
         reverse west
       end
 
-      def tree_indeces(chars)
+      def tree_indices(chars)
         chars.each_with_index.select { |char, _| char == "#" }.map(&:last)
       end
 
@@ -179,13 +179,13 @@ module Year2020
     class Border
       attr_reader :tiles
 
-      def initialize(indeces)
-        @indeces = indeces
+      def initialize(indices)
+        @indices = indices
         @tiles = Hash.new
       end
 
       def add_tile(tile)
-        @tiles[tile.id] = tile.border_label_lookup[@indeces]
+        @tiles[tile.id] = tile.border_label_lookup[@indices]
       end
     end
 
