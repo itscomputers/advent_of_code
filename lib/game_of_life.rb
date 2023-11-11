@@ -45,6 +45,7 @@ class GameOfLife
     case action
     when :activating then lambda { |count| count == 3 }
     when :deactivating then lambda { |count| !count.between?(2, 3) }
+    else lambda { |_count| false }
     end
   end
 

@@ -1,10 +1,10 @@
 class BaseGraph
   def neighbors(value)
-    raise NotImplemented
+    raise NotImplementedError
   end
 
   def distance(value, neighbor)
-    raise NotImplemented
+    raise NotImplementedError
   end
 
   class Builder
@@ -19,7 +19,7 @@ class BaseGraph
     end
 
     def process(input)
-      raise NotImplemented
+      raise NotImplementedError
     end
   end
 end
