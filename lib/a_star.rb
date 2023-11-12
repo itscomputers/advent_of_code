@@ -2,6 +2,101 @@ require "binary_heap"
 require "point"
 require "set"
 
+class AStarBase
+  def initialize(graph, start, **options)
+    @graph = graph
+    @start = start
+    handle_options(options)
+
+    @path_lookup = Hash.new
+
+    @visited = Set.new([@start])
+    @frontier = MinBinaryHeap.new << start_path
+  end
+
+  def handle_options(options)
+    options.each do |key, value|
+      instance_variable_set("@#{key}".to_sym, value)
+    end
+  end
+
+  def start_path
+    path(@start).tap do |path|
+      path.cost = 0
+      path.priority = heuristic(@start)
+    end
+  end
+
+  def path(node)
+    @path_lookup[node] ||= self.class::Path.new(node)
+  end
+
+  def heuristic(node)
+    raise NotImplementedError
+  end
+
+  def finished?
+    raise NotImplementedError
+  end
+
+  def extend_frontier
+    return if finished?
+    @curr_path = @frontier.pop
+    @graph.neighbors(@curr_path.node).each(&method(:add_to_frontier?))
+  end
+
+  def add_to_frontier?(neighbor)
+    cost = @curr_path.cost + @graph.distance(@curr_path.node, neighbor)
+    neighbor_path = path(neighbor)
+
+    if neighbor_path.cost.nil? || neighbor_path.cost > cost
+      neighbor_path.head = @curr_path
+      neighbor_path.cost = cost
+      neighbor_path.priority = heuristic(neighbor)
+      @frontier << neighbor_path if @visited.add?(neighbor)
+    end
+  end
+
+  def execute
+    extend_frontier until finished? || @frontier.empty?
+    self
+  end
+
+  def min_cost
+    @curr_path.cost
+  end
+
+  def min_path
+    @curr_path.nodes
+  end
+
+  class Path < Struct.new(:node)
+    include Comparable
+    attr_accessor :priority, :cost, :head
+
+    def <=>(other)
+      priority <=> other.priority
+    end
+
+    def nodes
+      return [node] if head.nil?
+      [*head.nodes, node]
+    end
+  end
+end
+
+class AStar < AStarBase
+  def finished?
+    return false if @curr_path.nil?
+    @curr_path.node == @goal
+  end
+
+  def heuristic(node)
+    return @graph.distance(node, @goal) if @heuristic.nil?
+    @heuristic&.call(node)
+  end
+end
+
 class AStarSimple
   attr_reader :path_node
 
@@ -125,7 +220,7 @@ class AStarGraph < AStarSimple
   end
 end
 
-class AStar
+class AStarOld
   def initialize(graph, start, static_goal: nil, goal: nil, heuristic: nil)
     @graph = graph
     if static_goal.nil?
