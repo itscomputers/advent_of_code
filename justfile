@@ -8,7 +8,7 @@ test year day:
   rspec spec/year{{year}}/day{{day}}_spec.rb
 
 open year day:
-  tmux split-window -h -d "vim spec/year{{year}}/day{{day}}_spec.rb"\; split-window -h -t 1
+  tmux split-window -h -d "vim spec/year{{year}}/day{{day}}_spec.rb"\; split-window -d -t 1
   vim lib/year{{year}}/day{{day}}.rb
 
 solve year day:
@@ -20,7 +20,7 @@ solve_part year day part:
 save_input year day input:
   echo "{{input}}" > lib/year{{year}}/inputs/{{day}}.txt
 
-setup year day: (_save_day year day) (_save_spec year day) (open year day)
+setup year day: (_save_day year day) (_save_spec year day)
 
 _save_day year day:
   echo "require \"solver\"\n\nmodule Year{{year}}\n  class Day{{day}} < Solver\n    def solve(part:)\n    end\n  end\nend" > lib/year{{year}}/day{{day}}.rb
