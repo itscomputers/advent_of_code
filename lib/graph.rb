@@ -60,7 +60,7 @@ class Graph
   end
 
   def adjacent?(value, other)
-    node(value).has_neighbor?(other)
+    node(value).has_neighbor?(node(other))
   end
 
   def to_h

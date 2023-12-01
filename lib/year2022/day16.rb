@@ -64,7 +64,6 @@ module Year2022
         iteration = 0
         until @paths.empty?
           iteration += 1
-          puts "-----\niteration: #{iteration} ~> #{inspect}"
           extend_paths
           reduce_paths
         end

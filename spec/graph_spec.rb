@@ -30,7 +30,7 @@ describe Graph do
     end
 
     describe "neighbors" do
-      subject { graph.neighbors(node).map(&:value).sort }
+      subject { graph.neighbors(node).sort }
 
       context "when node is A" do
         let(:node) { "A" }
@@ -194,7 +194,7 @@ describe Graph do
     end
 
     describe "neighbors" do
-      subject { graph.neighbors(node).map(&:value).sort }
+      subject { graph.neighbors(node).sort }
 
       context "when node is A" do
         let(:node) { "A" }
@@ -353,7 +353,7 @@ describe Graph do
     end
 
     describe "neighbors" do
-      subject { graph.neighbors(node).map(&:value).sort }
+      subject { graph.neighbors(node).sort }
 
       context "when node is A" do
         let(:node) { "A" }
@@ -510,7 +510,7 @@ describe Graph do
     end
 
     describe "neighbors" do
-      subject { graph.neighbors(node).map(&:value).sort }
+      subject { graph.neighbors(node).sort }
 
       context "when node is A" do
         let(:node) { "A" }
