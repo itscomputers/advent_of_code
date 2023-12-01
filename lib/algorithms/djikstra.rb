@@ -4,11 +4,11 @@ require "data_structures/binary_heap"
 module Algorithms
   class Djikstra < GraphSearch
     def self.get_shortest_path(graph, source, target)
-      new(graph, source: source, target: target).search.get_path
+      new(graph, source: source, target: target).search(target: target).get_path
     end
 
     def self.get_distance(graph, source, target)
-      new(graph, source: source, target: target).search.get_distance
+      new(graph, source: source, target: target).search(target: target).get_distance
     end
 
     def self.connected?(graph, source, target)
@@ -22,7 +22,7 @@ module Algorithms
     def search(target: nil)
       until priority_queue.empty?
         node = priority_queue.pop
-        break if target && target == node.key
+        break if finished?(node, target: target)
         next if node.visited?
         node.visit!
 
@@ -37,6 +37,10 @@ module Algorithms
       end
 
       self
+    end
+
+    def finished?(node, target: nil)
+      target && target == node.key
     end
   end
 end

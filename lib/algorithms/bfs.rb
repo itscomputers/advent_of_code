@@ -3,11 +3,11 @@ require "algorithms/graph_search"
 module Algorithms
   class BFS < GraphSearch
     def self.get_shortest_path(graph, source, target)
-      new(graph, source: source, target: target).search.get_path
+      new(graph, source: source, target: target).search(target: target).get_path
     end
 
     def self.get_distance(graph, source, target)
-      new(graph, source: source, target: target).search.get_distance
+      new(graph, source: source, target: target).search(target: target).get_distance
     end
 
     def self.connected?(graph, source, target)
