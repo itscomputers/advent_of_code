@@ -15,8 +15,8 @@ describe Year2021::Day21 do
   end
 
   # test takes 2 seconds
-  xdescribe "part 2" do
-    subject { day.solve(part: 2) }
-    it { is_expected.to eq 444356092776315 }
-  end
+  # describe "part 2" do
+  #   subject { day.solve(part: 2) }
+  #   it { is_expected.to eq 444356092776315 }
+  # end
 end
