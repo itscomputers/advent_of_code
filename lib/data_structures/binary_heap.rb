@@ -16,6 +16,19 @@ module DataStructures
       end
     end
 
+    class WithComparator < BinaryHeap
+      def initialize(*elements, &block)
+        super(*elements)
+        @comparator = block
+      end
+
+      private
+
+      def compare(element, other)
+        @comparator.call(element, other)
+      end
+    end
+
     def initialize(*elements)
       @elements = elements
     end
