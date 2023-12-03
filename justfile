@@ -17,10 +17,10 @@ solve year day:
 solve_part year day part:
   ruby -I lib lib/advent.rb {{year}} {{day}} {{part}}
 
-save_input year day input:
-  echo "{{input}}" > lib/year{{year}}/inputs/{{day}}.txt
+save_input year day:
+  curl https://adventofcode.com/{{year}}/day/{{trim_start_match(day, "0")}}/input -X GET -H "Cookie: $AOC_SESSION" > lib/year{{year}}/inputs/{{day}}.txt
 
-setup year day: (_save_day year day) (_save_spec year day)
+setup year day: (_save_day year day) (_save_spec year day) (save_input year day)
 
 _save_day year day:
   echo "require \"solver\"\n\nmodule Year{{year}}\n  class Day{{day}} < Solver\n    def solve(part:)\n    end\n  end\nend" > lib/year{{year}}/day{{day}}.rb
