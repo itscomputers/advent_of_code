@@ -5,7 +5,7 @@ module Year2023
     def solve(part:)
       case part
       when 1 then scratchers.map(&:score).sum
-      when 2 then multiplier.multiply.total_count
+      when 2 then counts.values.sum
       else nil
       end
     end
@@ -14,54 +14,29 @@ module Year2023
       @scratchers ||= lines.map { |line| Scratcher.build(line) }
     end
 
-    def multiplier
-      Multiplier.new(scratchers)
+    def counts
+      result = scratchers.size.times.map { |idx| [idx, 1] }.to_h
+      scratchers.each_with_index do |scratcher, index|
+        scratcher.count.times do |offset|
+          result[index + offset + 1] += result[index]
+        end
+      end
+      result
     end
 
     class Scratcher
-      attr_reader :id
+      attr_reader :count
 
       def self.build(line)
-        new(
-          line.split(":").first.split(" ").last.to_i,
-          *line.split(":").last.split("|").map do |seq|
-            Set.new(seq.split(" ").map(&:to_i))
-          end,
-        )
+        new(*line.split(": ").last.split(" | ").map { |seq| Set.new(seq.split(" ")) })
       end
 
-      def initialize(id, winners, numbers)
-        @id = id
-        @winners = winners
-        @numbers = numbers
-      end
-
-      def count
-        (@winners & @numbers).size
+      def initialize(winners, numbers)
+        @count = (winners & numbers).size
       end
 
       def score
-        count == 0 ? 0 : 2 ** (count - 1)
-      end
-    end
-
-    class Multiplier
-      def initialize(scratchers)
-        @scratchers = scratchers
-        @counts = scratchers.map { |scratcher| [scratcher.id, 1] }.to_h
-      end
-
-      def multiply
-        @scratchers.each do |scratcher|
-          scratcher.count.times do |offset|
-            @counts[scratcher.id + offset + 1] += @counts[scratcher.id]
-          end
-        end
-        self
-      end
-
-      def total_count
-        @counts.values.sum
+        @count == 0 ? 0 : 2 ** (@count - 1)
       end
     end
   end
