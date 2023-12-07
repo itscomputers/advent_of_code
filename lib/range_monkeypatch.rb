@@ -29,4 +29,12 @@ class Range
       overlapping.reduce(self) { |acc, other| acc.union(other) },
     ]
   end
+
+  def subtract(other)
+    [
+      overlap?(other) ? nil : self,
+      min < other.min && other.min <= max + 1 ? (min..other.min-1) : nil,
+      max > other.max && other.max >= min - 1 ? (other.max+1..max) : nil,
+    ].compact
+  end
 end

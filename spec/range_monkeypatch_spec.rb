@@ -111,4 +111,31 @@ describe "unions" do
       it { is_expected.to match_array data[:expected] }
     end
   end
+
+  describe "subtract" do
+    subject { (5..10).subtract(other) }
+
+    [
+      {other: (1..3), expected: [(5..10)]},
+      {other: (1..4), expected: [(5..10)]},
+      {other: (1..5), expected: [6..10]},
+      {other: (1..8), expected: [9..10]},
+      {other: (1..10), expected: []},
+      {other: (1..14), expected: []},
+      {other: (5..14), expected: []},
+      {other: (7..14), expected: [(5..6)]},
+      {other: (10..14), expected: [(5..9)]},
+      {other: (11..14), expected: [(5..10)]},
+      {other: (12..14), expected: [(5..10)]},
+      {other: (5..10), expected: []},
+      {other: (7..10), expected: [(5..6)]},
+      {other: (7..8), expected: [(5..6), (9..10)]},
+      {other: (5..8), expected: [(9..10)]},
+    ].each do |data|
+      context "when other is #{data[:other]}" do
+        let(:other) { data[:other] }
+        it { is_expected.to match_array data[:expected] }
+      end
+    end
+  end
 end
