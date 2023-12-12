@@ -28,6 +28,10 @@ module Algorithms
       get_node(target).distance || compute_distance(target)
     end
 
+    def distances
+      @nodes.keys.map { |key| [key, get_distance(target: key)] }.to_h
+    end
+
     private
 
     def nodes
