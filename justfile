@@ -29,4 +29,4 @@ _save_day year day:
   echo "require \"solver\"\n\nmodule Year{{year}}\n  class Day{{day}} < Solver\n    def solve(part:)\n    end\n  end\nend" > lib/year{{year}}/day{{day}}.rb
 
 _save_spec year day:
-  echo "require \"year{{year}}/day{{day}}\"\n\ndescribe Year{{year}}::Day{{day}} do\n  let(:day) { Year{{year}}::Day{{day}}.new }\n  before do\n    allow(day).to receive(:raw_input).and_return <<~RAW_INPUT\n    RAW_INPUT\n  end\n\n  describe \"part 1\" do\n    subject { day.solve(part: 1) }\n    it { is_expected.to eq 0 }\n  end\n\n  describe \"part 1\" do\n    subject { day.solve(part: 1) }\n    it { is_expected.to eq 0 }\n  end\nend" > spec/year{{year}}/day{{day}}_spec.rb
+  echo "require \"year{{year}}/day{{day}}\"\n\ndescribe Year{{year}}::Day{{day}} do\n  let(:day) { Year{{year}}::Day{{day}}.new }\n  before do\n    allow(day).to receive(:raw_input).and_return <<~RAW_INPUT\n    RAW_INPUT\n  end\n\n  describe \"part 1\" do\n    subject { day.solve(part: 1) }\n    it { is_expected.to eq 0 }\n  end\n\n  describe \"part 2\" do\n    subject { day.solve(part: 2) }\n    it { is_expected.to eq 0 }\n  end\nend" > spec/year{{year}}/day{{day}}_spec.rb
