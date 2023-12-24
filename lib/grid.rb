@@ -67,5 +67,12 @@ module Grid
   def self.x_range(points)
     range_from points.map(&:first)
   end
+
+  def self.dimensions(points)
+    [
+      x_range(points).size,
+      y_range(points).size,
+    ]
+  end
 end
 
