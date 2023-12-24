@@ -4,7 +4,7 @@ module Algorithms
       @graph = graph
       @source = source
       @target = target
-      @node = Node.source(source)
+      @node = self.class::Node.source(source)
       @nodes = {source => @node}
     end
 
@@ -13,7 +13,7 @@ module Algorithms
     end
 
     def get_node(key)
-      @nodes[key] ||= Node.new(key)
+      @nodes[key] ||= self.class::Node.new(key)
     end
 
     def get_path(target: @target)
@@ -30,6 +30,14 @@ module Algorithms
 
     def distances
       @nodes.keys.map { |key| [key, get_distance(target: key)] }.to_h
+    end
+
+    def neighbors(node)
+      @graph.neighbors(node.key).map(&method(:get_node))
+    end
+
+    def distance(node, neighbor)
+      @graph.distance(node.key, neighbor.key)
     end
 
     private

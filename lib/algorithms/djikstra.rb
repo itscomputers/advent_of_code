@@ -19,19 +19,15 @@ module Algorithms
       @priority_queue ||= DataStructures::BinaryHeap::Min.new(@node)
     end
 
-    def search(target: nil)
+    def search(target: @target)
       until priority_queue.empty?
         node = priority_queue.pop
         break if finished?(node, target: target)
-        next if node.visited?
-        node.visit!
 
-        @graph.neighbors(node.key).each do |neighbor|
-          neighbor_node = get_node(neighbor)
-          distance = node.distance + @graph.distance(node.key, neighbor)
-          if neighbor_node.distance.nil? || distance < neighbor_node.distance
-            connect(node, neighbor_node)
-            priority_queue.push(neighbor_node)
+        neighbors(node).each do |neighbor|
+          if neighbor.distance.nil? || improved_distance?(node, neighbor)
+            connect(node, neighbor)
+            priority_queue.push(neighbor)
           end
         end
       end
@@ -39,7 +35,11 @@ module Algorithms
       self
     end
 
-    def finished?(node, target: nil)
+    def improved_distance?(node, neighbor)
+      node.distance + distance(node, neighbor) < neighbor.distance
+    end
+
+    def finished?(node, target: @target)
       target && target == node.key
     end
   end
