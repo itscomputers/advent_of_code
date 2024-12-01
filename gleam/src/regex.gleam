@@ -10,6 +10,13 @@ pub fn regex(pattern: String) -> Option(Regexp) {
   }
 }
 
+pub fn split(str: String, pattern: String) -> List(String) {
+  case pattern |> regex {
+    Some(re) -> re |> regexp.split(str)
+    None -> [str]
+  }
+}
+
 pub fn matches(str: String, pattern: String) -> List(Match) {
   case pattern |> regex {
     Some(re) -> re |> regexp.scan(str)
