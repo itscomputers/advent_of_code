@@ -29,7 +29,7 @@ describe "overlap?" do
 end
 
 describe "union" do
-  subject { (5..15).union(other) }
+  subject { (5..15).restricted_union(other) }
 
   [
     {other: (0..3), expected: nil},
@@ -87,7 +87,7 @@ describe "intersection" do
 end
 
 describe "unions" do
-  subject { (5..10).unions(others) }
+  subject { (5..10).union(others) }
 
   [
     {others: [(1..3)], expected: [(1..3), (5..10)]},
@@ -105,6 +105,7 @@ describe "unions" do
     {others: [(1..4), (12..14)], expected: [(1..10), (12..14)]},
     {others: [(1..3), (11..14)], expected: [(1..3), (5..14)]},
     {others: [(1..4), (10..14)], expected: [(1..14)]},
+    {others: [(1..6), (10..14), (12..20), (15..30)], expected: [(1..30)]},
   ].each do |data|
     context "when others are #{data[:others]}" do
       let(:others) { data[:others] }

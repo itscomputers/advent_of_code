@@ -1,7 +1,6 @@
 require "circle"
 require "point"
 require "solver"
-require "set"
 require "vector"
 require "range_monkeypatch"
 
@@ -77,10 +76,10 @@ module Year2022
           HorizontalSensorField.new(
             @sensors,
             y_value,
-            limiting_value: @limiting_value,
+            limiting_value: @limiting_value
           ).tap do |sensor_field|
             if sensor_field.ranges.size == 2
-              x_value = sensor_field.ranges.first.max + 1
+              x_value = sensor_field.ranges.map(&:max).min + 1
               return [x_value, y_value]
             end
           end
@@ -96,14 +95,13 @@ module Year2022
       end
 
       def ranges
-        @ranges ||= @sensors
-          .map { |sensor| sensor.circle.x_range(y_value: @y_value) }
-          .compact
-          .reduce([]) { |acc, range| range.unions(acc) }
+        @ranges ||= Range.union(
+          @sensors.map { |sensor| sensor.circle.x_range(y_value: @y_value) }.compact
+        )
       end
 
       def beacon_count
-        @sensors.map(&:beacon).uniq.sum { |beacon| beacon.last == @y_value ? 1 : 0 }
+        @sensors.map(&:beacon).uniq.sum { |beacon| (beacon.last == @y_value) ? 1 : 0 }
       end
 
       def value_count
