@@ -28,15 +28,15 @@ class Range
     end
     [
       *independent,
-      overlapping.reduce(self) { |acc, other| acc.restricted_union(other) },
+      overlapping.reduce(self) { |acc, other| acc.restricted_union(other) }
     ]
   end
 
   def subtract(other)
     [
       overlap?(other) ? nil : self,
-      min < other.min && other.min <= max + 1 ? (min..other.min-1) : nil,
-      max > other.max && other.max >= min - 1 ? (other.max+1..max) : nil,
+      (min < other.min && other.min <= max + 1) ? (min..other.min - 1) : nil,
+      (max > other.max && other.max >= min - 1) ? (other.max + 1..max) : nil
     ].compact
   end
 

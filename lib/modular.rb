@@ -7,7 +7,7 @@ module Modular
       pairs = [pairs.last, pairs.transpose.map { |(u, v)| u - v * q }]
     end
     result = pairs.first
-    a < 0 ? result.map { |u| -u } : result
+    (a < 0) ? result.map { |u| -u } : result
   end
 
   def self.inverse(number, modulus)
@@ -20,8 +20,7 @@ module Modular
     return 1 if exponent == 0
     return number % modulus if exponent == 1
     return number * number % modulus if exponent == 2
-    return power(power(number, exponent/2, modulus), 2, modulus) if exponent % 2 == 0
-    number * power(number, exponent-1, modulus) % modulus
+    return power(power(number, exponent / 2, modulus), 2, modulus) if exponent % 2 == 0
+    number * power(number, exponent - 1, modulus) % modulus
   end
 end
-
