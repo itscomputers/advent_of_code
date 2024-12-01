@@ -73,10 +73,7 @@ fn get_inner(inner: Dict(a, Int), key: a) -> Int {
 }
 
 fn increment_inner(inner: Dict(a, Int), key: a) -> Dict(a, Int) {
-  case inner |> dict.get(key) {
-    Ok(count) -> inner |> dict.insert(key, count + 1)
-    Error(_) -> inner |> dict.insert(key, 1)
-  }
+  inner |> dict.insert(key, get_inner(inner, key) + 1)
 }
 
 fn decrement_inner(inner: Dict(a, Int), key: a) -> Dict(a, Int) {
