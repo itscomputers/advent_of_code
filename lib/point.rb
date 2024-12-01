@@ -1,4 +1,4 @@
-require 'vector'
+require "vector"
 
 class Point < Struct.new(:x, :y)
   def self.rotate(array, direction, center: nil)
@@ -9,8 +9,8 @@ class Point < Struct.new(:x, :y)
         center,
         rotate(
           Vector.subtract(center, array),
-          direction,
-        ),
+          direction
+        )
       )
     end
   end
@@ -35,15 +35,15 @@ class Point < Struct.new(:x, :y)
   end
 
   def +(other)
-    Point.new *Vector.add(to_a, other.to_a)
+    Point.new(*Vector.add(to_a, other.to_a))
   end
 
   def -(other)
-    Point.new *Vector.subtract(to_a, other.to_a)
+    Point.new(*Vector.subtract(to_a, other.to_a))
   end
 
-  def *(integer)
-    Point.new *Vector.scale(to_a, integer)
+  def *(other)
+    Point.new(*Vector.scale(to_a, other))
   end
 
   def to_a
@@ -65,4 +65,3 @@ class Point < Struct.new(:x, :y)
     end
   end
 end
-

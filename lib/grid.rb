@@ -1,13 +1,13 @@
 module Grid
   def self.parse(lines, as:, &block)
     case as.to_s
-    when 'set' then parse_as_set(lines, char: block.call)
-    when 'hash' then parse_as_hash(lines, block)
+    when "set" then parse_as_set(lines, char: block.call)
+    when "hash" then parse_as_hash(lines, block)
     end
   end
 
   def self.display(input, type:, **sub)
-    result = send "display_#{type}", input
+    result = send :"display_#{type}", input
     sub.empty? ? result : result.gsub(/[#{sub.keys.join("")}]/, **sub)
   end
 
@@ -15,20 +15,18 @@ module Grid
   # helper methods
 
   def self.parse_as_hash(lines, block)
-    lines.each_with_index.reduce(Hash.new) do |hash, (line, y)|
+    lines.each_with_index.each_with_object({}) do |(line, y), hash|
       line.chars.each_with_index do |ch, x|
         hash[[x, y]] = block.nil? ? ch : block.call([x, y], ch)
       end
-      hash
     end
   end
 
   def self.parse_as_set(lines, char:)
-    lines.each_with_index.reduce(Set.new) do |set, (line, y)|
+    lines.each_with_index.each_with_object(Set.new) do |(line, y), set|
       line.chars.each_with_index do |ch, x|
         set.add([x, y]) if ch == char
       end
-      set
     end
   end
 
@@ -57,7 +55,7 @@ module Grid
   end
 
   def self.range_from(numbers)
-    Range.new *numbers.minmax
+    Range.new(*numbers.minmax)
   end
 
   def self.y_range(points)
@@ -71,8 +69,7 @@ module Grid
   def self.dimensions(points)
     [
       x_range(points).size,
-      y_range(points).size,
+      y_range(points).size
     ]
   end
 end
-
