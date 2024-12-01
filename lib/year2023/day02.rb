@@ -6,7 +6,6 @@ module Year2023
       case part
       when 1 then games.select(&:valid?).map(&:id).sum
       when 2 then games.map(&:power).sum
-      else nil
       end
     end
 
@@ -27,7 +26,7 @@ module Year2023
       end
 
       def self.extract_counts(bag_set_str)
-        %w(blue red green).map do |color|
+        %w[blue red green].map do |color|
           m = bag_set_str.match(/(\d+) #{color}/)
           m.nil? ? 0 : m[0].to_i
         end
