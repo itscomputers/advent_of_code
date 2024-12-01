@@ -1,11 +1,9 @@
 class Range
   def overlap?(other)
-    min, max = minmax
-    omin, omax = other.minmax
-    min <= omax + 1 && max >= omin - 1
+    min <= other.max + 1 && max >= other.min - 1
   end
 
-  def union(other)
+  def restricted_union(other)
     return nil unless overlap?(other)
     min = [self, other].map(&:min).min
     max = [self, other].map(&:max).max
@@ -20,13 +18,17 @@ class Range
     (min..max)
   end
 
-  def unions(others)
+  def union(others)
+    Range.union([self, *others])
+  end
+
+  def union_v1(others)
     overlapping, independent = others.partition do |other|
       overlap?(other)
     end
     [
       *independent,
-      overlapping.reduce(self) { |acc, other| acc.union(other) },
+      overlapping.reduce(self) { |acc, other| acc.restricted_union(other) },
     ]
   end
 
@@ -36,5 +38,17 @@ class Range
       min < other.min && other.min <= max + 1 ? (min..other.min-1) : nil,
       max > other.max && other.max >= min - 1 ? (other.max+1..max) : nil,
     ].compact
+  end
+
+  def self.union(ranges)
+    return [] if ranges.empty?
+    range, *others = ranges
+    overlapping, independent = union(others).partition do |other|
+      range.overlap?(other)
+    end
+    [
+      overlapping.reduce(range) { |acc, other| acc.restricted_union(other) },
+      *independent
+    ]
   end
 end
