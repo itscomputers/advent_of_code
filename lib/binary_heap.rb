@@ -4,7 +4,7 @@ class BinaryHeap
   end
 
   def inspect
-    "<#{self.class.to_s} priority=#{peek}>"
+    "<#{self.class} priority=#{peek}>"
   end
 
   def push(element)
@@ -81,7 +81,7 @@ class BinaryHeap
   end
 
   def use_second_child?
-    compare *@elements.slice(first_child_index, 2)
+    compare(*@elements.slice(first_child_index, 2))
   end
 
   def child_index
@@ -128,4 +128,3 @@ class MaxBinaryHeap < BinaryHeap
     element < other
   end
 end
-
