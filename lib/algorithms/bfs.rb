@@ -15,33 +15,39 @@ module Algorithms
     end
 
     def queue
-      @queue ||= [@source]
+      @queue ||= [get_node(@source)]
     end
 
     def search(target: nil)
-      until queue.empty?
-        node = get_node(queue.shift)
-        node.visit!
+      expand_search(target) until queue.empty? || @target_found
+      self
+    end
 
-        break if target_found?(node, target: target)
+    def expand_search(target)
+      node = queue.shift
+      return if node.nil?
+      return if target_found?(node, target: target)
+      visit(node)
+    end
 
-        @graph.neighbors(node.key).each do |neighbor|
-          neighbor_node = get_node(neighbor)
-          unless neighbor_node.visited?
-            neighbor_node.visit!
-            connect(node, neighbor_node)
-            queue.push(neighbor)
-          end
+    def visit(node)
+      node.visit!
+
+      neighbors(node).each do |neighbor|
+        unless neighbor.visited?
+          neighbor.visit!
+          connect(node, neighbor)
+          queue.push(neighbor)
         end
       end
-
-      self
     end
 
     private
 
     def target_found?(node, target: @target)
-      target && target == node.key
+      (target && target == node.key).tap do |bool|
+        @target_found = true if bool
+      end
     end
   end
 end

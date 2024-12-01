@@ -7,14 +7,18 @@ module Year2023
     end
 
     def extractor(part:)
-      part == 1 ? NumberExtractor : RealNumberExtractor
+      (part == 1) ? NumberExtractor : RealNumberExtractor
     end
 
     class NumberExtractor
       PATTERN = /\d/
 
+      def self.patterns
+        @patterns ||= [/(#{self::PATTERN}).*$/, /^.*(#{self::PATTERN})/]
+      end
+
       def self.extract(line)
-        [/(#{self::PATTERN}).*$/, /^.*(#{self::PATTERN})/]
+        patterns
           .map { |regex| convert(regex.match(line)[1]) }
           .join
           .to_i
@@ -26,7 +30,7 @@ module Year2023
     end
 
     class RealNumberExtractor < NumberExtractor
-      DIGITS = %w(one two three four five six seven eight nine).map.with_index.to_h
+      DIGITS = %w[one two three four five six seven eight nine].map.with_index.to_h
       PATTERN = /\d|#{DIGITS.keys.join("|")}/
 
       def self.convert(digit)
