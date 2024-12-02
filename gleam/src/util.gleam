@@ -3,7 +3,7 @@ import gleam/list
 import gleam/string
 
 pub fn debug(value: a, prefix: String) -> a {
-  io.debug(prefix <> ": " <> string.inspect(value))
+  io.println(prefix <> ": " <> string.inspect(value))
   value
 }
 

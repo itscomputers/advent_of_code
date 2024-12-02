@@ -12,7 +12,7 @@ pub fn new() -> Graph(a) {
   Graph(dict.new())
 }
 
-pub fn from_string(str: String, separator: String) -> Graph(String) {
+pub fn from_string(str: String, sep separator: String) -> Graph(String) {
   str
   |> string.split("\n")
   |> list.map(regex.split(_, " *" <> separator <> " *"))
@@ -40,15 +40,15 @@ pub fn from_weighted_list(edges: List(#(a, a, Int))) -> Graph(a) {
   })
 }
 
-pub fn add(graph: Graph(a), source: a, target: a) -> Graph(a) {
+pub fn add(graph: Graph(a), from source: a, to target: a) -> Graph(a) {
   graph |> add_weighted(source, target, 1)
 }
 
 pub fn add_weighted(
   graph: Graph(a),
-  source: a,
-  target: a,
-  weight: Int,
+  from source: a,
+  to target: a,
+  weight weight: Int,
 ) -> Graph(a) {
   Graph(
     lookup: graph.lookup
@@ -61,15 +61,15 @@ pub fn add_weighted(
   )
 }
 
-pub fn neighbors(graph: Graph(a), vertex: a) -> List(a) {
+pub fn neighbors(graph: Graph(a), of vertex: a) -> List(a) {
   graph |> get(vertex) |> dict.keys
 }
 
-pub fn adjacent(graph: Graph(a), source: a, target: a) -> Bool {
+pub fn adjacent(graph: Graph(a), from source: a, to target: a) -> Bool {
   graph |> weight(source, target) != -1
 }
 
-pub fn weight(graph: Graph(a), source: a, target: a) -> Int {
+pub fn weight(graph: Graph(a), from source: a, to target: a) -> Int {
   case graph |> get(source) |> dict.get(target) {
     Ok(weight) -> weight
     Error(_) -> -1
