@@ -9,6 +9,7 @@ pub type Part {
 
 pub type Args {
   Args(year: String, day: String, part: Part)
+  Both(year: String, day: String)
 }
 
 pub fn input(args: Args) -> String {

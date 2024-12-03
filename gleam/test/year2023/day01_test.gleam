@@ -22,13 +22,13 @@ pub fn main() {
 }
 
 pub fn part_one_test() {
-  ex1 |> day01.run(PartOne) |> should.equal("142")
+  ex1 |> day01.main(PartOne) |> should.equal("142")
 }
 
 pub fn part_two_test() {
-  ex2 |> day01.run(PartTwo) |> should.equal("281")
+  ex2 |> day01.main(PartTwo) |> should.equal("281")
 }
 
 pub fn overlapping_test() {
-  "eightwo" |> day01.run(PartTwo) |> should.equal("82")
+  "eightwo" |> day01.main(PartTwo) |> should.equal("82")
 }
