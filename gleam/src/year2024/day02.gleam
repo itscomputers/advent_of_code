@@ -35,9 +35,7 @@ fn is_safe(report: List(Int)) -> Bool {
 
 fn almost_safe(report: List(Int)) -> Bool {
   list.range(0, list.length(report) - 1)
-  |> list.any(fn(index) {
-    report |> without(index) |> differences |> is_gradual
-  })
+  |> list.any(fn(idx) { report |> without(idx) |> is_safe })
 }
 
 fn is_monotonic(diffs: List(Int)) -> Bool {
