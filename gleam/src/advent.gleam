@@ -14,7 +14,7 @@ pub fn main() {
   let input = args |> args.input
   case args {
     Args(_, _, part) -> func(input, part)
-    Both(_, _) ->
+    Both(..) ->
       [func(input, PartOne), func(input, PartTwo)]
       |> string.join("\n")
   }
@@ -34,9 +34,9 @@ fn get_func(a: Args) -> fn(String, Part) -> String {
 
 fn get_args() -> Args {
   case argv.load().arguments {
-    [year, day, "1"] -> Args(year, day, PartOne)
-    [year, day, "2"] -> Args(year, day, PartTwo)
-    [year, day] -> Both(year, day)
+    [year, day, "1"] -> Args(year:, day:, part: PartOne)
+    [year, day, "2"] -> Args(year:, day:, part: PartTwo)
+    [year, day] -> Both(year:, day:)
     _ -> {
       io.println("usage: gleam run <year> <day> <part>, eg gleam run 2023 01 1")
       panic
