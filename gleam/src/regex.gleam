@@ -40,10 +40,7 @@ pub fn submatches(str: String, pattern: String) -> List(Option(String)) {
 }
 
 pub fn submatch(str: String, pattern: String) -> Option(String) {
-  case match(str, pattern).submatches {
-    [Some(first), ..] -> Some(first)
-    _ -> None
-  }
+  match(str, pattern).submatches |> first_submatch
 }
 
 pub fn int_match(str: String) -> Option(Int) {
@@ -73,7 +70,11 @@ pub fn int_submatches(str: String, pattern: String) -> List(Option(Int)) {
 }
 
 pub fn int_submatch(str: String, pattern: String) -> Option(Int) {
-  case int_submatches(str, pattern) {
+  int_submatches(str, pattern) |> first_submatch
+}
+
+fn first_submatch(submatches: List(Option(a))) -> Option(a) {
+  case submatches {
     [Some(value), ..] -> Some(value)
     _ -> None
   }
