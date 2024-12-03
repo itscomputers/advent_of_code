@@ -11,8 +11,12 @@ import gleamy/priority_queue as pq
 import graph.{type Graph}
 
 type Node(a) {
-  Infinity(value: a)
-  Node(value: a, dist: Int)
+  Node(vertex: a, dist: Distance)
+}
+
+type Distance {
+  Infinity
+  Distance(value: Int)
 }
 
 pub type Algorithm {
@@ -20,7 +24,7 @@ pub type Algorithm {
   Dijkstra
 }
 
-type SearchQueue(a) {
+type Queue(a) {
   Queue(inner: Deque(Node(a)))
   PriorityQueue(inner: pq.Queue(Node(a)))
 }
@@ -31,7 +35,7 @@ pub opaque type Search(a) {
     source: a,
     prev: Dict(a, a),
     nodes: Dict(a, Node(a)),
-    queue: SearchQueue(a),
+    queue: Queue(a),
     visited: Set(a),
     complete: Bool,
   )
@@ -62,7 +66,7 @@ pub fn distances(
 }
 
 fn new(gr: Graph(a), from source: a, using algorithm: Algorithm) -> Search(a) {
-  let node = Node(source, 0)
+  let node = Node(source, Distance(0))
   Search(
     gr,
     source,
@@ -74,7 +78,7 @@ fn new(gr: Graph(a), from source: a, using algorithm: Algorithm) -> Search(a) {
   )
 }
 
-fn empty_queue(algorithm: Algorithm) -> SearchQueue(a) {
+fn empty_queue(algorithm: Algorithm) -> Queue(a) {
   case algorithm {
     BFS -> Queue(deque.new())
     Dijkstra -> PriorityQueue(pq.new(compare))
@@ -86,9 +90,9 @@ fn get_distances(s: Search(a)) -> Dict(a, Int) {
 }
 
 fn get_distance(_vertex: a, node: Node(a)) -> Int {
-  case node {
-    Infinity(_) -> -1
-    Node(_, dist) -> dist
+  case node.dist {
+    Infinity -> -1
+    Distance(dist) -> dist
   }
 }
 
@@ -120,56 +124,67 @@ fn search(s: Search(a), for target: Option(a)) -> Search(a) {
     False ->
       case s.queue |> pop {
         Error(_) -> Search(..s, complete: True)
-        Ok(#(Infinity(_), _)) -> Search(..s, complete: True)
-        Ok(#(Node(vertex, _), queue)) -> {
-          s.graph
-          |> graph.neighbors(of: vertex)
-          |> list.filter(fn(neighbor) { !set.contains(s.visited, neighbor) })
-          |> list.fold(
-            from: Search(..s, queue: queue),
-            with: process_neighbor(vertex),
-          )
-          |> mark_visited(vertex, target)
+        Ok(#(Node(_, Infinity), _)) -> Search(..s, complete: True)
+        Ok(#(Node(vertex, _), queue)) ->
+          Search(..s, queue: queue)
+          |> process(vertex)
+          |> mark_visited(vertex)
+          |> check_complete(vertex, target)
           |> search(for: target)
-        }
       }
   }
 }
 
-fn process_neighbor(vertex: a) -> fn(Search(a), a) -> Search(a) {
-  fn(s, neighbor) {
-    let vertex_node = s |> get_node(vertex)
-    let original_node = s |> get_node(neighbor)
-    let updated_node = case vertex_node, original_node {
-      Node(_, dist), _ ->
-        Node(
-          value: neighbor,
-          dist: dist + graph.weight(s.graph, vertex, neighbor),
-        )
-      _, _ -> original_node
-    }
-    case updated_node |> compare(original_node) {
-      Lt ->
-        Search(
-          ..s,
-          prev: s.prev |> dict.insert(neighbor, vertex),
-          nodes: s.nodes |> dict.insert(neighbor, updated_node),
-          queue: s.queue |> push(updated_node),
-        )
-      _ -> s
-    }
+fn process(s: Search(a), vertex: a) -> Search(a) {
+  s |> loop(vertex, s |> neighbors(of: vertex))
+}
+
+fn loop(s: Search(a), vertex: a, neighbors: List(a)) -> Search(a) {
+  case neighbors {
+    [neighbor, ..rest] ->
+      s
+      |> process_edge(from: vertex, to: neighbor)
+      |> loop(vertex, rest)
+    _ -> s
   }
 }
 
-fn mark_visited(s: Search(a), vertex: a, target: Option(a)) -> Search(a) {
-  Search(
-    ..s,
-    visited: s.visited |> set.insert(vertex),
-    complete: target == Some(vertex),
-  )
+fn process_edge(s: Search(a), from vertex: a, to neighbor: a) -> Search(a) {
+  case s.visited |> set.contains(neighbor) {
+    True -> s
+    False -> s |> update(vertex, neighbor)
+  }
 }
 
-fn pop(queue: SearchQueue(a)) -> Result(#(Node(a), SearchQueue(a)), Nil) {
+fn update(s: Search(a), vertex: a, neighbor: a) -> Search(a) {
+  let vertex_node = s |> get_node(vertex)
+  let original_node = s |> get_node(neighbor)
+  let updated_node = case vertex_node.dist {
+    Infinity -> original_node
+    Distance(dist) ->
+      Node(neighbor, Distance(dist + weight(s, from: vertex, to: neighbor)))
+  }
+  case updated_node |> compare(original_node) {
+    Lt ->
+      Search(
+        ..s,
+        prev: s.prev |> dict.insert(neighbor, vertex),
+        nodes: s.nodes |> dict.insert(neighbor, updated_node),
+        queue: s.queue |> push(updated_node),
+      )
+    _ -> s
+  }
+}
+
+fn check_complete(s: Search(a), vertex: a, target: Option(a)) -> Search(a) {
+  Search(..s, complete: target == Some(vertex))
+}
+
+fn mark_visited(s: Search(a), vertex: a) -> Search(a) {
+  Search(..s, visited: s.visited |> set.insert(vertex))
+}
+
+fn pop(queue: Queue(a)) -> Result(#(Node(a), Queue(a)), Nil) {
   case queue {
     Queue(inner) ->
       inner
@@ -182,25 +197,33 @@ fn pop(queue: SearchQueue(a)) -> Result(#(Node(a), SearchQueue(a)), Nil) {
   }
 }
 
-fn push(queue: SearchQueue(a), node: Node(a)) -> SearchQueue(a) {
+fn push(queue: Queue(a), node: Node(a)) -> Queue(a) {
   case queue {
     Queue(inner) -> Queue(inner |> deque.push_back(node))
     PriorityQueue(inner) -> PriorityQueue(inner |> pq.push(node))
   }
 }
 
+fn neighbors(s: Search(a), of vertex: a) -> List(a) {
+  s.graph |> graph.neighbors(of: vertex)
+}
+
+fn weight(s: Search(a), from source: a, to target: a) -> Int {
+  s.graph |> graph.weight(from: source, to: target)
+}
+
 fn get_node(s: Search(a), vertex: a) -> Node(a) {
   case s.nodes |> dict.get(vertex) {
     Ok(node) -> node
-    Error(_) -> Infinity(vertex)
+    Error(_) -> Node(vertex, Infinity)
   }
 }
 
 fn compare(node: Node(a), other: Node(a)) -> Order {
-  case node, other {
-    Infinity(_), Infinity(_) -> Eq
-    Infinity(_), _ -> Gt
-    _, Infinity(_) -> Lt
-    Node(_, d1), Node(_, d2) -> int.compare(d1, d2)
+  case node.dist, other.dist {
+    Infinity, Infinity -> Eq
+    Infinity, _ -> Gt
+    _, Infinity -> Lt
+    Distance(d1), Distance(d2) -> int.compare(d1, d2)
   }
 }
