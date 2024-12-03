@@ -2,14 +2,12 @@
 
 printf -v day "%02d" $2
 gleam_file="gleam/src/year${1}/day${day}.gleam"
-gleam_code="import args.{type Args, type Part, PartOne, PartTwo}
+gleam_code="import args.{type Part, PartOne, PartTwo}
+import gleam/list
+
 import util
 
-pub fn main(a: Args) -> String {
-a |> args.input |> run(a.part)
-}
-
-pub fn run(input: String, part: Part) -> String {
+pub fn main(input: String, part: Part) -> String {
   case part {
     PartOne -> \"0\"
     PartTwo -> \"0\"
@@ -30,11 +28,11 @@ pub fn main() {
 }
 
 pub fn part_one_test() {
-  example |> day${day}.run(PartOne) |> should.equal(\"0\")
+  example |> day${day}.main(PartOne) |> should.equal(\"0\")
 }
 
 pub fn part_two_test() {
-  example |> day${day}.run(PartTwo) |> should.equal(\"0\")
+  example |> day${day}.main(PartTwo) |> should.equal(\"0\")
 }"
 
 mkdir -p "inputs/year$"

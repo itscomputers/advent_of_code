@@ -2,15 +2,11 @@ import gleam/int
 import gleam/list
 import gleam/order
 
-import args.{type Args, type Part, PartOne, PartTwo}
+import args.{type Part, PartOne, PartTwo}
 import regex
 import util
 
-pub fn main(a: Args) -> String {
-  a |> args.input |> run(a.part)
-}
-
-pub fn run(input: String, part: Part) -> String {
+pub fn main(input: String, part: Part) -> String {
   input
   |> reports
   |> list.filter(criteria(part))

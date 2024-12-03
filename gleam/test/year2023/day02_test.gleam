@@ -16,9 +16,9 @@ pub fn main() {
 }
 
 pub fn part_one_test() {
-  example |> day02.run(PartOne) |> should.equal("8")
+  example |> day02.main(PartOne) |> should.equal("8")
 }
 
 pub fn part_two_test() {
-  example |> day02.run(PartTwo) |> should.equal("2286")
+  example |> day02.main(PartTwo) |> should.equal("2286")
 }
