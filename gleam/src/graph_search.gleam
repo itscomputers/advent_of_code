@@ -126,7 +126,7 @@ fn search(s: Search(a), for target: Option(a)) -> Search(a) {
         Error(_) -> Search(..s, complete: True)
         Ok(#(Node(_, Infinity), _)) -> Search(..s, complete: True)
         Ok(#(Node(vertex, _), queue)) ->
-          Search(..s, queue: queue)
+          Search(..s, queue:)
           |> process(vertex)
           |> mark_visited(vertex)
           |> check_complete(vertex, target)
