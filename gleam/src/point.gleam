@@ -50,17 +50,35 @@ pub fn rotate(point: Point, rotation: Rotation) -> Point {
 }
 
 pub fn neighbors(point: Point) -> List(Point) {
-  list.append(point |> strict_neighbors, point |> diagonal_neighbors)
+  point |> get_neighbors(directions())
 }
 
 pub fn strict_neighbors(point: Point) -> List(Point) {
-  point
-  |> get_neighbors([Point(-1, 0), Point(0, -1), Point(0, 1), Point(1, 0)])
+  point |> get_neighbors(strict_directions())
 }
 
 pub fn diagonal_neighbors(point: Point) -> List(Point) {
-  point
-  |> get_neighbors([Point(-1, -1), Point(-1, 1), Point(1, -1), Point(1, 1)])
+  point |> get_neighbors(diagonal_directions())
+}
+
+pub fn directions() -> List(Point) {
+  list.append(strict_directions(), diagonal_directions())
+}
+
+pub fn horizontal_directions() -> List(Point) {
+  [Point(-1, 0), Point(1, 0)]
+}
+
+pub fn vertical_directions() -> List(Point) {
+  [Point(0, -1), Point(0, 1)]
+}
+
+pub fn strict_directions() -> List(Point) {
+  list.append(horizontal_directions(), vertical_directions())
+}
+
+pub fn diagonal_directions() -> List(Point) {
+  [Point(-1, -1), Point(-1, 1), Point(1, -1), Point(1, 1)]
 }
 
 fn get_neighbors(point: Point, directions: List(Point)) {

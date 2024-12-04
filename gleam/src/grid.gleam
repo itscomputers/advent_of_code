@@ -40,6 +40,14 @@ pub fn get_or(grid: Grid, point: Point, default default: String) -> String {
   }
 }
 
+pub fn fold(
+  grid: Grid,
+  from initial: a,
+  with func: fn(a, Point, String) -> a,
+) -> a {
+  grid.lookup |> dict.fold(from: initial, with: func)
+}
+
 pub fn sub(grid: Grid, func: fn(String) -> String) -> Grid {
   Grid(
     ..grid,
