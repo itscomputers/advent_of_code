@@ -54,7 +54,7 @@ pub fn neighbors(point: Point) -> List(Point) {
 }
 
 pub fn strict_neighbors(point: Point) -> List(Point) {
-  point |> get_neighbors(strict_directions())
+  point |> get_neighbors(rectangular_directions())
 }
 
 pub fn diagonal_neighbors(point: Point) -> List(Point) {
@@ -62,7 +62,7 @@ pub fn diagonal_neighbors(point: Point) -> List(Point) {
 }
 
 pub fn directions() -> List(Point) {
-  list.append(strict_directions(), diagonal_directions())
+  list.append(rectangular_directions(), diagonal_directions())
 }
 
 pub fn horizontal_directions() -> List(Point) {
@@ -73,7 +73,7 @@ pub fn vertical_directions() -> List(Point) {
   [Point(0, -1), Point(0, 1)]
 }
 
-pub fn strict_directions() -> List(Point) {
+pub fn rectangular_directions() -> List(Point) {
   list.append(horizontal_directions(), vertical_directions())
 }
 
