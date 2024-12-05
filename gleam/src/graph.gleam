@@ -2,8 +2,6 @@ import gleam/dict.{type Dict}
 import gleam/list
 import gleam/string
 
-import regex
-
 pub opaque type Graph(a) {
   Graph(lookup: Dict(a, Dict(a, Int)))
 }
@@ -15,7 +13,7 @@ pub fn new() -> Graph(a) {
 pub fn from_string(str: String, sep separator: String) -> Graph(String) {
   str
   |> string.split("\n")
-  |> list.map(regex.split(_, " *" <> separator <> " *"))
+  |> list.map(string.split(_, separator))
   |> list.map(fn(vertices) {
     case vertices {
       [source, target] -> #(source, target)

@@ -25,7 +25,7 @@ pub fn main() {
 }
 
 pub fn neighbors_test() {
-  graph.from_string(example, "->")
+  graph.from_string(example, " -> ")
   |> assert_neighbors("a", ["b", "c", "d"])
   |> assert_neighbors("b", ["d"])
   |> assert_neighbors("c", ["e"])
@@ -34,7 +34,7 @@ pub fn neighbors_test() {
 }
 
 pub fn adjacent_test() {
-  graph.from_string(example, "->")
+  graph.from_string(example, " -> ")
   |> assert_adjacency("a", "b", True)
   |> assert_adjacency("a", "c", True)
   |> assert_adjacency("a", "d", True)
@@ -58,7 +58,7 @@ pub fn adjacent_test() {
 }
 
 pub fn weight_test() {
-  graph.from_string(example, "->")
+  graph.from_string(example, " -> ")
   |> assert_weight("a", "b", 1)
   |> assert_weight("a", "c", 1)
   |> assert_weight("a", "d", 1)
@@ -82,7 +82,7 @@ pub fn weight_test() {
 }
 
 pub fn add_test() {
-  graph.from_string(example, "->")
+  graph.from_string(example, " -> ")
   |> graph.add("a", "e")
   |> graph.add("e", "a")
   |> graph.add("d", "c")
