@@ -2,11 +2,11 @@ import args.{type Part, PartOne, PartTwo}
 import gleam/int
 import gleam/list
 import gleam/result
-import gleam/set.{type Set}
 import gleam/string
 
-import graph.{type Graph}
-import toposort
+import graph/graph.{type Graph}
+import graph/toposort
+import graph/util as graph_util
 import util
 
 type SafetyManual {
@@ -44,31 +44,20 @@ fn updates(str: String) -> List(List(String)) {
 fn ordered(manual: SafetyManual) -> SafetyManual {
   let updates =
     manual.updates
-    |> list.filter(ordered_loop(_, manual.graph, set.new()))
+    |> list.filter(graph_util.is_sorted(manual.graph, _))
   SafetyManual(..manual, updates:)
 }
 
 fn unordered(manual: SafetyManual) -> SafetyManual {
   let updates =
     manual.updates
-    |> list.filter(fn(update) { !ordered_loop(update, manual.graph, set.new()) })
-    |> list.map(toposort.sort(manual.graph, _))
+    |> list.filter(fn(update) { !graph_util.is_sorted(manual.graph, update) })
+    |> list.map(order(manual, _))
   SafetyManual(..manual, updates:)
 }
 
-fn ordered_loop(
-  update: List(String),
-  gr: Graph(String),
-  visited: Set(String),
-) -> Bool {
-  case update {
-    [] -> True
-    [first, ..rest] ->
-      case graph.neighbors(gr, first) |> list.any(set.contains(visited, _)) {
-        True -> False
-        False -> ordered_loop(rest, gr, visited |> set.insert(first))
-      }
-  }
+fn order(manual: SafetyManual, update: List(String)) -> List(String) {
+  manual.graph |> graph.subgraph(update) |> toposort.unsafe_sort
 }
 
 fn middle_sum(manual: SafetyManual) -> Int {

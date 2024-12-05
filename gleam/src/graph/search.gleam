@@ -8,7 +8,7 @@ import gleam/result
 import gleam/set.{type Set}
 import gleamy/priority_queue as pq
 
-import graph.{type Graph}
+import graph/graph.{type Graph}
 
 type Node(a) {
   Node(vertex: a, dist: Distance)

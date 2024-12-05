@@ -1,4 +1,5 @@
 import gleam/dict.{type Dict}
+import gleam/function
 import gleam/list
 import gleam/string
 
@@ -8,6 +9,18 @@ pub opaque type Graph(a) {
 
 pub fn new() -> Graph(a) {
   Graph(dict.new())
+}
+
+pub fn vertices(graph: Graph(a)) -> List(a) {
+  graph.lookup |> dict.keys
+}
+
+pub fn size(graph: Graph(a)) -> Int {
+  graph.lookup |> dict.size
+}
+
+pub fn subgraph(graph: Graph(a), vertices: List(a)) -> Graph(a) {
+  Graph(lookup: graph.lookup |> dict.take(vertices))
 }
 
 pub fn from_string(str: String, sep separator: String) -> Graph(String) {
@@ -53,6 +66,7 @@ pub fn add_weighted(
     |> dict.insert(
       source,
       graph
+        |> function.tap(get(_, target))
         |> get(source)
         |> dict.insert(target, weight),
     ),
