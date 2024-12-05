@@ -1,7 +1,8 @@
 import gleam/dict.{type Dict}
 import gleam/list
+import gleam/option.{type Option, None, Some}
 
-import graph.{type Graph}
+import graph/graph.{type Graph}
 
 type Toposort(a) {
   Toposort(
@@ -12,12 +13,20 @@ type Toposort(a) {
   )
 }
 
-pub fn sort(gr: Graph(a), vertices: List(a)) -> List(a) {
-  gr |> new(vertices) |> loop |> sorted |> list.reverse
+pub fn sort(gr: Graph(a)) -> Option(List(a)) {
+  let sorted = gr |> unsafe_sort
+  case list.length(sorted) == graph.size(gr) {
+    True -> Some(sorted)
+    False -> None
+  }
 }
 
-fn new(gr: Graph(a), vertices: List(a)) -> Toposort(a) {
-  let indegree = gr |> build_indegree(vertices)
+pub fn unsafe_sort(gr: Graph(a)) -> List(a) {
+  gr |> new |> loop |> sorted
+}
+
+fn new(gr: Graph(a)) -> Toposort(a) {
+  let indegree = gr |> build_indegree
   let stack =
     indegree
     |> dict.fold(from: [], with: fn(acc, vertex, count) {
@@ -40,10 +49,11 @@ fn loop(toposort: Toposort(a)) -> Toposort(a) {
 }
 
 fn sorted(toposort: Toposort(a)) -> List(a) {
-  toposort.sorted
+  toposort.sorted |> list.reverse
 }
 
-fn build_indegree(gr: Graph(a), vertices: List(a)) -> Dict(a, Int) {
+fn build_indegree(gr: Graph(a)) -> Dict(a, Int) {
+  let vertices = gr |> graph.vertices
   let indegree =
     vertices |> list.map(fn(vertex) { #(vertex, 0) }) |> dict.from_list
   vertices

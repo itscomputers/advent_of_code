@@ -4,7 +4,7 @@ import gleam/string
 import gleeunit
 import gleeunit/should
 
-import graph.{type Graph}
+import graph/graph.{type Graph}
 
 //   /--------------\
 //  /                \
