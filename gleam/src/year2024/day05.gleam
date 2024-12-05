@@ -18,8 +18,8 @@ pub fn main(input: String, part: Part) -> String {
   |> safety_manual
   |> fn(sf) {
     case part {
-      PartOne -> sf |> ordered |> middle_sum |> int.to_string
-      PartTwo -> sf |> unordered |> middle_sum |> int.to_string
+      PartOne -> sf |> filter(ordered) |> middle_sum |> int.to_string
+      PartTwo -> sf |> filter(unordered) |> order |> middle_sum |> int.to_string
     }
   }
 }
@@ -41,22 +41,32 @@ fn updates(str: String) -> List(List(String)) {
   str |> util.lines |> list.map(string.split(_, ","))
 }
 
-fn ordered(manual: SafetyManual) -> SafetyManual {
-  let updates =
-    manual.updates
-    |> list.filter(graph_util.is_sorted(manual.graph, _))
-  SafetyManual(..manual, updates:)
+fn ordered(manual: SafetyManual, update: List(String)) -> Bool {
+  graph_util.is_sorted(manual.graph, update)
 }
 
-fn unordered(manual: SafetyManual) -> SafetyManual {
-  let updates =
-    manual.updates
-    |> list.filter(fn(update) { !graph_util.is_sorted(manual.graph, update) })
-    |> list.map(order(manual, _))
-  SafetyManual(..manual, updates:)
+fn unordered(manual: SafetyManual, update: List(String)) -> Bool {
+  !ordered(manual, update)
 }
 
-fn order(manual: SafetyManual, update: List(String)) -> List(String) {
+fn filter(
+  manual: SafetyManual,
+  predicate: fn(SafetyManual, List(String)) -> Bool,
+) -> SafetyManual {
+  SafetyManual(
+    ..manual,
+    updates: manual.updates |> list.filter(predicate(manual, _)),
+  )
+}
+
+fn order(manual: SafetyManual) -> SafetyManual {
+  SafetyManual(
+    ..manual,
+    updates: manual.updates |> list.map(order_update(manual, _)),
+  )
+}
+
+fn order_update(manual: SafetyManual, update: List(String)) -> List(String) {
   manual.graph |> graph.subgraph(update) |> toposort.unsafe_sort
 }
 
