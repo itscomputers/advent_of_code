@@ -9,7 +9,6 @@ import gleam/set.{type Set}
 import direction.{type Direction, Up} as dir
 import grid.{type Grid}
 import point.{type Point, Point}
-import range.{type Range, Range}
 
 type Patrol {
   Patrol(
@@ -20,7 +19,6 @@ type Patrol {
     check_loops: Bool,
     is_loop: Bool,
     loop_tasks: Dict(Point, Task(Bool)),
-    ranges: Dict(#(Direction, Int), List(Range)),
     possible_obstructions: Set(Point),
   )
 }
@@ -30,19 +28,21 @@ pub fn main(input: String, part: Part) -> String {
     PartOne ->
       input
       |> grid.new
-      |> patrol(False)
+      |> patrol(loops: False)
+      |> explore
       |> visited_count
       |> int.to_string
     PartTwo ->
       input
       |> grid.new
-      |> patrol(True)
+      |> patrol(loops: True)
+      |> explore
       |> possible_obstruction_count
       |> int.to_string
   }
 }
 
-fn patrol(grid: Grid, check_loops: Bool) -> Patrol {
+fn patrol(grid: Grid, loops check_loops: Bool) -> Patrol {
   case
     grid
     |> function.tap(fn(g) { g |> grid.dimensions })
@@ -54,36 +54,17 @@ fn patrol(grid: Grid, check_loops: Bool) -> Patrol {
         grid:,
         guard:,
         direction: Up,
-        visited: dict.new(),
+        visited: [#(guard, set.from_list([Up]))] |> dict.from_list,
         check_loops:,
         is_loop: False,
         loop_tasks: dict.new(),
-        ranges: dict.new(),
         possible_obstructions: set.new(),
       )
-      |> visit
-      |> explore
   }
 }
 
 fn sub_patrol(grid: Grid, obstruction: Point) -> Patrol {
-  case grid |> grid.filter(fn(ch) { ch == "^" }) {
-    [] -> panic
-    [guard, ..] ->
-      Patrol(
-        grid: grid |> grid.set(obstruction, "#"),
-        guard:,
-        direction: Up,
-        visited: dict.new(),
-        check_loops: False,
-        is_loop: False,
-        loop_tasks: dict.new(),
-        ranges: dict.new(),
-        possible_obstructions: set.new(),
-      )
-      |> visit
-      |> explore
-  }
+  grid |> grid.set(obstruction, "#") |> patrol(loops: False)
 }
 
 fn is_loop(patrol: Patrol) -> Bool {
@@ -170,7 +151,8 @@ fn add_loop_task(patrol: Patrol) -> Patrol {
     patrol.loop_tasks |> dict.has_key(obs)
   {
     True, Some("."), False -> {
-      let task = task.async(fn() { patrol.grid |> sub_patrol(obs) |> is_loop })
+      let task =
+        task.async(fn() { patrol.grid |> sub_patrol(obs) |> explore |> is_loop })
       Patrol(..patrol, loop_tasks: patrol.loop_tasks |> dict.insert(obs, task))
     }
     _, _, _ -> patrol
