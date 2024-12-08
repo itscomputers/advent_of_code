@@ -6,11 +6,10 @@ import gleam/option.{type Option, None, Some}
 import gleam/otp/task.{type Task}
 import gleam/set.{type Set}
 
-import direction.{type Direction} as dir
+import direction.{type Direction, Up} as dir
 import grid.{type Grid}
 import point.{type Point, Point}
 import range.{type Range, Range}
-import util
 
 type Patrol {
   Patrol(
@@ -97,7 +96,6 @@ fn visited_count(patrol: Patrol) -> Int {
 
 fn possible_obstruction_count(patrol: Patrol) -> Int {
   patrol.loop_tasks
-  |> function.tap(fn(tasks) { tasks |> dict.size |> util.debug("tasks") })
   |> dict.map_values(fn(_, t) { task.await_forever(t) })
   |> dict.fold(from: 0, with: fn(acc, _, bool) {
     case bool {
@@ -172,12 +170,7 @@ fn add_loop_task(patrol: Patrol) -> Patrol {
     patrol.loop_tasks |> dict.has_key(obs)
   {
     True, Some("."), False -> {
-      let task =
-        task.async(fn() {
-          patrol.grid
-          |> sub_patrol(obs)
-          |> is_loop
-        })
+      let task = task.async(fn() { patrol.grid |> sub_patrol(obs) |> is_loop })
       Patrol(..patrol, loop_tasks: patrol.loop_tasks |> dict.insert(obs, task))
     }
     _, _, _ -> patrol
