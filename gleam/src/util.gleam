@@ -1,5 +1,6 @@
 import gleam/io
 import gleam/list
+import gleam/otp/task
 import gleam/string
 
 pub fn debug(value: a, prefix: String) -> a {
@@ -13,6 +14,10 @@ pub fn lines(input: String) -> List(String) {
 
 pub fn blocks(input: String) -> List(String) {
   input |> split("\n\n")
+}
+
+pub fn run_async(funcs: List(fn() -> a)) -> List(a) {
+  funcs |> list.map(task.async) |> list.map(task.await_forever)
 }
 
 fn split(input: String, delimiter: String) -> List(String) {
