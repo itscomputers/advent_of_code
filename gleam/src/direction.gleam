@@ -39,17 +39,6 @@ pub fn rotate(dir: Direction, rotation: point.Rotation) -> Direction {
   dir |> to_point |> point.rotate(rotation) |> from_point_unsafe
 }
 
-pub fn is_horizontal(dir: Direction) -> Bool {
-  case dir {
-    Right | Left -> True
-    Up | Down -> False
-  }
-}
-
-pub fn is_vertical(dir: Direction) -> Bool {
-  !is_horizontal(dir)
-}
-
 pub fn cw(dir: Direction) -> Direction {
   dir |> rotate(point.CW)
 }
@@ -68,4 +57,15 @@ pub fn step(pt: Point, dir: Direction) -> Point {
 
 pub fn move(pt: Point, dir: Direction, times count: Int) -> Point {
   pt |> point.add(dir |> to_point |> point.scale(count))
+}
+
+pub fn is_horizontal(dir: Direction) -> Bool {
+  case dir {
+    Right | Left -> True
+    Up | Down -> False
+  }
+}
+
+pub fn is_vertical(dir: Direction) -> Bool {
+  !is_horizontal(dir)
 }
