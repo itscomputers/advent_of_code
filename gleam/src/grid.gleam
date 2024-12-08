@@ -1,7 +1,6 @@
 import gleam/dict.{type Dict}
 import gleam/list
 import gleam/option.{type Option, None, Some}
-import gleam/set.{type Set}
 import gleam/string
 import gleam/string_tree
 
@@ -40,6 +39,10 @@ pub fn get_or(grid: Grid, point: Point, default default: String) -> String {
   }
 }
 
+pub fn set(grid: Grid, point: Point, value: String) -> Grid {
+  Grid(..grid, lookup: grid.lookup |> dict.insert(point, value))
+}
+
 pub fn fold(
   grid: Grid,
   from initial: a,
@@ -73,11 +76,10 @@ pub fn matrix(grid: Grid, default default: String) -> List(List(String)) {
   })
 }
 
-pub fn filter(grid: Grid, select predicate: fn(String) -> Bool) -> Set(Point) {
+pub fn filter(grid: Grid, select predicate: fn(String) -> Bool) -> List(Point) {
   grid.lookup
   |> dict.filter(fn(_, value) { predicate(value) })
   |> dict.keys
-  |> set.from_list
 }
 
 fn build_x_range(str: String) -> Range {
