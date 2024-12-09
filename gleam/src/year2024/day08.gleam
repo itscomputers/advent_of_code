@@ -39,13 +39,8 @@ fn antenna_map(input: String, part: Part) {
 fn add_pairs(map: AntennaMap) -> AntennaMap {
   let pairs =
     map.grid
-    |> grid.fold(from: dict.new(), with: fn(acc, point, ch) {
-      case ch, acc |> dict.get(ch) {
-        ".", _ -> acc
-        _, Error(_) -> acc |> dict.insert(ch, [point])
-        _, Ok(points) -> acc |> dict.insert(ch, [point, ..points])
-      }
-    })
+    |> grid.reverse_lookup
+    |> dict.drop(["."])
     |> dict.fold(from: [], with: fn(acc, freq, points) {
       points
       |> list.combination_pairs

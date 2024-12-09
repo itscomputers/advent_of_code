@@ -39,6 +39,19 @@ pub fn get_or(grid: Grid, point: Point, default default: String) -> String {
   }
 }
 
+pub fn reverse_lookup(grid: Grid) -> Dict(String, List(Point)) {
+  grid
+  |> fold(from: dict.new(), with: fn(acc, point, ch) {
+    acc
+    |> dict.upsert(update: ch, with: fn(opt) {
+      case opt {
+        Some(points) -> [point, ..points]
+        None -> [point]
+      }
+    })
+  })
+}
+
 pub fn set(grid: Grid, point: Point, value: String) -> Grid {
   Grid(..grid, lookup: grid.lookup |> dict.insert(point, value))
 }
