@@ -4,6 +4,7 @@ import gleam/function
 import gleam/int
 import gleam/option.{type Option, None, Some}
 import gleam/otp/task.{type Task}
+import gleam/result
 import gleam/set.{type Set}
 
 import direction.{type Direction, Up} as dir
@@ -120,27 +121,20 @@ fn explore(patrol: Patrol) -> Patrol {
 }
 
 fn visit(patrol: Patrol) -> Patrol {
-  case patrol.visited |> dict.get(patrol.guard) {
-    Ok(directions) ->
-      case directions |> set.contains(patrol.direction) {
-        True -> Patrol(..patrol, is_loop: True)
-        False ->
-          Patrol(
-            ..patrol,
-            visited: patrol.visited
-              |> dict.insert(
-                patrol.guard,
-                directions |> set.insert(patrol.direction),
-              ),
-          )
+  let visited =
+    patrol.visited
+    |> dict.upsert(update: patrol.guard, with: fn(opt) {
+      case opt {
+        Some(directions) -> directions |> set.insert(patrol.direction)
+        None -> set.from_list([patrol.direction])
       }
-    Error(_) ->
-      Patrol(
-        ..patrol,
-        visited: patrol.visited
-          |> dict.insert(patrol.guard, set.from_list([patrol.direction])),
-      )
-  }
+    })
+  let is_loop =
+    patrol.visited
+    |> dict.get(patrol.guard)
+    |> result.map(set.contains(_, patrol.direction))
+    == Ok(True)
+  Patrol(..patrol, visited:, is_loop:)
 }
 
 fn add_loop_task(patrol: Patrol) -> Patrol {
