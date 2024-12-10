@@ -26,6 +26,10 @@ pub fn size(range: Range) -> Int {
   range.upper - range.lower
 }
 
+pub fn offset(range: Range, by offset: Int) -> Range {
+  Range(range.lower + offset, range.upper + offset)
+}
+
 pub fn compare(range: Range, other: Range) -> Order {
   case int.compare(range.lower, other.lower) {
     Eq -> int.compare(range.upper, other.upper)
@@ -72,10 +76,11 @@ pub fn union(range: Range, with other: Range) -> List(Range) {
 pub fn reduce(ranges: List(Range)) -> List(Range) {
   ranges
   |> list.fold(from: [empty()], with: reduce_one)
+  |> list.filter(fn(range) { !is_empty(range) })
   |> list.sort(by: compare)
 }
 
-fn reduce_one(ranges: List(Range), other: Range) -> List(Range) {
+pub fn reduce_one(ranges: List(Range), other: Range) -> List(Range) {
   let #(overlapping, disjoint) =
     ranges
     |> list.partition(fn(range) {
