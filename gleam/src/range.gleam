@@ -22,11 +22,15 @@ pub fn contains(range: Range, value: Int) -> Bool {
   range.lower <= value && value < range.upper
 }
 
+pub fn subrange(range: Range, of other: Range) -> Bool {
+  range.lower >= other.lower && range.upper <= other.upper
+}
+
 pub fn size(range: Range) -> Int {
   range.upper - range.lower
 }
 
-pub fn offset(range: Range, by offset: Int) -> Range {
+pub fn shift(range: Range, by offset: Int) -> Range {
   Range(range.lower + offset, range.upper + offset)
 }
 

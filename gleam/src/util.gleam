@@ -4,6 +4,11 @@ import gleam/otp/task
 import gleam/string
 
 pub fn debug(value: a, prefix: String) -> a {
+  io.debug(prefix <> ": " <> string.inspect(value))
+  value
+}
+
+pub fn println(value: a, prefix: String) -> a {
   io.println(prefix <> ": " <> string.inspect(value))
   value
 }
