@@ -1,32 +1,46 @@
 import args.{type Part, PartOne, PartTwo}
+import gleam/function
 import gleam/int
 import gleam/list
 import gleam/string
 
+import counter.{type Counter}
 import regex
 import util
 
 pub fn main(input: String, part: Part) -> String {
-  let stones = input |> stones |> util.println("start") |> blink(times: 25)
+  let stones = input |> stones |> blink(times: 25)
   case part {
-    PartOne -> stones |> list.length |> int.to_string
-    PartTwo -> stones |> blink(times: 0) |> list.length |> int.to_string
+    PartOne -> stones |> count |> int.to_string
+    PartTwo -> stones |> blink(times: 50) |> count |> int.to_string
   }
 }
 
-fn stones(input: String) -> List(Int) {
-  input |> regex.int_matches
+pub fn stones(input: String) -> Counter(Int) {
+  input |> regex.int_matches |> counter.from_list
 }
 
-fn blink(stones: List(Int), times count: Int) -> List(Int) {
+pub fn count(stones: Counter(Int)) -> Int {
+  stones |> counter.fold(from: 0, with: fn(acc, _, count) { acc + count })
+}
+
+pub fn blink(stones: Counter(Int), times count: Int) -> Counter(Int) {
   case count {
     0 -> stones
-    _ -> blink(stones |> blink_once, count - 1)
+    _ -> stones |> blink_once |> blink(count - 1)
   }
 }
 
-fn blink_once(stones: List(Int)) -> List(Int) {
-  stones |> util.println("blink") |> list.map(change) |> list.flatten
+fn blink_once(stones: Counter(Int)) -> Counter(Int) {
+  stones
+  |> counter.fold(from: counter.new(), with: fn(acc, stone, count) {
+    stone
+    |> change
+    |> list.fold(from: counter.new(), with: fn(sub, new_stone) {
+      sub |> counter.increment(new_stone, by: count)
+    })
+    |> counter.combine(acc)
+  })
 }
 
 fn change(stone: Int) -> List(Int) {
