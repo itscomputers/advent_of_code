@@ -10,9 +10,9 @@ pub fn main() {
   gleeunit.main()
 }
 
-// pub fn part_one_test() {
-//   example |> day11.main(PartOne) |> should.equal("55313")
-// }
+pub fn part_one_test() {
+  example |> day11.main(PartOne) |> should.equal("55312")
+}
 
 pub fn count_test() {
   example

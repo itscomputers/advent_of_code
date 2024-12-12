@@ -5,7 +5,6 @@ import gleam/order.{type Order, Eq, Gt, Lt}
 import gleam/string
 
 import range.{type Range, Range}
-import util
 
 type DiskMap {
   DiskMap(files: List(File), compressed: List(File), spaces: List(Range))

@@ -1,12 +1,10 @@
 import args.{type Part, PartOne, PartTwo}
-import gleam/function
 import gleam/int
 import gleam/list
 import gleam/string
 
 import counter.{type Counter}
 import regex
-import util
 
 pub fn main(input: String, part: Part) -> String {
   let stones = input |> stones |> blink(times: 25)
