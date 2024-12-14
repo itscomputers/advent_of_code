@@ -14,6 +14,14 @@ pub fn values(range: Range) -> List(Int) {
   list.range(range.lower, range.upper - 1)
 }
 
+pub fn map(range: Range, with func: fn(Int) -> a) -> List(a) {
+  range |> values |> list.map(func)
+}
+
+pub fn fold(range: Range, from initial: a, with func: fn(a, Int) -> a) -> a {
+  range |> values |> list.fold(from: initial, with: func)
+}
+
 pub fn is_empty(range: Range) -> Bool {
   range.lower >= range.upper
 }

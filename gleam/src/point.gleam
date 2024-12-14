@@ -1,6 +1,8 @@
 import gleam/int
 import gleam/list
 
+import ebe
+
 pub type Rotation {
   CW
   CCW
@@ -35,6 +37,10 @@ pub fn scale(point: Point, by scalar: Int) -> Point {
 
 pub fn dot(point: Point, other: Point) -> Int {
   point.x * other.x + point.y * other.y
+}
+
+pub fn reduce(point: Point, mod other: Point) -> Point {
+  Point(point.x |> ebe.mod(other.x), point.y |> ebe.mod(other.y))
 }
 
 pub fn norm(point: Point) -> Int {

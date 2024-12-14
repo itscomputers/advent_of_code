@@ -44,11 +44,11 @@ pub fn submatch(str: String, pattern: String) -> Option(String) {
 }
 
 pub fn int_match(str: String) -> Option(Int) {
-  match(str, "\\d+") |> as_int
+  match(str, "-?\\d+") |> as_int
 }
 
 pub fn int_matches(str: String) -> List(Int) {
-  matches(str, "\\d+")
+  matches(str, "-?\\d+")
   |> list.map(as_int)
   |> list.fold(from: [], with: fn(acc, opt) {
     case opt {
