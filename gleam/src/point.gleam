@@ -8,6 +8,11 @@ pub type Rotation {
   CCWAround(center: Point)
 }
 
+pub type Reflection {
+  Horizontal
+  Vertical
+}
+
 pub type Point {
   Point(x: Int, y: Int)
 }
@@ -28,6 +33,10 @@ pub fn scale(point: Point, by scalar: Int) -> Point {
   point |> map(int.multiply(_, scalar))
 }
 
+pub fn dot(point: Point, other: Point) -> Int {
+  point.x * other.x + point.y * other.y
+}
+
 pub fn norm(point: Point) -> Int {
   point |> coords |> list.map(int.absolute_value) |> int.sum
 }
@@ -38,6 +47,13 @@ pub fn distance(point: Point, other: Point) -> Int {
 
 pub fn map(point: Point, func: fn(Int) -> Int) -> Point {
   Point(func(point.x), func(point.y))
+}
+
+pub fn reflect(point: Point, across line: Reflection) -> Point {
+  case line {
+    Horizontal -> Point(point.x, -point.y)
+    Vertical -> Point(-point.x, point.y)
+  }
 }
 
 pub fn rotate(point: Point, rotation: Rotation) -> Point {
