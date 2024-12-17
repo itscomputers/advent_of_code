@@ -3,6 +3,7 @@ import gleam/dict.{type Dict}
 import gleam/int
 import gleam/list
 import gleam/option.{type Option, None, Some}
+import gleam/result
 import gleam/set.{type Set}
 import gleam/string
 import gleam/string_tree
@@ -19,12 +20,19 @@ type Warehouse {
     walls: Set(Point),
     boxes: Dict(Point, Box),
     moves: List(Direction),
+    dimensions: Point,
   )
 }
 
 type Box {
   Basic(pt: Point)
   Wide(pt: Point)
+}
+
+type Collision {
+  Wall
+  Open
+  Boxes(boxes: List(Box))
 }
 
 pub fn main(input: String, part: Part) -> String {
@@ -37,11 +45,18 @@ fn warehouse(input: String, part: Part) -> Warehouse {
     PartOne -> grid_str |> grid.new
     PartTwo -> grid_str |> widen |> grid.new
   }
-  Warehouse(robot: Point(0, 0), walls: set.new(), boxes: dict.new(), moves: [])
+  Warehouse(
+    robot: Point(0, 0),
+    walls: set.new(),
+    boxes: dict.new(),
+    moves: [],
+    dimensions: grid |> grid.dimensions,
+  )
   |> assign_walls(grid)
   |> assign_boxes(grid, part)
   |> assign_robot(grid)
   |> assign_moves(move_str)
+  |> display(False)
 }
 
 fn widen(grid_str: String) -> String {
@@ -56,41 +71,35 @@ fn gps(warehouse: Warehouse) -> Int {
   warehouse.boxes
   |> dict.values
   |> list.unique
-  |> list.map(fn(box) { box.pt |> point.dot(Point(1, 100)) })
+  |> list.map(distance)
   |> int.sum
 }
 
+fn distance(box: Box) -> Int {
+  box.pt |> point.dot(Point(1, 100))
+}
+
 fn assign_robot(warehouse: Warehouse, grid: Grid) -> Warehouse {
-  let assert Ok(robot) = grid |> get_points("@") |> list.first
+  let assert Ok(robot) = grid |> get_points(["@"]) |> list.first
   Warehouse(..warehouse, robot:)
 }
 
 fn assign_walls(warehouse: Warehouse, grid: Grid) -> Warehouse {
-  Warehouse(..warehouse, walls: grid |> get_points("#") |> set.from_list)
+  Warehouse(..warehouse, walls: grid |> get_points(["#"]) |> set.from_list)
 }
 
 fn assign_boxes(warehouse: Warehouse, grid: Grid, part: Part) -> Warehouse {
-  let boxes = case part {
-    PartOne ->
-      grid
-      |> get_points("O")
-      |> list.map(fn(pt) { #(pt, Basic(pt)) })
-      |> dict.from_list
-    PartTwo ->
-      grid
-      |> get_points("[")
-      |> list.zip(grid |> get_points("]"))
-      |> list.flat_map(fn(tuple) {
-        let box = Wide(tuple.0)
-        [#(tuple.0, box), #(tuple.1, box)]
-      })
-      |> dict.from_list
-  }
+  let boxes =
+    grid
+    |> get_points(["O", "["])
+    |> list.map(fn(pt) {
+      case part {
+        PartOne -> #(pt, Basic(pt))
+        PartTwo -> #(pt, Wide(pt))
+      }
+    })
+    |> dict.from_list
   Warehouse(..warehouse, boxes:)
-}
-
-fn get_points(grid: Grid, str: String) -> List(Point) {
-  grid |> grid.filter(fn(ch) { ch == str })
 }
 
 fn assign_moves(warehouse: Warehouse, str: String) -> Warehouse {
@@ -113,194 +122,151 @@ fn assign_moves(warehouse: Warehouse, str: String) -> Warehouse {
 fn loop(warehouse: Warehouse) -> Warehouse {
   case warehouse.moves {
     [] -> warehouse
-    [move, ..moves] -> Warehouse(..warehouse, moves:) |> handle(move) |> loop
+    [move, ..moves] ->
+      Warehouse(..warehouse, moves:)
+      |> handle(move)
+      |> loop
   }
 }
 
 fn handle(warehouse: Warehouse, direction: Direction) -> Warehouse {
-  let robot = warehouse.robot |> dir.step(direction)
-  case
-    set.contains(warehouse.walls, robot),
-    dict.has_key(warehouse.boxes, robot)
-  {
+  let pt = warehouse.robot |> dir.step(direction)
+  case warehouse |> has_wall(at: pt), warehouse |> get_box(at: pt) {
     True, _ -> warehouse
-    False, False -> warehouse |> set_robot(robot)
-    False, True -> warehouse |> handle_box(robot, direction)
+    _, None -> warehouse |> set_robot(pt)
+    _, Some(box) ->
+      case warehouse |> try_move(box, direction) {
+        Ok(warehouse) -> warehouse |> set_robot(pt)
+        Error(_) -> warehouse
+      }
   }
 }
 
-fn handle_box(
+fn try_move(
   warehouse: Warehouse,
-  robot: Point,
+  box: Box,
   direction: Direction,
-) -> Warehouse {
-  let assert Ok(box) = warehouse.boxes |> dict.get(robot)
-  case boxes_group(warehouse, direction, [], [box]) {
-    None -> warehouse
-    Some(group) -> {
-      let moved = group |> list.map(move_box(_, direction))
-      warehouse
-      |> remove_boxes(group)
-      |> add_boxes(moved)
-      |> set_robot(robot)
-    }
+) -> Result(Warehouse, Nil) {
+  let pt = box.pt |> dir.step(direction)
+  let moved_box = case box {
+    Basic(_) -> Basic(pt)
+    Wide(_) -> Wide(pt)
+  }
+  let do_move = fn(w) { w |> remove_box(at: box.pt) |> add_box(moved_box) }
+  case warehouse |> collision(box, direction) {
+    Wall -> Error(Nil)
+    Open -> Ok(warehouse |> do_move)
+    Boxes(boxes) ->
+      boxes
+      |> list.fold(from: Ok(warehouse), with: fn(res, b) {
+        res |> result.try(try_move(_, b, direction))
+      })
+      |> result.map(do_move)
   }
 }
 
-fn boxes_group(
-  warehouse: Warehouse,
-  direction: Direction,
-  group: List(Box),
-  queue: List(Box),
-) -> Option(List(Box)) {
-  case queue {
-    [] -> Some(group)
-    [box, ..queue] ->
-      case warehouse |> neighbors(of: box, in: direction) {
-        None -> None
-        Some(boxes) ->
-          boxes_group(
-            warehouse,
-            direction,
-            [box, ..group],
-            list.append(queue, boxes),
-          )
+fn collision(warehouse: Warehouse, box: Box, direction: Direction) -> Collision {
+  let pts = case box, direction {
+    Basic(pt), _ -> [pt |> dir.step(direction)]
+    Wide(pt), Left -> [pt |> dir.step(Left)]
+    Wide(pt), Right -> [pt |> dir.move(Right, times: 2)]
+    Wide(pt), _ ->
+      [pt, pt |> dir.step(Right)] |> list.map(dir.step(_, direction))
+  }
+  case pts |> list.any(has_wall(warehouse, _)) {
+    True -> Wall
+    False ->
+      case pts |> list.all(is_open(warehouse, _)) {
+        True -> Open
+        False ->
+          pts
+          |> list.map(get_box(warehouse, _))
+          |> list.fold(from: [], with: fn(acc, opt) {
+            case opt {
+              Some(b) -> [b, ..acc]
+              None -> acc
+            }
+          })
+          |> list.unique
+          |> Boxes
       }
   }
 }
 
-fn box_points(box: Box) -> List(Point) {
-  case box {
-    Basic(pt) -> [pt]
-    Wide(pt) -> [pt, pt |> dir.step(Right)]
+fn has_wall(warehouse: Warehouse, at pt: Point) -> Bool {
+  warehouse.walls |> set.contains(pt)
+}
+
+fn get_box(warehouse: Warehouse, at pt: Point) -> Option(Box) {
+  case
+    warehouse.boxes |> dict.get(pt),
+    warehouse.boxes |> dict.get(pt |> dir.step(Left))
+  {
+    Ok(box), _ -> Some(box)
+    Error(_), Ok(Wide(pt)) -> Some(Wide(pt))
+    _, _ -> None
   }
 }
 
-fn move_box(box: Box, direction: Direction) -> Box {
-  case box {
-    Basic(pt) -> Basic(pt |> dir.step(direction))
-    Wide(pt) -> Wide(pt |> dir.step(direction))
-  }
-}
-
-fn neighbors(
-  warehouse: Warehouse,
-  of box: Box,
-  in direction: Direction,
-) -> Option(List(Box)) {
-  case box {
-    Basic(pt) -> {
-      let next_pt = pt |> dir.step(direction)
-      case
-        warehouse.walls |> set.contains(next_pt),
-        warehouse.boxes |> dict.get(next_pt)
-      {
-        True, _ -> None
-        _, Ok(neighbor) -> Some([neighbor])
-        _, Error(_) -> Some([])
-      }
-    }
-    Wide(pt) -> {
-      case direction {
-        Left -> {
-          let next_pt = pt |> dir.step(direction)
-          case
-            warehouse.walls |> set.contains(next_pt),
-            warehouse.boxes |> dict.get(next_pt)
-          {
-            True, _ -> None
-            _, Ok(neighbor) -> Some([neighbor])
-            _, Error(_) -> Some([])
-          }
-        }
-        Right -> {
-          let next_pt = pt |> dir.move(direction, times: 2)
-          case
-            warehouse.walls |> set.contains(next_pt),
-            warehouse.boxes |> dict.get(next_pt)
-          {
-            True, _ -> None
-            _, Ok(neighbor) -> Some([neighbor])
-            _, Error(_) -> Some([])
-          }
-        }
-        _ -> {
-          let pts = box |> box_points |> list.map(dir.step(_, direction))
-          let is_wall =
-            pts
-            |> list.any(fn(pt) { warehouse.walls |> set.contains(pt) })
-          let res =
-            pts
-            |> list.map(fn(pt) { warehouse.boxes |> dict.get(pt) })
-          case is_wall, res {
-            True, _ -> None
-            _, [Ok(left), Ok(right)] -> Some([left, right])
-            _, [Ok(left), Error(_)] -> Some([left])
-            _, [Error(_), Ok(right)] -> Some([right])
-            _, [Error(_), Error(_)] -> Some([])
-            _, _ -> None
-          }
-        }
-      }
-    }
+fn is_open(warehouse: Warehouse, at pt: Point) -> Bool {
+  case warehouse |> has_wall(at: pt), warehouse |> get_box(at: pt) {
+    True, _ -> False
+    _, Some(_) -> False
+    _, _ -> True
   }
 }
 
 fn set_robot(warehouse: Warehouse, robot: Point) -> Warehouse {
-  Warehouse(..warehouse, robot:) |> remove_box_pts([robot])
-}
-
-fn add_boxes(warehouse: Warehouse, boxes: List(Box)) -> Warehouse {
-  boxes |> list.fold(from: warehouse, with: add_box)
+  let boxes = warehouse.boxes |> dict.drop([robot])
+  Warehouse(..warehouse, robot:, boxes:)
 }
 
 fn add_box(warehouse: Warehouse, box: Box) -> Warehouse {
-  let boxes =
-    box
-    |> box_points
-    |> list.fold(from: warehouse.boxes, with: fn(acc, pt) {
-      acc |> dict.insert(pt, box)
-    })
+  let boxes = warehouse.boxes |> dict.insert(box.pt, box)
   Warehouse(..warehouse, boxes:)
 }
 
-fn remove_box_pts(warehouse: Warehouse, pts: List(Point)) -> Warehouse {
-  let boxes = warehouse.boxes |> dict.drop(pts)
+fn remove_box(warehouse: Warehouse, at pt: Point) -> Warehouse {
+  let boxes = warehouse.boxes |> dict.delete(pt)
   Warehouse(..warehouse, boxes:)
 }
 
-fn remove_boxes(warehouse: Warehouse, boxes: List(Box)) -> Warehouse {
-  warehouse |> remove_box_pts(boxes |> list.flat_map(box_points))
+fn get_points(grid: Grid, strings: List(String)) -> List(Point) {
+  grid |> grid.filter(fn(ch) { strings |> list.contains(ch) })
 }
 
-fn display(warehouse: Warehouse, dim: Point) -> Warehouse {
-  util.println("", "")
-  Range(0, dim.y)
-  |> range.map(fn(y) {
-    Range(0, dim.x)
-    |> range.fold(from: string_tree.new(), with: fn(acc, x) {
-      let pt = Point(x, y)
-      let ch = case
-        warehouse.robot == pt,
-        warehouse.walls |> set.contains(pt),
-        warehouse.boxes |> dict.get(pt)
-      {
-        True, _, _ -> "@"
-        _, True, _ -> "#"
-        _, _, Error(_) -> "."
-        _, _, Ok(box) -> {
-          case box {
-            Basic(_) -> "O"
-            Wide(pt2) if pt == pt2 -> "["
-            _ -> "]"
+fn display(warehouse: Warehouse, show: Bool) -> Warehouse {
+  case show {
+    False -> Nil
+    True -> {
+      util.println("", "")
+      Range(0, warehouse.dimensions.y)
+      |> range.each(fn(y) {
+        Range(0, warehouse.dimensions.x)
+        |> range.fold(from: string_tree.new(), with: fn(acc, x) {
+          let pt = Point(x, y)
+          let ch = case
+            warehouse.robot == pt,
+            warehouse |> has_wall(at: pt),
+            warehouse |> get_box(at: pt)
+          {
+            True, _, _ -> "@"
+            _, True, _ -> "#"
+            _, _, None -> "."
+            _, _, Some(box) -> {
+              case box {
+                Basic(_) -> "O"
+                Wide(pt2) if pt == pt2 -> "["
+                _ -> "]"
+              }
+            }
           }
-        }
-      }
-      acc |> string_tree.append(ch)
-    })
-    |> string_tree.to_string
-    |> util.println("")
-  })
-
+          acc |> string_tree.append(ch)
+        })
+        |> string_tree.to_string
+        |> util.println("")
+      })
+    }
+  }
   warehouse
 }

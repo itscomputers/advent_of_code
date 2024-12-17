@@ -77,7 +77,7 @@ fn antinodes(map: AntennaMap, pair: AntennaPair) -> List(Point) {
     PartTwo ->
       map.grid
       |> grid.dimensions
-      |> fn(tuple) { int.max(tuple.0, tuple.1) }
+      |> fn(pt) { int.max(pt.x, pt.y) }
       |> list.range(1, _)
       |> list.flat_map(fn(idx) {
         [

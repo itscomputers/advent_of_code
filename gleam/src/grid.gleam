@@ -25,8 +25,8 @@ pub fn new(str: String) -> Grid {
   |> Grid(build_x_range(str), build_y_range(str))
 }
 
-pub fn dimensions(grid: Grid) -> #(Int, Int) {
-  #(range.size(grid.x_range), range.size(grid.y_range))
+pub fn dimensions(grid: Grid) -> Point {
+  Point(range.size(grid.x_range), range.size(grid.y_range))
 }
 
 pub fn get(grid: Grid, point: Point) -> Option(String) {

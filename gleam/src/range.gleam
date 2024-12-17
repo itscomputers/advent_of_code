@@ -18,6 +18,10 @@ pub fn map(range: Range, with func: fn(Int) -> a) -> List(a) {
   range |> values |> list.map(func)
 }
 
+pub fn each(range: Range, with func: fn(Int) -> a) -> Nil {
+  range |> values |> list.each(func)
+}
+
 pub fn fold(range: Range, from initial: a, with func: fn(a, Int) -> a) -> a {
   range |> values |> list.fold(from: initial, with: func)
 }

@@ -1,9 +1,7 @@
 import gleeunit
 import gleeunit/should
 
-import args.{PartOne, PartTwo}
 import point.{Point}
-import util
 import year2024/day14
 
 const example = "p=0,4 v=3,-3
