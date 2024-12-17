@@ -1,4 +1,5 @@
 import gleam/dict.{type Dict}
+import gleam/io
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/string
@@ -93,6 +94,20 @@ pub fn filter(grid: Grid, select predicate: fn(String) -> Bool) -> List(Point) {
   grid.lookup
   |> dict.filter(fn(_, value) { predicate(value) })
   |> dict.keys
+}
+
+pub fn display(grid: Grid) -> Grid {
+  io.println("")
+  grid.y_range
+  |> range.map(fn(y) {
+    grid.x_range
+    |> range.fold(from: string_tree.new(), with: fn(acc, x) {
+      acc |> string_tree.append(grid |> get_or(Point(x, y), default: "."))
+    })
+    |> string_tree.to_string
+    |> io.println
+  })
+  grid
 }
 
 fn build_x_range(str: String) -> Range {

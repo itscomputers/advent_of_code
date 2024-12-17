@@ -1,14 +1,15 @@
 import gleam/dict.{type Dict}
 import gleam/function
 import gleam/list
+import gleam/set.{type Set}
 import gleam/string
 
 pub opaque type Graph(a) {
-  Graph(lookup: Dict(a, Dict(a, Int)))
+  Graph(lookup: Dict(a, Dict(a, Int)), incoming: Dict(a, Set(a)))
 }
 
 pub fn new() -> Graph(a) {
-  Graph(dict.new())
+  Graph(dict.new(), dict.new())
 }
 
 pub fn vertices(graph: Graph(a)) -> List(a) {
@@ -20,7 +21,8 @@ pub fn size(graph: Graph(a)) -> Int {
 }
 
 pub fn subgraph(graph: Graph(a), vertices: List(a)) -> Graph(a) {
-  Graph(lookup: graph.lookup |> dict.take(vertices))
+  Graph(lookup: graph.lookup |> dict.take(vertices), incoming: dict.new())
+  |> set_incoming
 }
 
 pub fn from_string(str: String, sep separator: String) -> Graph(String) {
@@ -61,20 +63,33 @@ pub fn add_weighted(
   to target: a,
   weight weight: Int,
 ) -> Graph(a) {
-  Graph(
-    lookup: graph.lookup
+  let lookup =
+    graph.lookup
     |> dict.insert(
       source,
       graph
         |> function.tap(get(_, target))
         |> get(source)
         |> dict.insert(target, weight),
-    ),
-  )
+    )
+  let incoming =
+    graph.incoming
+    |> dict.insert(
+      target,
+      graph
+        |> function.tap(get_incoming(_, source))
+        |> get_incoming(target)
+        |> set.insert(source),
+    )
+  Graph(lookup:, incoming:)
 }
 
 pub fn neighbors(graph: Graph(a), of vertex: a) -> List(a) {
   graph |> get(vertex) |> dict.keys
+}
+
+pub fn incoming(graph: Graph(a), to vertex: a) -> List(a) {
+  graph |> get_incoming(vertex) |> set.to_list
 }
 
 pub fn adjacent(graph: Graph(a), from source: a, to target: a) -> Bool {
@@ -93,4 +108,29 @@ fn get(graph: Graph(a), vertex: a) -> Dict(a, Int) {
     Ok(dct) -> dct
     Error(_) -> dict.new()
   }
+}
+
+fn get_incoming(graph: Graph(a), vertex: a) -> Set(a) {
+  case graph.incoming |> dict.get(vertex) {
+    Ok(s) -> s
+    Error(_) -> set.new()
+  }
+}
+
+fn set_incoming(graph: Graph(a)) -> Graph(a) {
+  let incoming =
+    graph.lookup
+    |> dict.fold(from: dict.new(), with: fn(acc, source, edges) {
+      edges
+      |> dict.fold(from: acc, with: fn(acc, target, _) {
+        let incoming_edges =
+          case acc |> dict.get(target) {
+            Ok(incoming_edges) -> incoming_edges
+            Error(_) -> set.new()
+          }
+          |> set.insert(source)
+        acc |> dict.insert(target, incoming_edges)
+      })
+    })
+  Graph(..graph, incoming:)
 }

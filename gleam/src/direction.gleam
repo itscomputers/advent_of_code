@@ -11,6 +11,10 @@ pub type Direction {
   Up
 }
 
+pub fn all() -> List(Direction) {
+  [Right, Down, Left, Up]
+}
+
 pub fn to_point(dir: Direction) -> Point {
   case dir {
     Right -> Point(1, 0)

@@ -15,6 +15,7 @@ import year2024/day12
 import year2024/day13
 import year2024/day14
 import year2024/day15
+import year2024/day16
 
 pub fn get_func(day: String) -> fn(String, Part) -> String {
   case day {
@@ -33,6 +34,7 @@ pub fn get_func(day: String) -> fn(String, Part) -> String {
     "13" -> day13.main
     "14" -> day14.main
     "15" -> day15.main
+    "16" -> day16.main
     _ -> {
       util.debug("2024 " <> day, "unimplemented")
       fn(_, _) { "" }
