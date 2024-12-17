@@ -35,7 +35,7 @@ pub fn part_two_test() {
   example |> day${day}.main(PartTwo) |> should.equal(\"0\")
 }"
 
-mkdir -p "inputs/year$"
+mkdir -p "inputs/${1}"
 mkdir -p "gleam/src/year${1}"
 mkdir -p "gleam/test/year${1}"
 
