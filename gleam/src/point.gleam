@@ -35,7 +35,7 @@ pub fn scale(point: Point, by scalar: Int) -> Point {
   point |> map(int.multiply(_, scalar))
 }
 
-pub fn dot(point: Point, other: Point) -> Int {
+pub fn dot(point: Point, with other: Point) -> Int {
   point.x * other.x + point.y * other.y
 }
 
@@ -47,11 +47,11 @@ pub fn norm(point: Point) -> Int {
   point |> coords |> list.map(int.absolute_value) |> int.sum
 }
 
-pub fn distance(point: Point, other: Point) -> Int {
+pub fn distance(point: Point, from other: Point) -> Int {
   point |> subtract(other) |> norm
 }
 
-pub fn map(point: Point, func: fn(Int) -> Int) -> Point {
+pub fn map(point: Point, with func: fn(Int) -> Int) -> Point {
   Point(func(point.x), func(point.y))
 }
 
@@ -71,15 +71,15 @@ pub fn rotate(point: Point, rotation: Rotation) -> Point {
   }
 }
 
-pub fn neighbors(point: Point) -> List(Point) {
+pub fn neighbors(of point: Point) -> List(Point) {
   point |> get_neighbors(directions())
 }
 
-pub fn strict_neighbors(point: Point) -> List(Point) {
+pub fn strict_neighbors(of point: Point) -> List(Point) {
   point |> get_neighbors(rectangular_directions())
 }
 
-pub fn diagonal_neighbors(point: Point) -> List(Point) {
+pub fn diagonal_neighbors(of point: Point) -> List(Point) {
   point |> get_neighbors(diagonal_directions())
 }
 
@@ -108,6 +108,6 @@ fn get_neighbors(point: Point, directions: List(Point)) {
   |> list.map(add(_, point))
 }
 
-fn coords(point: Point) -> List(Int) {
+pub fn coords(point: Point) -> List(Int) {
   [point.x, point.y]
 }

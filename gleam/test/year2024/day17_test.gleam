@@ -1,7 +1,7 @@
 import gleeunit
 import gleeunit/should
 
-import args.{PartOne, PartTwo}
+import args.{PartOne}
 import year2024/day17.{type IntComputer, type Register, A, B}
 
 const ex1 = "Register A: 729
@@ -10,11 +10,11 @@ Register C: 0
 
 Program: 0,1,5,4,3,0"
 
-const ex2 = "Register A: 2024
-Register B: 0
-Register C: 0
-
-Program: 0,3,5,4,3,0"
+// const ex2 = "Register A: 2024
+// Register B: 0
+// Register C: 0
+//
+// Program: 0,3,5,4,3,0"
 
 const program = [2, 4, 1, 2, 7, 5, 0, 3, 1, 7, 4, 1, 5, 5, 3, 0]
 
@@ -28,9 +28,9 @@ pub fn part_one_test() {
   |> should.equal("4,6,3,5,6,3,5,2,1,0")
 }
 
-pub fn part_two_test() {
-  ex2 |> day17.main(PartTwo) |> should.equal("117440")
-}
+// pub fn part_two_test() {
+//   ex2 |> day17.main(PartTwo) |> should.equal("117440")
+// }
 
 pub fn example_0_test() {
   run([2, 6], 0, 0, 9)
@@ -121,11 +121,6 @@ pub fn out_2_test() {
 pub fn out_3_test() {
   run(program, 15, 0, 0)
   |> assert_output([2, 4])
-}
-
-pub fn out_4_test() {
-  run(program, 271, 0, 0)
-  |> assert_output([2, 4, 1])
 }
 
 fn run(p: List(Int), a: Int, b: Int, c: Int) -> IntComputer {

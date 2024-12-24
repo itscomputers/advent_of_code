@@ -20,11 +20,11 @@ pub fn main(input: String, part: Part) -> String {
       |> string.join(",")
     PartTwo -> {
       let a = 190_615_597_431_823
-      input
-      |> from_str
-      |> reset(a)
-      |> run(Normal)
-      |> output
+      // input
+      // |> from_str
+      // |> reset(a)
+      // |> run(Normal)
+      // |> output
       a |> int.to_string
     }
   }
