@@ -84,6 +84,25 @@ pub fn add_weighted(
   Graph(lookup:, incoming:)
 }
 
+pub fn remove(graph: Graph(a), from source: a, to target: a) -> Graph(a) {
+  case graph.lookup |> dict.get(source) {
+    Ok(edges) -> {
+      let edges = edges |> dict.delete(target)
+      let lookup = graph.lookup |> dict.insert(source, edges)
+      let incoming =
+        graph.incoming
+        |> dict.insert(
+          target,
+          graph
+            |> get_incoming(target)
+            |> set.delete(source),
+        )
+      Graph(lookup:, incoming:)
+    }
+    Error(_) -> graph
+  }
+}
+
 pub fn neighbors(graph: Graph(a), of vertex: a) -> List(a) {
   graph |> get(vertex) |> dict.keys
 }
