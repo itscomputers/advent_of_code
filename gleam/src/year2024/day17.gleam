@@ -99,12 +99,12 @@ pub fn run(cmp: IntComputer, mode: Mode) -> IntComputer {
   }
 }
 
-fn reset(cmp: IntComputer, a: Int) -> IntComputer {
-  IntComputer(..cmp, ptr: 0, out: [], status: Continue)
-  |> set(A, a)
-  |> set(B, 0)
-  |> set(C, 0)
-}
+// fn reset(cmp: IntComputer, a: Int) -> IntComputer {
+//   IntComputer(..cmp, ptr: 0, out: [], status: Continue)
+//   |> set(A, a)
+//   |> set(B, 0)
+//   |> set(C, 0)
+// }
 
 fn value(cmp: IntComputer, op: Int, operand: Operand) -> Int {
   case operand {
