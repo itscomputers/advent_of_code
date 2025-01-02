@@ -7,6 +7,7 @@ import gleam/order.{type Order, Eq, Gt, Lt}
 import gleam/result
 import gleam/set.{type Set}
 import gleamy/priority_queue as pq
+import util
 
 import graph/graph.{type Graph}
 
@@ -52,6 +53,19 @@ pub fn path(
   |> search(for: Some(target))
   |> build_path(to: target)
   |> validate_path(from: source)
+}
+
+pub fn distance(
+  gr: Graph(a),
+  from source: a,
+  to target: a,
+  using algorithm: Algorithm,
+) -> Int {
+  gr
+  |> new(from: source, using: algorithm)
+  |> search(for: Some(target))
+  |> get_node(target)
+  |> get_distance(target, _)
 }
 
 pub fn distances(

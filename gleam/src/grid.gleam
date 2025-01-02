@@ -2,6 +2,7 @@ import gleam/dict.{type Dict}
 import gleam/io
 import gleam/list
 import gleam/option.{type Option, None, Some}
+import gleam/pair
 import gleam/string
 import gleam/string_tree
 
@@ -94,6 +95,14 @@ pub fn filter(grid: Grid, select predicate: fn(String) -> Bool) -> List(Point) {
   grid.lookup
   |> dict.filter(fn(_, value) { predicate(value) })
   |> dict.keys
+}
+
+pub fn find(grid: Grid, with predicate: fn(String) -> Bool) -> Option(Point) {
+  grid.lookup
+  |> dict.to_list
+  |> list.find(fn(t) { predicate(t.1) })
+  |> option.from_result
+  |> option.map(pair.first)
 }
 
 pub fn display(grid: Grid) -> Grid {

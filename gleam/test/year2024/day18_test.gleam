@@ -1,7 +1,6 @@
 import gleeunit
 import gleeunit/should
 
-import args.{PartTwo}
 import year2024/day18
 
 const example = "5,4

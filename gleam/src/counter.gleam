@@ -19,6 +19,14 @@ pub fn from_list(lst: List(a)) -> Counter(a) {
   )
 }
 
+pub fn size(counter: Counter(a)) -> Int {
+  counter.inner |> dict.size
+}
+
+pub fn is_empty(counter: Counter(a)) -> Bool {
+  counter.inner |> dict.is_empty
+}
+
 pub fn get(counter: Counter(a), key: a) -> Int {
   counter.inner |> get_inner(key)
 }
@@ -64,6 +72,14 @@ pub fn fold(
 
 pub fn keys(counter: Counter(a)) -> List(a) {
   counter.inner |> dict.keys
+}
+
+pub fn values(counter: Counter(a)) -> List(Int) {
+  counter.inner |> dict.values
+}
+
+pub fn has_key(counter: Counter(a), key: a) -> Bool {
+  counter.inner |> dict.has_key(key)
 }
 
 pub fn take(from counter: Counter(a), keeping kept_keys: List(a)) -> Counter(a) {
