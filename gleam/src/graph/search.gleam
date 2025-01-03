@@ -7,7 +7,6 @@ import gleam/order.{type Order, Eq, Gt, Lt}
 import gleam/result
 import gleam/set.{type Set}
 import gleamy/priority_queue as pq
-import util
 
 import graph/graph.{type Graph}
 
