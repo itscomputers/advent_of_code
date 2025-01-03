@@ -78,51 +78,6 @@ pub fn distances(
   |> get_distances
 }
 
-pub fn best_path_points(
-  gr: Graph(a),
-  to target: a,
-  using distances: Dict(a, Int),
-) -> Set(a) {
-  best_path_points_loop(gr, [target], set.new(), distances)
-}
-
-fn best_path_points_loop(
-  gr: Graph(a),
-  vertices: List(a),
-  visited: Set(a),
-  distances: Dict(a, Int),
-) -> Set(a) {
-  case vertices {
-    [] -> visited
-    [vertex, ..vertices] -> {
-      let vertices =
-        gr
-        |> graph.incoming(to: vertex)
-        |> list.fold(from: vertices, with: fn(acc, incoming) {
-          case distances |> dict.get(vertex), distances |> dict.get(incoming) {
-            Error(_), _ -> acc
-            _, Error(_) -> acc
-            Ok(d1), Ok(d0) ->
-              case d1 - d0 == gr |> graph.weight(incoming, vertex) {
-                True ->
-                  case acc |> list.contains(incoming) {
-                    True -> acc
-                    False -> list.append(acc, [incoming])
-                  }
-                False -> acc
-              }
-          }
-        })
-      best_path_points_loop(
-        gr,
-        vertices,
-        visited |> set.insert(vertex),
-        distances,
-      )
-    }
-  }
-}
-
 fn new(gr: Graph(a), from source: a, using algorithm: Algorithm) -> Search(a) {
   let node = Node(source, Distance(0))
   Search(

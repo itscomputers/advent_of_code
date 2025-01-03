@@ -9,6 +9,7 @@ import args.{type Part, PartOne, PartTwo}
 import direction.{type Direction, Down, Left, Right, Up}
 import graph/graph.{type Graph}
 import graph/search
+import graph/util as graph_util
 import grid.{type Grid}
 import point.{type Point, Point}
 
@@ -53,7 +54,7 @@ fn best_location_count(maze: Maze) -> Int {
     acc
     |> set.union(
       maze.graph
-      |> search.best_path_points(to: target, using: maze.distances)
+      |> graph_util.best_path_points(to: target, using: maze.distances)
       |> set.map(fn(node) { node.pt }),
     )
   })
