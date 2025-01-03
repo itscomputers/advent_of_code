@@ -3,7 +3,7 @@ import gleam/deque.{type Deque}
 import gleam/dict.{type Dict}
 import gleam/int
 import gleam/list
-import gleam/option.{Some}
+import gleam/option.{None, Some}
 import gleam/set.{type Set}
 
 import graph/graph.{type Graph}
@@ -11,35 +11,32 @@ import graph/search
 import grid.{type Grid}
 import point.{type Point}
 
-type Neighbors {
-  Neighbors(
-    race: Race,
-    point: Point,
-    distance: Int,
-    queue: Deque(Point),
-    visited: Set(Point),
-    neighbors: Set(Point),
-  )
-}
-
 pub type Race {
   Race(
     grid: Grid,
     source_distances: Dict(Point, Int),
     target_distances: Dict(Point, Int),
-    cheat: Cheat,
+    distance: Int,
   )
 }
 
-pub type Cheat {
-  Cheat(radius: Int, distance: Int)
+type Cheat {
+  Cheat(
+    race: Race,
+    point: Point,
+    max_distance: Int,
+    radius: Int,
+    queue: Deque(Point),
+    distances: Dict(Point, Int),
+    neighbors: Set(Point),
+  )
 }
 
 pub fn main(input: String, part: Part) -> String {
-  input |> race(part, 100) |> cheat_count |> int.to_string
+  input |> race |> count(part, 100) |> int.to_string
 }
 
-pub fn race(input: String, part: Part, min_cheat: Int) -> Race {
+pub fn race(input: String) -> Race {
   let grid = input |> grid.new
   let assert Some(source) = grid |> grid.find(fn(ch) { ch == "S" })
   let assert Some(target) = grid |> grid.find(fn(ch) { ch == "E" })
@@ -59,90 +56,97 @@ pub fn race(input: String, part: Part, min_cheat: Int) -> Race {
   let source_distances = distances(graph, source)
   let target_distances = distances(graph, target)
   let assert Ok(distance) = source_distances |> dict.get(target)
-  let distance = distance - min_cheat
+  Race(grid:, source_distances:, target_distances:, distance:)
+}
+
+pub fn count(race: Race, part: Part, threshold: Int) -> Int {
   let radius = case part {
     PartOne -> 2
     PartTwo -> 20
   }
-  let cheat = Cheat(radius:, distance:)
-  Race(grid:, source_distances:, target_distances:, cheat:)
-}
-
-pub fn cheat_count(race: Race) -> Int {
   race.source_distances
-  |> dict.fold(from: 0, with: fn(acc, pt, dist) {
-    acc + cheat_count_at(race, pt, dist)
+  |> dict.fold(from: 0, with: fn(acc, point, distance) {
+    Cheat(
+      race:,
+      point:,
+      max_distance: race.distance - distance - threshold,
+      radius:,
+      queue: deque.from_list([point]),
+      distances: dict.from_list([#(point, 0)]),
+      neighbors: set.new(),
+    )
+    |> cheat_search
+    |> cheat_count
+    |> int.add(acc)
   })
 }
 
-fn cheat_count_at(race: Race, vertex: Point, distance: Int) -> Int {
-  race
-  |> neighbors(vertex, distance)
-  |> list.length
+fn cheat_count(cheat: Cheat) -> Int {
+  cheat.neighbors |> set.size
+}
+
+fn cheat_search(cheat: Cheat) -> Cheat {
+  case cheat.queue |> deque.pop_front {
+    Error(_) -> cheat
+    Ok(#(vertex, queue)) ->
+      Cheat(..cheat, queue:)
+      |> process(vertex)
+      |> cheat_search
+  }
+}
+
+fn process(cheat: Cheat, vertex: Point) -> Cheat {
+  let assert Ok(distance) = cheat.distances |> dict.get(vertex)
+  case distance == cheat.radius {
+    True -> cheat
+    False ->
+      vertex
+      |> point.strict_neighbors
+      |> list.fold(from: cheat, with: fn(acc, neighbor) {
+        case
+          acc.distances |> dict.get(neighbor),
+          acc.race.grid |> grid.get(neighbor)
+        {
+          Ok(_), _ | _, None -> acc
+          _, Some("#") ->
+            acc
+            |> add_to_queue(neighbor)
+            |> set_distance(neighbor, distance + 1)
+          _, Some(_) ->
+            acc
+            |> add_to_neighbors(neighbor, distance)
+            |> add_to_queue(neighbor)
+            |> set_distance(neighbor, distance + 1)
+        }
+      })
+  }
+}
+
+fn add_to_queue(cheat: Cheat, neighbor: Point) -> Cheat {
+  let queue = cheat.queue |> deque.push_back(neighbor)
+  Cheat(..cheat, queue:)
+}
+
+fn add_to_neighbors(cheat: Cheat, neighbor: Point, distance: Int) -> Cheat {
+  case cheat.race.target_distances |> dict.get(neighbor) {
+    Ok(remaining) -> {
+      case distance + remaining < cheat.max_distance {
+        True -> {
+          let neighbors = cheat.neighbors |> set.insert(neighbor)
+          Cheat(..cheat, neighbors:)
+        }
+        False -> cheat
+      }
+    }
+    Error(_) -> cheat
+  }
+}
+
+fn set_distance(cheat: Cheat, vertex: Point, distance: Int) -> Cheat {
+  let distances = cheat.distances |> dict.insert(vertex, distance)
+  Cheat(..cheat, distances:)
 }
 
 fn distances(graph: Graph(Point), vertex: Point) -> Dict(Point, Int) {
   graph |> search.distances(from: vertex, using: search.BFS)
-}
-
-fn neighbors(race: Race, point: Point, distance: Int) -> List(Point) {
-  Neighbors(
-    race:,
-    point:,
-    distance:,
-    queue: deque.from_list([point]),
-    visited: set.new(),
-    neighbors: set.new(),
-  )
-  |> loop
-  |> fn(n) { n.neighbors |> set.to_list }
-}
-
-fn loop(n: Neighbors) -> Neighbors {
-  case n.queue |> deque.pop_front {
-    Error(_) -> n
-    Ok(#(vertex, queue)) ->
-      case n |> should_skip(vertex) {
-        True -> Neighbors(..n, queue:)
-        False -> {
-          let visited = n.visited |> set.insert(vertex)
-          vertex
-          |> point.strict_neighbors
-          |> list.fold(
-            from: Neighbors(..n, queue:, visited:),
-            with: process_neighbor,
-          )
-        }
-      }
-      |> loop
-  }
-}
-
-fn process_neighbor(n: Neighbors, neighbor: Point) -> Neighbors {
-  let is_exit = is_open(n, neighbor) && is_cheat(n, neighbor)
-  let should_enqueue = n.race.grid |> grid.get(neighbor) == Some("#")
-  case is_exit, should_enqueue {
-    True, _ -> Neighbors(..n, neighbors: n.neighbors |> set.insert(neighbor))
-    _, True -> Neighbors(..n, queue: n.queue |> deque.push_back(neighbor))
-    _, _ -> n
-  }
-}
-
-fn should_skip(n: Neighbors, vertex: Point) -> Bool {
-  set.contains(n.visited, vertex)
-  || point.distance(vertex, n.point) >= n.race.cheat.radius
-}
-
-fn is_open(n: Neighbors, vertex: Point) -> Bool {
-  [Some("."), Some("S"), Some("E")]
-  |> list.contains(n.race.grid |> grid.get(vertex))
-}
-
-fn is_cheat(n: Neighbors, vertex: Point) -> Bool {
-  case n.race.target_distances |> dict.get(vertex) {
-    Error(_) -> False
-    Ok(distance) ->
-      distance + n.distance + point.distance(vertex, n.point)
-      <= n.race.cheat.distance
-  }
 }
