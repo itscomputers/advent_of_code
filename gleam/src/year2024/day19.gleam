@@ -1,5 +1,4 @@
 import args.{type Part, PartOne, PartTwo}
-import gleam/function
 import gleam/int
 import gleam/list
 import gleam/option.{type Option, None, Some}
