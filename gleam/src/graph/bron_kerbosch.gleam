@@ -55,11 +55,6 @@ fn adjacent(bk: BronKerbosch(a), vertices: List(a), to vertex: a) -> List(a) {
   vertices |> list.filter(graph.adjacent(bk.graph, vertex, _))
 }
 
-fn non_adjacent(bk: BronKerbosch(a), vertices: List(a), to vertex: a) -> List(a) {
-  vertices
-  |> list.filter(fn(v) { !graph.adjacent(bk.graph, vertex, v) })
-}
-
 fn cliques(bk: BronKerbosch(a)) -> List(List(a)) {
   bk.cliques
 }

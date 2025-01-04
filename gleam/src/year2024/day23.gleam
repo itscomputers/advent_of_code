@@ -1,5 +1,4 @@
 import args.{type Part, PartOne, PartTwo}
-import gleam/function
 import gleam/int
 import gleam/list
 import gleam/option
@@ -17,8 +16,7 @@ type Party {
 
 pub fn main(input: String, part: Part) -> String {
   case part {
-    PartOne ->
-      input |> lan |> party_count(string.starts_with(_, "t")) |> int.to_string
+    PartOne -> input |> lan |> party_count |> int.to_string
     PartTwo -> input |> lan |> max_party |> show_party
   }
 }
@@ -43,16 +41,15 @@ fn make_bidirectional(lan: Graph(String)) -> Graph(String) {
 
 fn parties_of_three(lan: Graph(String)) -> Set(Party) {
   lan
-  |> graph.vertices
-  |> list.fold(from: set.new(), with: fn(acc, vertex) {
-    lan
-    |> graph.neighbors(of: vertex)
-    |> list.combination_pairs
-    |> list.filter(fn(p) { lan |> graph.adjacent(p.0, p.1) })
-    |> list.map(fn(p) { [vertex, p.0, p.1] |> build_party })
-    |> set.from_list
-    |> set.union(acc)
+  |> maximal_parties
+  |> list.flat_map(fn(party) {
+    case list.length(party.party) < 3 {
+      True -> []
+      False -> party.party |> list.combinations(3)
+    }
   })
+  |> list.map(build_party)
+  |> set.from_list
 }
 
 fn max_party(lan: Graph(String)) -> Party {
@@ -68,11 +65,11 @@ fn maximal_parties(lan: Graph(String)) -> List(Party) {
   |> list.map(build_party)
 }
 
-fn party_count(lan: Graph(String), condition: fn(String) -> Bool) -> Int {
+fn party_count(lan: Graph(String)) -> Int {
   lan
   |> parties_of_three
   |> set.fold(from: 0, with: fn(acc, party) {
-    case party.party |> list.any(condition) {
+    case party.party |> list.any(string.starts_with(_, "t")) {
       True -> acc + 1
       False -> acc
     }
