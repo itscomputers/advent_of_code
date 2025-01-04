@@ -1,6 +1,7 @@
 import gleam/dict.{type Dict}
 import gleam/int
 import gleam/list
+import gleam/set.{type Set}
 
 pub opaque type Counter(a) {
   Counter(inner: Dict(a, Int))
@@ -72,6 +73,10 @@ pub fn fold(
 
 pub fn keys(counter: Counter(a)) -> List(a) {
   counter.inner |> dict.keys
+}
+
+pub fn key_set(counter: Counter(a)) -> Set(a) {
+  counter.inner |> dict.keys |> set.from_list
 }
 
 pub fn values(counter: Counter(a)) -> List(Int) {
