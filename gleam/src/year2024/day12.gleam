@@ -1,10 +1,10 @@
-import args.{type Part, PartOne, PartTwo}
 import gleam/bool
 import gleam/dict.{type Dict}
 import gleam/int
 import gleam/list
 import gleam/set.{type Set}
 
+import args.{type Part, PartOne, PartTwo}
 import direction.{type Direction, Down, Left, Right, Up} as dir
 import grid
 import point.{type Point, Point}

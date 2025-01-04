@@ -2,9 +2,10 @@
 
 printf -v day "%02d" $2
 gleam_file="gleam/src/year${1}/day${day}.gleam"
-gleam_code="import args.{type Part, PartOne, PartTwo}
+gleam_code="import gleam/int
 import gleam/list
 
+import args.{type Part, PartOne, PartTwo}
 import util
 
 pub fn main(input: String, part: Part) -> String {

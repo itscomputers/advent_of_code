@@ -1,8 +1,8 @@
-import args.{type Part, PartOne, PartTwo}
 import gleam/int
 import gleam/list
 import gleam/option.{None, Some}
 
+import args.{type Part, PartOne, PartTwo}
 import matrix
 import point.{type Point, Point}
 import regex

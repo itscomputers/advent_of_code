@@ -1,4 +1,3 @@
-import args.{type Part, PartOne, PartTwo}
 import gleam/dict.{type Dict}
 import gleam/int
 import gleam/list
@@ -8,6 +7,7 @@ import gleam/set.{type Set}
 import gleam/string
 import gleam/string_tree
 
+import args.{type Part, PartOne, PartTwo}
 import direction.{type Direction, Down, Left, Right, Up} as dir
 import grid.{type Grid}
 import point.{type Point, Point}

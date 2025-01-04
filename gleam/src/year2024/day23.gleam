@@ -1,4 +1,3 @@
-import args.{type Part, PartOne, PartTwo}
 import gleam/int
 import gleam/list
 import gleam/option
@@ -6,6 +5,7 @@ import gleam/order.{type Order}
 import gleam/set.{type Set}
 import gleam/string
 
+import args.{type Part, PartOne, PartTwo}
 import graph/bron_kerbosch
 import graph/graph.{type Graph}
 import util

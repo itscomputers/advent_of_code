@@ -1,7 +1,6 @@
+import argv
 import gleam/io
 import gleam/string
-
-import argv
 
 import args.{type Args, type Part, Args, Both, PartOne, PartTwo}
 import util
@@ -34,9 +33,8 @@ fn get_func(a: Args) -> fn(String, Part) -> String {
 
 fn get_args() -> Args {
   case argv.load().arguments {
-    [year, day, "1"] -> Args(year:, day:, part: PartOne)
-    [year, day, "2"] -> Args(year:, day:, part: PartTwo)
-    [year, day] -> Both(year:, day:)
+    [year, day, part] -> args.with_part(year, day, part)
+    [year, day] -> args.without_part(year, day)
     _ -> {
       io.println("usage: gleam run <year> <day> <part>, eg gleam run 2023 01 1")
       panic

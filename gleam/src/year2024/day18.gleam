@@ -1,4 +1,3 @@
-import args.{type Part, PartOne, PartTwo}
 import gleam/int
 import gleam/list
 import gleam/option.{None, Some}
@@ -6,6 +5,7 @@ import gleam/set.{type Set}
 import gleam/string
 import regex
 
+import args.{type Part, PartOne, PartTwo}
 import graph/graph.{type Graph}
 import graph/search
 import point.{type Point, Point}

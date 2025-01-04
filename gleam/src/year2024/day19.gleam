@@ -1,8 +1,8 @@
-import args.{type Part, PartOne, PartTwo}
 import gleam/int
 import gleam/list
 import gleam/string
 
+import args.{type Part, PartOne, PartTwo}
 import counter.{type Counter}
 import util
 

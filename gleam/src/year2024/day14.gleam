@@ -8,12 +8,12 @@ import gleam/order.{Gt, Lt}
 import gleam/set.{type Set}
 import gleam/string
 import gleam/string_tree
-import regex
 
 import args.{type Part, PartOne, PartTwo}
 import counter.{type Counter}
 import point.{type Point, Point}
 import range.{type Range, Range}
+import regex
 import util
 
 const dimensions = Point(101, 103)

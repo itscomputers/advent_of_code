@@ -1,4 +1,3 @@
-import args.{type Part, PartOne, PartTwo}
 import gleam/dict.{type Dict}
 import gleam/function
 import gleam/int
@@ -7,6 +6,7 @@ import gleam/otp/task.{type Task}
 import gleam/result
 import gleam/set.{type Set}
 
+import args.{type Part, PartOne, PartTwo}
 import direction.{type Direction, Up} as dir
 import grid.{type Grid}
 import point.{type Point, Point}

@@ -1,9 +1,9 @@
-import args.{type Part, PartOne, PartTwo}
 import gleam/int
 import gleam/list
 import gleam/result
 import gleam/string
 
+import args.{type Part, PartOne, PartTwo}
 import graph/graph.{type Graph}
 import graph/toposort
 import graph/util as graph_util

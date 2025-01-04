@@ -1,10 +1,10 @@
-import args.{type Part, PartOne, PartTwo}
 import gleam/dict.{type Dict}
 import gleam/int
 import gleam/list
 import gleam/result
 import gleam/string
 
+import args.{type Part, PartOne, PartTwo}
 import util
 
 type Operation {

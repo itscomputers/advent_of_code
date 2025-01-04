@@ -1,10 +1,10 @@
-import args.{type Part, PartOne, PartTwo}
 import gleam/dict
 import gleam/int
 import gleam/list
 import gleam/option
 import gleam/set.{type Set}
 
+import args.{type Part, PartOne, PartTwo}
 import grid.{type Grid}
 import point.{type Point}
 

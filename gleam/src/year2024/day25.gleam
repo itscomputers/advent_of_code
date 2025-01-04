@@ -1,8 +1,8 @@
-import args.{type Part, PartOne, PartTwo}
 import gleam/function
 import gleam/int
 import gleam/list
 
+import args.{type Part, PartOne, PartTwo}
 import grid
 import util
 

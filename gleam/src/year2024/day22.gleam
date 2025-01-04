@@ -1,10 +1,10 @@
-import args.{type Part, PartOne, PartTwo}
 import gleam/int
 import gleam/list
 import gleam/option.{Some}
 import gleam/set
 import regex
 
+import args.{type Part, PartOne, PartTwo}
 import counter.{type Counter}
 import util
 

@@ -1,9 +1,9 @@
-import args.{type Part, PartOne, PartTwo}
 import gleam/dict.{type Dict}
 import gleam/int
 import gleam/list
 import gleam/option.{type Option, None, Some}
 
+import args.{type Part, PartOne, PartTwo}
 import graph/graph.{type Graph}
 import graph/search
 import grid.{type Grid}

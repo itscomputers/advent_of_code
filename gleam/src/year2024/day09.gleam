@@ -1,9 +1,9 @@
-import args.{type Part, PartOne, PartTwo}
 import gleam/int
 import gleam/list
 import gleam/order.{type Order, Eq, Gt, Lt}
 import gleam/string
 
+import args.{type Part, PartOne, PartTwo}
 import range.{type Range, Range}
 
 type DiskMap {
