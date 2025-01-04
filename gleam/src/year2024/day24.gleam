@@ -1,9 +1,8 @@
 import args.{type Part, PartOne, PartTwo}
 import gleam/dict.{type Dict}
-import gleam/function
 import gleam/int
 import gleam/list
-import gleam/otp/task
+import gleam/result
 import gleam/string
 
 import util
@@ -28,7 +27,7 @@ type Network {
 pub fn main(input: String, part: Part) -> String {
   case part {
     PartOne -> input |> build_network |> loop |> output |> int.to_string
-    PartTwo -> input |> build_network |> swaps |> dict.size |> int.to_string
+    PartTwo -> input |> build_network |> find_swaps |> string.join(",")
   }
 }
 
@@ -43,28 +42,6 @@ fn build_network(input: String) -> Network {
   |> set_inputs
   |> set_outputs
   |> update_ready
-}
-
-fn swaps(network: Network) -> Dict(#(Operation, Operation), Int) {
-  list.append(network.now, network.later)
-  |> list.combination_pairs
-  |> list.map(fn(swap) {
-    task.async(fn() {
-      let n = network |> do_swap([swap]) |> loop
-      #(swap, expected_output(n) - output(n))
-    })
-  })
-  |> list.map(task.await_forever)
-  |> dict.from_list
-  |> function.tap(fn(d) {
-    dict.each(d, fn(s, diff) {
-      util.println(diff, { s.0 }.output <> "--" <> { s.1 }.output)
-    })
-  })
-}
-
-fn expected_output(network: Network) -> Int {
-  get_number(network, network.x) + get_number(network, network.y)
 }
 
 fn output(network: Network) -> Int {
@@ -99,20 +76,6 @@ fn update_ready(network: Network) -> Network {
     network.later |> list.partition(is_ready(network.inputs, _))
   let now = list.append(network.now, now)
   Network(..network, now:, later:)
-}
-
-fn do_swap(network: Network, swap: List(#(Operation, Operation))) -> Network {
-  let operations =
-    network.now
-    |> list.append(network.later)
-    |> list.filter(fn(op) { swap |> list.all(fn(t) { op != t.0 && op != t.1 }) })
-  let swapped =
-    swap
-    |> list.flat_map(fn(t) {
-      [reset_output(t.0, { t.1 }.output), reset_output(t.1, { t.0 }.output)]
-    })
-  let later = list.append(operations, swapped)
-  Network(..network, now: [], later:) |> update_ready
 }
 
 fn set_inputs(network: Network) -> Network {
@@ -178,10 +141,88 @@ fn get_number(network: Network, vars: List(String)) -> Int {
   }
 }
 
-fn reset_output(operation: Operation, output: String) -> Operation {
-  case operation {
-    And(..) -> And(..operation, output:)
-    Or(..) -> Or(..operation, output:)
-    Xor(..) -> Xor(..operation, output:)
+fn find_swaps(network: Network) -> List(String) {
+  let lookup =
+    network.now
+    |> list.append(network.later)
+    |> list.map(fn(operation) { #(operation.output, operation) })
+    |> dict.from_list
+
+  let is_xor = fn(op: Operation) {
+    case op {
+      Xor(..) -> True
+      _ -> False
+    }
   }
+
+  let index = fn(var: String) { var |> string.drop_start(1) }
+
+  let has_inner_xor = fn(op: Operation, matching: String) -> Bool {
+    list.any([op.a, op.b], fn(sub) {
+      case lookup |> dict.get(sub) {
+        Ok(Xor(a, b, _)) ->
+          list.any([a, b], fn(sub) { index(sub) == index(matching) })
+        _ -> False
+      }
+    })
+  }
+
+  let has_xor = fn(op: Operation, matching: String) {
+    is_xor(op) && has_inner_xor(op, matching)
+  }
+
+  let find_xor = fn(matching: String) {
+    case
+      lookup
+      |> dict.filter(fn(_, op) { has_xor(op, matching) })
+      |> dict.keys
+      |> list.first
+    {
+      Ok(var) -> var
+      Error(_) -> panic
+    }
+  }
+
+  let find_inner_xor = fn(matching: String) {
+    case
+      lookup
+      |> dict.filter(fn(_, op) { is_xor(op) && index(op.a) == index(matching) })
+      |> dict.keys
+      |> list.first
+    {
+      Ok(var) -> var
+      Error(_) -> panic
+    }
+  }
+
+  let needs_xor =
+    lookup
+    |> dict.take(network.outputs)
+    |> dict.filter(fn(var, op) { var != "z45" && !is_xor(op) })
+    |> dict.keys
+    |> list.flat_map(fn(var) { [var, find_xor(var)] })
+
+  let needs_inner_xor =
+    lookup
+    |> dict.take(network.outputs)
+    |> dict.filter(fn(var, op) {
+      var != "z45" && var != "z00" && is_xor(op) && !has_inner_xor(op, var)
+    })
+    |> dict.fold(from: [], with: fn(acc, var, op) {
+      let assert Ok(sub_op) =
+        [op.a, op.b]
+        |> list.map(dict.get(lookup, _))
+        |> list.find(fn(res) {
+          case res {
+            Ok(And(..)) -> True
+            _ -> False
+          }
+        })
+        |> result.flatten
+      acc |> list.append([sub_op.output, find_inner_xor(var)])
+    })
+
+  needs_xor
+  |> list.append(needs_inner_xor)
+  |> list.sort(by: string.compare)
 }
