@@ -1,7 +1,10 @@
 import gleam/dict.{type Dict}
 import gleam/int
+import gleam/io
 import gleam/list
 import gleam/set.{type Set}
+import gleam/string
+import gleam/string_tree
 
 pub opaque type Counter(a) {
   Counter(inner: Dict(a, Int))
@@ -28,8 +31,31 @@ pub fn is_empty(counter: Counter(a)) -> Bool {
   counter.inner |> dict.is_empty
 }
 
+pub fn to_string(counter: Counter(a)) -> String {
+  counter
+  |> fold(from: string_tree.from_string("{\n"), with: fn(acc, key, count) {
+    acc
+    |> string_tree.append("  ")
+    |> string_tree.append(string.inspect(key))
+    |> string_tree.append(": ")
+    |> string_tree.append(int.to_string(count))
+    |> string_tree.append(",\n")
+  })
+  |> string_tree.append("}")
+  |> string_tree.to_string
+}
+
+pub fn display(counter: Counter(a)) -> Counter(a) {
+  counter |> to_string |> string.split("\n") |> list.each(io.println)
+  counter
+}
+
 pub fn get(counter: Counter(a), key: a) -> Int {
   counter.inner |> get_inner(key)
+}
+
+pub fn prune(counter: Counter(a)) -> Counter(a) {
+  Counter(inner: counter.inner |> dict.filter(fn(_, count) { count > 0 }))
 }
 
 pub fn increment(counter: Counter(a), key: a, by value: Int) -> Counter(a) {

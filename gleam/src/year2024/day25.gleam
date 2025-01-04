@@ -2,8 +2,6 @@ import args.{type Part, PartOne, PartTwo}
 import gleam/function
 import gleam/int
 import gleam/list
-import gleam/option
-import gleam/order.{type Order}
 
 import grid
 import util
