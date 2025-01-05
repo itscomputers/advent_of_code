@@ -21,6 +21,10 @@ pub fn are_connected(gr: Graph(a), source: a, target: a) -> Bool {
   }
 }
 
+pub fn connected_component(gr: Graph(a), of vertex: a) -> List(a) {
+  gr |> search.distances(from: vertex, using: BFS) |> dict.keys
+}
+
 pub fn is_sorted(gr: Graph(a), vertices: List(a)) -> Bool {
   gr |> is_sorted_loop(vertices, set.new())
 }

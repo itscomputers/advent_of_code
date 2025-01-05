@@ -1,8 +1,10 @@
 import gleam/dict.{type Dict}
 import gleam/function
+import gleam/io
 import gleam/list
 import gleam/set.{type Set}
 import gleam/string
+import gleam/string_tree
 
 pub opaque type Graph(a) {
   Graph(lookup: Dict(a, Dict(a, Int)), incoming: Dict(a, Set(a)))
@@ -14,6 +16,16 @@ pub fn new() -> Graph(a) {
 
 pub fn vertices(graph: Graph(a)) -> List(a) {
   graph.lookup |> dict.keys
+}
+
+pub fn edges(graph: Graph(a)) -> List(#(a, a)) {
+  graph.lookup
+  |> dict.fold(from: [], with: fn(acc, vertex, neighbors) {
+    neighbors
+    |> dict.fold(from: acc, with: fn(acc, neighbor, _weight) {
+      [#(vertex, neighbor), ..acc]
+    })
+  })
 }
 
 pub fn size(graph: Graph(a)) -> Int {
@@ -44,6 +56,26 @@ pub fn from_list(edges: List(#(a, a))) -> Graph(a) {
   |> list.fold(from: new(), with: fn(graph, edge) {
     graph |> add(edge.0, edge.1)
   })
+}
+
+pub fn to_string(graph: Graph(a)) -> String {
+  graph
+  |> edges
+  |> list.fold(from: string_tree.from_string("{\n"), with: fn(acc, edge) {
+    acc
+    |> string_tree.append("  ")
+    |> string_tree.append(string.inspect(edge.0))
+    |> string_tree.append(" -> ")
+    |> string_tree.append(string.inspect(edge.1))
+    |> string_tree.append("\n")
+  })
+  |> string_tree.append("}")
+  |> string_tree.to_string
+}
+
+pub fn display(graph: Graph(a)) -> Graph(a) {
+  graph |> to_string |> io.println
+  graph
 }
 
 pub fn from_weighted_list(edges: List(#(a, a, Int))) -> Graph(a) {
@@ -101,6 +133,24 @@ pub fn remove(graph: Graph(a), from source: a, to target: a) -> Graph(a) {
     }
     Error(_) -> graph
   }
+}
+
+pub fn replace(graph: Graph(a), vertex: a, with replacement: a) -> Graph(a) {
+  let graph =
+    graph
+    |> neighbors(of: vertex)
+    |> list.fold(from: graph, with: fn(acc, neighbor) {
+      acc
+      |> remove(vertex, neighbor)
+      |> add(replacement, neighbor)
+    })
+  graph
+  |> incoming(to: vertex)
+  |> list.fold(from: graph, with: fn(acc, prev) {
+    acc
+    |> remove(prev, vertex)
+    |> add(prev, replacement)
+  })
 }
 
 pub fn neighbors(graph: Graph(a), of vertex: a) -> List(a) {
