@@ -3,6 +3,7 @@ import gleam/list
 import gleam/option.{None, Some}
 import gleam/set.{type Set}
 
+import graph/bfs
 import graph/graph.{type Graph}
 import graph/search.{BFS}
 import graph/toposort
@@ -27,6 +28,23 @@ pub fn connected_component(gr: Graph(a), of vertex: a) -> List(a) {
 
 pub fn is_sorted(gr: Graph(a), vertices: List(a)) -> Bool {
   gr |> is_sorted_loop(vertices, set.new())
+}
+
+pub fn condense(
+  gr: Graph(a),
+  from sources: List(a),
+  to targets: List(a),
+) -> Graph(a) {
+  let targets = set.from_list(targets)
+  sources
+  |> list.fold(from: graph.new(), with: fn(acc, src) {
+    let targets = targets |> set.delete(src)
+    bfs.distances(gr, from: src, until: set.contains(targets, _))
+    |> dict.take(targets |> set.to_list)
+    |> dict.fold(from: acc, with: fn(acc, dst, weight) {
+      acc |> graph.add_weighted(from: src, to: dst, weight:)
+    })
+  })
 }
 
 fn is_sorted_loop(gr: Graph(a), vertices: List(a), visited: Set(a)) -> Bool {

@@ -1,4 +1,5 @@
 import gleam/dict.{type Dict}
+import gleam/int
 import gleam/io
 import gleam/list
 import gleam/option.{type Option, None, Some}
@@ -10,24 +11,20 @@ import point.{type Point, Point}
 import range.{type Range, Range}
 
 pub opaque type Grid {
-  Grid(lookup: Dict(Point, String), x_range: Range, y_range: Range)
+  Grid(lookup: Dict(Point, String), dims: Point)
 }
 
 pub fn new(str: String) -> Grid {
   str
   |> string.split("\n")
-  |> list.index_map(fn(line, row) {
-    line
-    |> string.to_graphemes
-    |> list.index_map(fn(char, col) { #(Point(col, row), char) })
-  })
-  |> list.flatten
-  |> dict.from_list
-  |> Grid(build_x_range(str), build_y_range(str))
+  |> list.index_fold(
+    from: Grid(lookup: dict.new(), dims: Point(0, 0)),
+    with: process_line,
+  )
 }
 
 pub fn dimensions(grid: Grid) -> Point {
-  Point(range.size(grid.x_range), range.size(grid.y_range))
+  grid.dims
 }
 
 pub fn get(grid: Grid, point: Point) -> Option(String) {
@@ -82,10 +79,12 @@ pub fn to_string(grid: Grid, default default: String) -> String {
 }
 
 pub fn matrix(grid: Grid, default default: String) -> List(List(String)) {
-  grid.y_range
+  grid
+  |> y_range
   |> range.values
   |> list.map(fn(y) {
-    grid.x_range
+    grid
+    |> x_range
     |> range.values
     |> list.map(fn(x) { grid |> get_or(Point(x, y), default) })
   })
@@ -107,9 +106,11 @@ pub fn find(grid: Grid, with predicate: fn(String) -> Bool) -> Option(Point) {
 
 pub fn display(grid: Grid) -> Grid {
   io.println("")
-  grid.y_range
+  grid
+  |> y_range
   |> range.map(fn(y) {
-    grid.x_range
+    grid
+    |> x_range
     |> range.fold(from: string_tree.new(), with: fn(acc, x) {
       acc |> string_tree.append(grid |> get_or(Point(x, y), default: "."))
     })
@@ -119,13 +120,29 @@ pub fn display(grid: Grid) -> Grid {
   grid
 }
 
-fn build_x_range(str: String) -> Range {
-  case str |> string.split("\n") {
-    [line, ..] -> Range(0, line |> string.length)
-    _ -> range.empty()
-  }
+fn process_line(grid: Grid, line: String, y: Int) -> Grid {
+  line
+  |> string.to_graphemes
+  |> list.index_fold(from: grid, with: fn(acc, ch, x) {
+    let point = Point(x, y)
+    let lookup = acc.lookup |> dict.insert(point, ch)
+    Grid(..acc, lookup:) |> update_dimensions(point)
+  })
 }
 
-fn build_y_range(str: String) -> Range {
-  Range(0, str |> string.split("\n") |> list.length)
+fn update_dimensions(grid: Grid, point: Point) -> Grid {
+  let dims =
+    Point(
+      x: grid.dims.x |> int.max(point.x),
+      y: grid.dims.y |> int.max(point.y),
+    )
+  Grid(..grid, dims:)
+}
+
+fn x_range(grid: Grid) -> Range {
+  Range(0, grid.dims.x)
+}
+
+fn y_range(grid: Grid) -> Range {
+  Range(0, grid.dims.y)
 }

@@ -2,6 +2,7 @@ import gleam/dict
 import gleeunit
 import gleeunit/should
 
+import graph/bfs
 import graph/graph
 import graph/search.{BFS}
 
@@ -86,4 +87,19 @@ pub fn path_to_g_test() {
   |> graph.from_string(" -> ")
   |> search.path(from: "a", to: "g", using: BFS)
   |> should.be_none
+}
+
+pub fn bfs_dist_test() {
+  example
+  |> graph.from_string(" -> ")
+  |> bfs.distances(from: "a", until: fn(v) { v == "c" })
+  |> should.equal(
+    dict.new()
+    |> dict.insert("a", 0)
+    |> dict.insert("b", 1)
+    |> dict.insert("c", 1)
+    |> dict.insert("d", 2)
+    |> dict.insert("e", 3)
+    |> dict.insert("f", 3),
+  )
 }

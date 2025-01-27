@@ -1,231 +1,226 @@
 import gleam/dict.{type Dict}
-import gleam/function
 import gleam/int
 import gleam/list
-import gleam/option.{None, Some}
-import gleam/set.{type Set}
+import gleam/option.{Some}
 import util
 
 import args.{type Part, PartOne, PartTwo}
-import direction.{Down, Left, Right, Up} as dir
-import graph/bfs
-import graph/graph.{type Edge, type Graph}
+import direction.{type Direction, Down, Left, Right, Up} as dir
+import graph/graph.{type Graph}
+import graph/util as graph_util
 import grid.{type Grid}
 import iset.{type ISet}
 import point.{type Point, Point}
 
-type Hike {
-  Hike(graph: Graph(Point), source: Point, target: Point, slopes: Set(Point))
-}
-
-type ContractedHike {
-  ContractedHike(graph: Graph(Int), source: Int, target: Int)
-}
-
 pub fn main(input: String, part: Part) -> String {
-  case part {
-    PartOne -> input |> hike(part) |> contract |> max |> int.to_string
-    PartTwo -> input |> hike(part) |> contracted_hike |> max |> int.to_string
-  }
+  input |> build_hike |> condense(part) |> max_dist |> int.to_string
 }
 
-fn max(hike: ContractedHike) -> Int {
-  max_loop(hike, hike.source, 0, iset.new())
+type Hike {
+  Hike(
+    graph: Graph(Point),
+    start: Point,
+    end: Point,
+    crests: Dict(Point, Direction),
+    slopes: Dict(Point, Direction),
+  )
 }
 
-fn max_loop(hike: ContractedHike, pt: Int, distance: Int, visited: ISet) -> Int {
-  case pt == hike.target {
-    True -> distance
-    False -> {
-      let visited = visited |> iset.add(pt)
-      hike.graph
-      |> graph.neighbors(of: pt)
-      |> list.filter(fn(neighbor) { !iset.contains(visited, neighbor) })
-      |> list.fold(from: 0, with: fn(acc, neighbor) {
-        max_loop(
+type IHike {
+  IHike(graph: Graph(Int), start: Int, end: Int)
+}
+
+type Builder {
+  Builder(grid: Grid, points: List(Point), last: Point, hike: Hike)
+}
+
+fn max_dist(hike: IHike) -> Int {
+  dist_loop(hike, hike.start, 0, iset.new())
+}
+
+fn dist_loop(hike: IHike, pt: Int, dist: Int, visited: ISet) -> Int {
+  case pt == hike.end {
+    True -> dist
+    False ->
+      graph.neighbors(hike.graph, of: pt)
+      |> list.filter(fn(nbr) { !iset.contains(visited, nbr) })
+      |> list.fold(from: 0, with: fn(acc, nbr) {
+        dist_loop(
           hike,
-          neighbor,
-          distance + graph.weight(hike.graph, from: pt, to: neighbor),
-          visited,
+          nbr,
+          dist + graph.weight(hike.graph, from: pt, to: nbr),
+          visited |> iset.insert(pt),
         )
         |> int.max(acc)
       })
-    }
   }
 }
 
-fn hike(input: String, part: Part) -> Hike {
-  let grid = input |> grid.new
-  let source = Point(1, 0)
-  let target =
-    grid
-    |> grid.dimensions
-    |> point.add(Point(-1, 0))
-  let slopes =
-    grid
-    |> grid.filter(list.contains(["^", "v", "<", ">"], _))
-    |> set.from_list
-  Hike(graph: graph.new(), source:, target:, slopes:)
-  |> hike_loop(grid, [source], set.new(), part)
+fn ihike(hike: Hike) -> IHike {
+  let transform =
+    hike.graph
+    |> graph.vertices
+    |> list.index_map(fn(pt, idx) { #(pt, idx) })
+    |> dict.from_list
+  let i = fn(pt) {
+    case dict.get(transform, pt) {
+      Ok(value) -> value
+      Error(_) -> {
+        util.println(pt, "error")
+        panic
+      }
+    }
+  }
+  let graph =
+    hike.graph
+    |> graph.edges
+    |> list.fold(from: graph.new(), with: fn(acc, edge) {
+      acc |> graph.add_weighted(i(edge.from), i(edge.to), edge.weight)
+    })
+  let start = i(hike.start)
+  let end = i(hike.end)
+  IHike(graph:, start:, end:)
 }
 
-fn hike_loop(
-  hike: Hike,
-  grid: Grid,
-  pts: List(Point),
-  visited: Set(Point),
-  part: Part,
-) -> Hike {
-  case pts {
-    [] -> hike
-    [pt, ..pts] ->
-      case visited |> set.contains(pt) {
-        True -> hike_loop(hike, grid, pts, visited, part)
-        False -> {
-          let assert Some(ch) = grid |> grid.get(pt)
-          let graph =
-            pt
-            |> point.strict_neighbors
-            |> list.fold(from: hike.graph, with: fn(acc, npt) {
-              case grid |> grid.get(npt) {
-                Some(nch) -> process_edge(acc, pt, ch, npt, nch, part)
-                None -> acc
-              }
-            })
-          let pts =
-            pt
-            |> point.strict_neighbors
-            |> list.fold(from: pts, with: fn(acc, npt) {
-              case grid |> grid.get(npt) {
-                Some(_) -> [npt, ..acc]
-                None -> acc
-              }
-            })
-          let visited = visited |> set.insert(pt)
-          Hike(..hike, graph:) |> hike_loop(grid, pts, visited, part)
+fn condense(hike: Hike, part: Part) -> IHike {
+  let graph = case part {
+    PartOne -> {
+      let vertices = hike.slopes |> dict.keys
+      graph_util.condense(hike.graph, from: vertices, to: vertices)
+    }
+    PartTwo -> {
+      let crests = hike.crests |> dict.keys
+      let init_gr =
+        graph_util.condense(hike.graph, from: [hike.start], to: crests)
+      let crest_gr = graph_util.condense(hike.graph, from: crests, to: crests)
+      let graph =
+        init_gr
+        |> graph.edges
+        |> list.fold(from: graph.new(), with: fn(acc, edge) {
+          let from = edge.from
+          let to = edge.to
+          let weight = edge.weight
+          graph.add_weighted(acc, from:, to:, weight:)
+        })
+      crest_gr
+      |> graph.edges
+      |> list.filter(fn(edge) { edge.to != hike.end })
+      |> list.fold(from: graph, with: fn(acc, edge) {
+        let assert Ok(direction) = hike.crests |> dict.get(edge.to)
+        case dir.step(edge.to, direction) == hike.end {
+          True ->
+            graph.add_weighted(
+              acc,
+              from: edge.from,
+              to: dir.step(edge.to, direction),
+              weight: edge.weight + 1,
+            )
+          False ->
+            acc
+            |> graph.add_weighted(
+              from: edge.from,
+              to: edge.to,
+              weight: edge.weight,
+            )
+            |> graph.add_weighted(
+              from: edge.to,
+              to: edge.from,
+              weight: edge.weight,
+            )
         }
+      })
+    }
+  }
+  Hike(..hike, graph:) |> ihike
+}
+
+fn build_hike(input: String) -> Hike {
+  let grid = grid.new(input)
+  let start = Point(1, 0)
+  let last = start |> dir.step(Up)
+  let end = grid |> grid.dimensions |> point.add(Point(-1, 0))
+  let graph = graph.new()
+  let crests = dict.new()
+  let slopes =
+    dict.new()
+    |> dict.insert(start, Down)
+    |> dict.insert(end, Down)
+  let hike = Hike(graph:, start:, end:, crests:, slopes:)
+  Builder(grid:, points: [Point(1, 0)], last:, hike:)
+  |> build_loop
+}
+
+fn build_loop(builder: Builder) -> Hike {
+  case builder.points {
+    [] -> builder.hike
+    [pt, ..points] ->
+      process_point(Builder(..builder, points:), pt)
+      |> build_loop
+  }
+}
+
+fn process_point(builder: Builder, pt: Point) -> Builder {
+  case builder.grid |> grid.get(pt) {
+    Some(">") -> process_slope(builder, pt, Right)
+    Some("<") -> process_slope(builder, pt, Left)
+    Some("^") -> process_slope(builder, pt, Up)
+    Some("v") -> process_slope(builder, pt, Down)
+    Some(".") ->
+      point.strict_neighbors(of: pt)
+      |> list.fold(from: builder, with: fn(acc, nbr) {
+        process_edge(acc, pt, nbr)
+      })
+    _ -> builder
+  }
+  |> update_last(to: pt)
+}
+
+fn update_last(builder: Builder, to last: Point) -> Builder {
+  Builder(..builder, last:)
+}
+
+fn process_slope(builder: Builder, pt: Point, direction: Direction) -> Builder {
+  let slopes = builder.hike.slopes |> dict.insert(pt, direction)
+  Builder(..builder, hike: Hike(..builder.hike, slopes:))
+  |> process_edge(pt, pt |> dir.step(direction))
+}
+
+fn process_crest(builder: Builder, pt: Point, direction: Direction) -> Builder {
+  let crests = builder.hike.crests |> dict.insert(pt, direction)
+  Builder(..builder, hike: Hike(..builder.hike, crests:))
+  |> add_edge(pt, pt |> dir.step(direction))
+}
+
+fn process_edge(builder: Builder, pt: Point, nbr: Point) -> Builder {
+  case nbr == builder.last {
+    True -> builder
+    False ->
+      case nbr == builder.hike.end {
+        True -> process_crest(builder, pt, Down)
+        False ->
+          case
+            builder.grid |> grid.get(nbr),
+            point.subtract(nbr, pt) |> dir.from_point
+          {
+            Some("#"), _ -> builder
+            Some(">"), Some(Left) -> builder
+            Some("<"), Some(Right) -> builder
+            Some("^"), Some(Down) -> builder
+            Some("v"), Some(Up) -> builder
+            Some(">"), Some(Right) -> process_crest(builder, pt, Right)
+            Some("<"), Some(Left) -> process_crest(builder, pt, Left)
+            Some("^"), Some(Up) -> process_crest(builder, pt, Up)
+            Some("v"), Some(Down) -> process_crest(builder, pt, Down)
+            Some(_), Some(_) -> add_edge(builder, pt, nbr)
+            _, _ -> builder
+          }
       }
   }
 }
 
-fn contract(hike: Hike) -> ContractedHike {
-  case
-    hike
-    |> edges_to_contract
-    |> function.tap(fn(l) { util.println(list.length(l), "remaining") })
-  {
-    [] -> hike |> display |> transform
-    [edge, ..] -> {
-      let graph = hike.graph |> graph.contract(edge)
-      Hike(..hike, graph:) |> contract
-    }
-  }
-}
-
-fn transform(hike: Hike) -> ContractedHike {
-  let transform =
-    hike.graph
-    |> graph.vertices
-    |> list.index_map(fn(vertex, index) { #(vertex, index) })
-    |> dict.from_list
-
-  let graph =
-    hike.graph
-    |> graph.vertices
-    |> list.fold(from: graph.new(), with: fn(acc, vertex) {
-      hike.graph
-      |> graph.neighbors(of: vertex)
-      |> list.fold(from: acc, with: fn(acc, neighbor) {
-        let assert Ok(v) = transform |> dict.get(vertex)
-        let assert Ok(n) = transform |> dict.get(neighbor)
-        let weight = hike.graph |> graph.weight(from: vertex, to: neighbor)
-        acc |> graph.add_weighted(from: v, to: n, weight:)
-      })
-    })
-
-  let assert Ok(source) = transform |> dict.get(hike.source)
-  let assert Ok(target) = transform |> dict.get(hike.target)
-  ContractedHike(graph:, source:, target:)
-}
-
-fn edges_to_contract(hike: Hike) -> List(Edge(Point)) {
-  hike.graph
-  |> graph.edges
-  |> list.filter(fn(edge) {
-    edge.to != hike.target && !set.contains(hike.slopes, edge.to)
-  })
-}
-
-fn contracted_hike(hike: Hike) -> ContractedHike {
-  let Hike(graph, source, target, slopes) = hike
-  let graph =
-    [source, target, ..slopes |> set.to_list]
-    |> list.fold(from: graph.new(), with: fn(acc, vertex) {
-      let slopes = set.delete(slopes, vertex)
-      graph
-      |> bfs.distances(from: vertex, until: set.contains(slopes, _))
-      |> dict.take([source, target, ..slopes |> set.to_list])
-      |> dict.fold(from: acc, with: fn(acc, neighbor, weight) {
-        case vertex == neighbor {
-          True -> acc
-          False ->
-            acc |> graph.add_weighted(from: vertex, to: neighbor, weight:)
-        }
-      })
-    })
-
-  let transform =
-    graph
-    |> graph.vertices
-    |> list.index_map(fn(vertex, index) { #(vertex, index) })
-    |> dict.from_list
-
-  let graph =
-    graph
-    |> graph.vertices
-    |> list.fold(from: graph.new(), with: fn(acc, vertex) {
-      graph
-      |> graph.neighbors(of: vertex)
-      |> list.fold(from: acc, with: fn(acc, neighbor) {
-        let assert Ok(v) = transform |> dict.get(vertex)
-        let assert Ok(n) = transform |> dict.get(neighbor)
-        let weight = graph |> graph.weight(from: vertex, to: neighbor)
-        acc |> graph.add_weighted(from: v, to: n, weight:)
-      })
-    })
-
-  let assert Ok(source) = transform |> dict.get(source)
-  let assert Ok(target) = transform |> dict.get(target)
-  ContractedHike(graph:, source:, target:)
-}
-
-fn process_edge(
-  graph: Graph(Point),
-  pt: Point,
-  ch: String,
-  npt: Point,
-  nch: String,
-  part: Part,
-) -> Graph(Point) {
-  let direction = npt |> point.subtract(pt) |> dir.from_point_unsafe
-  case ch, direction, nch, part {
-    "#", _, _, _ -> graph
-    _, _, "#", _ -> graph
-    _, _, _, PartTwo -> graph |> graph.add(pt, npt)
-    _, Up, "v", _ -> graph
-    _, Down, "^", _ -> graph
-    _, Right, "<", _ -> graph
-    _, Left, ">", _ -> graph
-    ".", _, _, _ -> graph |> graph.add(pt, npt)
-    "^", Up, _, _ -> graph |> graph.add(pt, npt)
-    "v", Down, _, _ -> graph |> graph.add(pt, npt)
-    "<", Left, _, _ -> graph |> graph.add(pt, npt)
-    ">", Right, _, _ -> graph |> graph.add(pt, npt)
-    _, _, _, _ -> graph
-  }
-}
-
-fn display(hike: Hike) -> Hike {
-  hike.graph |> graph.display
-  hike
+fn add_edge(builder: Builder, pt: Point, nbr: Point) -> Builder {
+  let graph = builder.hike.graph |> graph.add(pt, nbr)
+  let hike = Hike(..builder.hike, graph:)
+  let points = [nbr, ..builder.points]
+  Builder(..builder, points:, hike:)
 }

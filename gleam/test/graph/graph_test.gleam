@@ -93,6 +93,28 @@ pub fn add_test() {
   |> assert_neighbors("e", ["d", "a"])
 }
 
+pub fn contract_ab_test() {
+  graph.from_string(example, " -> ")
+  |> graph.contract(graph.Edge("a", "b", 1))
+  |> assert_neighbors("a", ["c", "d"])
+  |> assert_neighbors("c", ["e"])
+  |> assert_neighbors("d", [])
+  |> assert_neighbors("e", ["d"])
+  |> assert_weight("a", "c", 1)
+  |> assert_weight("a", "d", 2)
+}
+
+pub fn contract_ce_test() {
+  graph.from_string(example, " -> ")
+  |> graph.contract(graph.Edge("c", "e", 1))
+  |> assert_neighbors("a", ["b", "c", "d"])
+  |> assert_neighbors("b", ["d"])
+  |> assert_neighbors("c", ["d"])
+  |> assert_neighbors("d", [])
+  |> assert_weight("a", "c", 1)
+  |> assert_weight("c", "d", 2)
+}
+
 fn assert_neighbors(
   gr: Graph(String),
   vertex: String,
