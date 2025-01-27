@@ -3,15 +3,14 @@ import gleam/int
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/otp/task
-import gleam/pair
 import gleam/string
 
 import args.{type Part, PartOne, PartTwo}
-import graph/graph.{type Graph}
+import graph/graph.{type Edge, type Graph, Edge}
 import util
 
 type Cut {
-  Cut(groups: List(List(String)), edges: List(#(String, String)))
+  Cut(groups: List(List(String)), edges: List(Edge(String)))
 }
 
 pub fn main(input: String, part: Part) -> String {
@@ -53,17 +52,16 @@ fn min_cut_candidate(graph: Graph(String)) -> Cut {
   let assert [group1, group2] =
     contracted
     |> graph.edges
-    |> list.map(pair.first)
+    |> list.map(fn(edge) { edge.from })
     |> list.map(string.split(_, "|"))
   let edges =
     graph
     |> graph.edges
     |> list.filter(fn(edge) {
-      let #(s, t) = edge
-      list.contains(group1, s)
-      && list.contains(group2, t)
-      || list.contains(group2, s)
-      && list.contains(group1, t)
+      list.contains(group1, edge.from)
+      && list.contains(group2, edge.to)
+      || list.contains(group2, edge.from)
+      && list.contains(group1, edge.to)
     })
   Cut(groups: [group1, group2], edges:)
 }
@@ -90,24 +88,17 @@ fn build_graph(input: String) -> Graph(String) {
   })
 }
 
-fn contract(
-  graph: Graph(String),
-  edge: Option(#(String, String)),
-) -> Graph(String) {
+fn contract(graph: Graph(String), edge: Option(Edge(String))) -> Graph(String) {
   case edge {
-    Some(#(s, t)) -> {
-      let st = s <> "|" <> t
-      graph
-      |> graph.remove(s, t)
-      |> graph.remove(t, s)
-      |> graph.replace(s, with: st)
-      |> graph.replace(t, with: st)
+    Some(edge) -> {
+      let st = edge.from <> "|" <> edge.to
+      graph |> graph.contract(edge) |> graph.replace(edge.from, with: st)
     }
     None -> graph
   }
 }
 
-fn random_edge(graph: Graph(String)) -> Option(#(String, String)) {
+fn random_edge(graph: Graph(String)) -> Option(Edge(String)) {
   let edges = graph |> graph.edges
   let index = edges |> list.length |> int.random
   edges |> list.drop(index) |> list.first |> option.from_result

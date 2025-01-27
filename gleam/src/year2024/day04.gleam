@@ -1,4 +1,3 @@
-import gleam/bool
 import gleam/int
 import gleam/list
 
@@ -32,21 +31,27 @@ fn count(gr: Grid, count_at: fn(Grid, Point) -> Int) -> Int {
 fn xmas(gr: Grid, pt: Point) -> Int {
   point.directions()
   |> list.map(fn(dir) {
-    { gr |> get_chars(pt, dir, list.range(0, 3)) == ["X", "M", "A", "S"] }
-    |> bool.to_int
+    case get_chars(gr, pt, dir, list.range(0, 3)) == ["X", "M", "A", "S"] {
+      True -> 1
+      False -> 0
+    }
   })
   |> int.sum
 }
 
 fn x_mas(gr: Grid, pt: Point) -> Int {
-  [Point(1, 1), Point(1, -1)]
-  |> list.all(fn(direction) {
-    [direction, direction |> point.negate]
-    |> list.any(fn(dir) {
-      gr |> get_chars(pt, dir, list.range(-1, 1)) == ["M", "A", "S"]
+  case
+    [Point(1, 1), Point(1, -1)]
+    |> list.all(fn(direction) {
+      [direction, direction |> point.negate]
+      |> list.any(fn(dir) {
+        gr |> get_chars(pt, dir, list.range(-1, 1)) == ["M", "A", "S"]
+      })
     })
-  })
-  |> bool.to_int
+  {
+    True -> 1
+    False -> 0
+  }
 }
 
 fn get_chars(

@@ -1,3 +1,4 @@
+import gleam/dict.{type Dict}
 import gleam/io
 import gleam/list
 import gleam/option.{type Option, None, Some}
@@ -13,6 +14,16 @@ pub fn debug(value: a, prefix: String) -> a {
 pub fn println(value: a, prefix: String) -> a {
   io.println(prefix <> ": " <> string.inspect(value))
   value
+}
+
+pub fn printdict(d: Dict(a, b), prefix: String) -> Dict(a, b) {
+  io.println(prefix <> ": {")
+  d
+  |> dict.each(fn(key, value) {
+    io.println("  " <> string.inspect(key) <> ": " <> string.inspect(value))
+  })
+  io.println("}")
+  d
 }
 
 pub fn lines(input: String) -> List(String) {

@@ -1,4 +1,3 @@
-import gleam/bool
 import gleam/dict.{type Dict}
 import gleam/int
 import gleam/list
@@ -207,7 +206,7 @@ fn get_edge_count(subregion: Region, value: Int, direction: Direction) -> Int {
       |> list.map(get_value(_, direction))
       |> list.window_by_2
       |> list.map(fn(tuple) { tuple.1 - tuple.0 != 1 })
-      |> list.map(bool.to_int)
+      |> list.map(bool_to_int)
       |> int.sum
     }
   }
@@ -244,5 +243,12 @@ fn get_value(pt: Point, direction: Direction) -> Int {
   case direction |> dir.is_horizontal {
     True -> pt.y
     False -> pt.x
+  }
+}
+
+fn bool_to_int(bool: Bool) -> Int {
+  case bool {
+    True -> 1
+    False -> 0
   }
 }

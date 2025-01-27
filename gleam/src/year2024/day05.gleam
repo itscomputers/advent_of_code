@@ -67,7 +67,9 @@ fn order(manual: SafetyManual) -> SafetyManual {
 }
 
 fn order_update(manual: SafetyManual, update: List(String)) -> List(String) {
-  manual.graph |> graph.subgraph(update) |> toposort.unsafe_sort
+  manual.graph
+  |> graph.subgraph(update)
+  |> toposort.unsafe_sort
 }
 
 fn middle_sum(manual: SafetyManual) -> Int {

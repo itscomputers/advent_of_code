@@ -1,17 +1,17 @@
-require 'grid'
+require "grid"
 
 class Solver
-  def initialize(raw_input=nil)
+  def initialize(raw_input = nil)
     @raw_input = raw_input
   end
 
   def inspect
-    "<Solver #{self.class.to_s}>"
+    "<Solver #{self.class}>"
   end
 
   def file_name
     match = /Year(?<year>\d{4})::Day(?<day>\d{2})/.match self.class.to_s
-    "lib/year#{match[:year]}/inputs/#{match[:day]}.txt"
+    "inputs/#{match[:year]}/#{match[:day]}.txt"
   end
 
   def raw_input
@@ -47,4 +47,3 @@ class Solver
   def part_two
   end
 end
-
