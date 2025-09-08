@@ -1,5 +1,6 @@
 import gleam/deque.{type Deque}
 import gleam/dict.{type Dict}
+import gleam/io
 import gleam/list
 import gleam/set.{type Set}
 
@@ -25,6 +26,7 @@ pub fn distances(
   |> new(from: source)
   |> search(until: predicate)
   |> fn(bfs) { bfs.dist }
+  |> io.debug
 }
 
 fn new(graph: Graph(a), from source: a) -> BFS(a) {
