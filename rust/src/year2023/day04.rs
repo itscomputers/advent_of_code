@@ -1,27 +1,25 @@
-use lazy_static::lazy_static;
 use std::collections::{HashMap, HashSet};
-use std::fs::read_to_string;
 
-lazy_static! {
-    static ref INPUT: String = read_to_string("inputs/04.txt").unwrap();
+use crate::solution::Solution;
+
+pub fn solve(part: &str, input: &String) -> Solution {
+    let scratchers = build_scratchers(&input);
+    Solution::build(part, &scratchers, &part_one, &part_two)
 }
 
-pub fn main() {
-    let scratchers = build_scratchers(&INPUT);
-    let counts = get_counts(&scratchers);
-    println!("day 04");
-    println!(
-        "part 1: {}",
-        scratchers.iter().map(|s| s.score()).sum::<isize>()
-    );
-    println!("part 2: {}", counts.values().sum::<usize>());
+fn part_one(scratchers: &Vec<Scratcher>) -> isize {
+    scratchers.iter().map(|s| s.score()).sum::<isize>()
 }
 
-fn build_scratchers(input: &str) -> Vec<Scratcher> {
+fn part_two(scratchers: &Vec<Scratcher>) -> isize {
+    get_counts(&scratchers).values().sum::<isize>()
+}
+
+fn build_scratchers(input: &String) -> Vec<Scratcher> {
     input.lines().map(|line| build_scratcher(line)).collect()
 }
 
-fn get_counts(scratchers: &Vec<Scratcher>) -> HashMap<usize, usize> {
+fn get_counts(scratchers: &Vec<Scratcher>) -> HashMap<usize, isize> {
     let mut hashmap = HashMap::new();
     for index in 0..scratchers.len() {
         hashmap.insert(index, 1);
@@ -70,8 +68,8 @@ impl Scratcher {
 mod tests {
     use super::*;
 
-    lazy_static! {
-        static ref TEST_INPUT: String = String::from(
+    fn scratchers() -> Vec<Scratcher> {
+        build_scratchers(&String::from(
             "\
             Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53\n\
             Card 2: 13 32 20 16 61 | 61 30 68 82 17 32 24 19\n\
@@ -79,20 +77,17 @@ mod tests {
             Card 4: 41 92 73 84 69 | 59 84 76 51 58  5 54 83\n\
             Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36\n\
             Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11\n\
-        "
-        );
+        ",
+        ))
     }
 
     #[test]
     fn test_part_one() {
-        let scratchers = build_scratchers(TEST_INPUT.as_ref());
-        assert_eq!(scratchers.iter().map(|s| s.score()).sum::<isize>(), 13);
+        assert_eq!(part_one(&scratchers()), 13);
     }
 
     #[test]
     fn test_part_two() {
-        let scratchers = build_scratchers(TEST_INPUT.as_ref());
-        let counts = get_counts(&scratchers);
-        assert_eq!(counts.values().sum::<usize>(), 30);
+        assert_eq!(part_two(&scratchers()), 30);
     }
 }

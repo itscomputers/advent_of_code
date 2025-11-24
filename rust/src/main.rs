@@ -1,23 +1,41 @@
 #![allow(dead_code)]
 
 use std::env;
+use std::fs::read_to_string;
 
-mod day01;
-mod day02;
-mod day03;
-mod day04;
-mod day09;
-mod day06;
+mod solution;
+mod year2023;
+mod year2024;
+mod year2025;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    match args[1].as_str() {
-        "01" => day01::main(),
-        "02" => day02::main(),
-        "03" => day03::main(),
-        "04" => day04::main(),
-        "06" => day06::main(),
-        "09" => day09::main(),
-        _ => {}
+    let year = args[1].as_str();
+    let day = args[2].as_str();
+    let part = if args.len() == 4 {
+        args[3].as_str()
+    } else {
+        ""
+    };
+    let solution = get_solution(&year, &day, &part);
+    println!("{}", solution);
+}
+
+fn get_solution(year: &str, day: &str, part: &str) -> solution::Solution {
+    let input = get_input(&year, &day);
+    match year {
+        "2023" => year2023::solve(&day, &part, &input),
+        "2024" => year2024::solve(&day, &part, &input),
+        "2025" => year2025::solve(&day, &part, &input),
+        _ => solution::Solution::default(),
+    }
+}
+
+fn get_input(year: &str, day: &str) -> String {
+    let filepath = format!("../inputs/{}/{}.txt", &year, &day);
+    let input = read_to_string(&filepath);
+    match input {
+        Ok(s) => s,
+        Err(_) => panic!("{}", format!("could not find input file {}", filepath)),
     }
 }

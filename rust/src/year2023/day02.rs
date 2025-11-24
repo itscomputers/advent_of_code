@@ -1,15 +1,9 @@
-use lazy_static::lazy_static;
 use regex::Regex;
-use std::fs::read_to_string;
 
-lazy_static! {
-    static ref INPUT: String = read_to_string("inputs/02.txt").unwrap();
-}
+use crate::solution::Solution;
 
-pub fn main() {
-    println!("day 02");
-    println!("part 1: {}", possible_id_sum(&INPUT.as_ref()));
-    println!("part 2: {}", power_sum(&INPUT.as_ref()));
+pub fn solve(part: &str, input: &String) -> Solution {
+    Solution::build(part, input, &part_one, &part_two)
 }
 
 fn get_maxes(line: &str) -> [usize; 3] {
@@ -25,7 +19,7 @@ fn get_maxes(line: &str) -> [usize; 3] {
     })
 }
 
-fn possible_id_sum(input: &str) -> usize {
+fn part_one(input: &String) -> usize {
     input
         .lines()
         .enumerate()
@@ -39,7 +33,7 @@ fn possible_id_sum(input: &str) -> usize {
         .sum()
 }
 
-fn power_sum(input: &str) -> usize {
+fn part_two(input: &String) -> usize {
     input
         .lines()
         .map(|line| get_maxes(line).iter().product::<usize>())
@@ -50,24 +44,24 @@ fn power_sum(input: &str) -> usize {
 mod tests {
     use super::*;
 
-    lazy_static! {
-        static ref INPUT: String = String::from(
+    fn input() -> String {
+        String::from(
             "\
             Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green\n\
             Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue\n\
             Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red\n\
             Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red\n\
-            Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green"
-        );
+            Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green",
+        )
     }
 
     #[test]
-    fn part_one() {
-        assert_eq!(possible_id_sum(&INPUT.as_ref()), 8);
+    fn test_part_one() {
+        assert_eq!(part_one(&input()), 8);
     }
 
     #[test]
-    fn part_two() {
-        assert_eq!(power_sum(&INPUT.as_ref()), 2286)
+    fn test_part_two() {
+        assert_eq!(part_two(&input()), 2286)
     }
 }

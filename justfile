@@ -24,6 +24,10 @@ setup_gleam year day:
     ./setup_gleam.sh {{ year }} {{ day }}
     ./get_input.sh {{ year }} {{ day }}
 
+setup_rust year day:
+    ./setup_rust.sh {{ year }} {{ day }}
+    ./get_input.sh {{ year }} {{ day }}
+
 save_input year day:
     curl --verbose https://adventofcode.com/{{ year }}/day/{{ trim_start_match(day, "0") }}/input \
       -X GET \

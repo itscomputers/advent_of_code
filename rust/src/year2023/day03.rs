@@ -1,28 +1,30 @@
-use std::collections::{HashMap, HashSet};
-use std::fs::read_to_string;
-
 use regex::Regex;
+use std::collections::{HashMap, HashSet};
+
+use crate::solution::Solution;
 
 use itertools::Itertools;
-use lazy_static::lazy_static;
 
-lazy_static! {
-    static ref INPUT: String = read_to_string("inputs/03.txt").unwrap();
+pub fn solve(part: &str, str_input: &String) -> Solution {
+    let input = get_input(&str_input);
+    Solution::build(part, &input, &part_one, &part_two)
 }
 
-pub fn main() {
-    let symbol_lookup = symbol_lookup(&INPUT);
-    let parts = parts(&INPUT, &symbol_lookup);
-    let gear_ratios = gear_ratios(&parts, &symbol_lookup);
-    println!("day 02");
-    println!(
-        "part 1: {}",
-        parts.iter().map(|part| part.value).sum::<usize>()
-    );
-    println!("part 2: {}", gear_ratios.iter().sum::<usize>());
+fn part_one(input: &Input) -> usize {
+    input.parts.iter().map(|part| part.value).sum::<usize>()
 }
 
-fn symbol_lookup(input: &str) -> HashMap<Loc, char> {
+fn part_two(input: &Input) -> usize {
+    gear_ratios(&input).iter().sum::<usize>()
+}
+
+fn get_input(input: &String) -> Input {
+    let symbols = get_symbols(&input);
+    let parts = get_parts(&input, &symbols);
+    Input { symbols, parts }
+}
+
+fn get_symbols(input: &str) -> HashMap<Loc, char> {
     let mut hashmap = HashMap::new();
     input.lines().enumerate().for_each(|(row, line)| {
         line.chars().enumerate().for_each(|(col, ch)| {
@@ -34,7 +36,7 @@ fn symbol_lookup(input: &str) -> HashMap<Loc, char> {
     hashmap
 }
 
-fn parts(input: &str, symbol_lookup: &HashMap<Loc, char>) -> HashSet<Part> {
+fn get_parts(input: &str, symbol_lookup: &HashMap<Loc, char>) -> HashSet<Part> {
     let mut set = HashSet::new();
     let re = Regex::new(r"\d+").unwrap();
     input.lines().enumerate().for_each(|(row, line)| {
@@ -63,12 +65,13 @@ fn parts(input: &str, symbol_lookup: &HashMap<Loc, char>) -> HashSet<Part> {
     set
 }
 
-fn gear_ratios(parts: &HashSet<Part>, symbol_lookup: &HashMap<Loc, char>) -> Vec<usize> {
-    parts
+fn gear_ratios(input: &Input) -> Vec<usize> {
+    input
+        .parts
         .iter()
         .filter(|part| {
-            symbol_lookup.contains_key(&part.symbol_loc)
-                && symbol_lookup.get(&part.symbol_loc).unwrap() == &'*'
+            input.symbols.contains_key(&part.symbol_loc)
+                && input.symbols.get(&part.symbol_loc).unwrap() == &'*'
         })
         .collect::<Vec<_>>()
         .iter()
@@ -90,12 +93,18 @@ struct Part {
     symbol_loc: Loc,
 }
 
+#[derive(Debug)]
+struct Input {
+    symbols: HashMap<Loc, char>,
+    parts: HashSet<Part>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    lazy_static! {
-        static ref TEST_INPUT: String = String::from(
+    fn input() -> Input {
+        get_input(&String::from(
             "\
             467..114..\n\
             ...*......\n\
@@ -106,22 +115,17 @@ mod tests {
             ..592.....\n\
             ......755.\n\
             ...$.*....\n\
-            .664.598.."
-        );
+            .664.598..",
+        ))
     }
 
     #[test]
     fn test_part_one() {
-        let parts = parts(&TEST_INPUT, &symbol_lookup(&TEST_INPUT));
-        assert_eq!(parts.iter().map(|part| part.value).sum::<usize>(), 4361);
+        assert_eq!(part_one(&input()), 4361);
     }
 
     #[test]
     fn test_part_two() {
-        let ratios = gear_ratios(
-            &parts(&TEST_INPUT, &symbol_lookup(&TEST_INPUT)),
-            &symbol_lookup(&TEST_INPUT),
-        );
-        assert_eq!(ratios.iter().sum::<usize>(), 467835);
+        assert_eq!(part_two(&input()), 467835);
     }
 }

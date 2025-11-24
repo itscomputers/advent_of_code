@@ -1,15 +1,17 @@
-use lazy_static::lazy_static;
-use std::fs::read_to_string;
 use std::str::FromStr;
 
-lazy_static! {
-    static ref INPUT: String = read_to_string("inputs/04.txt").unwrap();
+use crate::solution::Solution;
+
+pub fn solve(part: &str, input: &String) -> Solution {
+    Solution::build(part, input, &part_one, &part_two)
 }
 
-pub fn main() {
-    println!("day 09");
-    println!("part 1: {}", predict_sum(&INPUT, predict_right));
-    println!("part 2: {}", predict_sum(&INPUT, predict_left));
+fn part_one(input: &String) -> isize {
+    predict_sum(&input, predict_right)
+}
+
+fn part_two(input: &String) -> isize {
+    predict_sum(&input, predict_left)
 }
 
 fn get_histories(input: &str) -> Vec<Vec<isize>> {
@@ -72,22 +74,22 @@ fn differences(sequence: &Vec<isize>) -> Vec<isize> {
 mod tests {
     use super::*;
 
-    lazy_static! {
-        static ref TEST_INPUT: String = String::from(
+    fn input() -> String {
+        String::from(
             "\
             0 3 6 9 12 15\n\
             1 3 6 10 15 21\n\
-            10 13 16 21 30 45"
-        );
+            10 13 16 21 30 45",
+        )
     }
 
     #[test]
     fn test_part_one() {
-        assert_eq!(predict_sum(&TEST_INPUT, predict_right), 114);
+        assert_eq!(part_one(&input()), 114);
     }
 
     #[test]
     fn test_part_two() {
-        assert_eq!(predict_sum(&TEST_INPUT, predict_left), 2);
+        assert_eq!(part_two(&input()), 2);
     }
 }

@@ -1,30 +1,24 @@
-use std::str::FromStr;
 use itertools::Itertools;
-use lazy_static::lazy_static;
-use std::fs::read_to_string;
+use std::str::FromStr;
 
-lazy_static! {
-    static ref INPUT: String = read_to_string("inputs/06.txt").unwrap();
+use crate::solution::Solution;
+
+pub fn solve(part: &str, input: &String) -> Solution {
+    Solution::build(part, input, &part_one, &part_two)
 }
 
-pub fn main() {
-    println!("day 06");
-    println!("part 1: {}", part1(&INPUT));
-    println!("part 2: {}", part2(&INPUT));
-}
-
-fn part1(input: &str) -> isize {
+fn part_one(input: &String) -> isize {
     match data(input, extract_numbers).as_slice() {
         [times, distances] => times
             .iter()
             .zip(distances)
             .map(|(time, distance)| winning_count(*time, *distance))
             .product::<isize>(),
-        _ => 0
+        _ => 0,
     }
 }
 
-fn part2(input: &str) -> isize {
+fn part_two(input: &String) -> isize {
     match data(input, extract_number).as_slice() {
         [time, distance] => winning_count(*time, *distance),
         _ => 0,
@@ -32,10 +26,7 @@ fn part2(input: &str) -> isize {
 }
 
 fn data<T>(input: &str, function: fn(&str) -> T) -> Vec<T> {
-    input
-        .lines()
-        .map(|line| function(line))
-        .collect::<Vec<T>>()
+    input.lines().map(|line| function(line)).collect::<Vec<T>>()
 }
 
 fn extract_numbers(input: &str) -> Vec<isize> {
@@ -47,9 +38,7 @@ fn extract_numbers(input: &str) -> Vec<isize> {
 }
 
 fn extract_number(input: &str) -> isize {
-    isize::from_str(
-        input.split_ascii_whitespace().dropping(1).join("").as_str()
-    ).unwrap()
+    isize::from_str(input.split_ascii_whitespace().dropping(1).join("").as_str()).unwrap()
 }
 
 fn winning_count(time: isize, distance: isize) -> isize {
@@ -69,21 +58,21 @@ fn quadratic_solution(a: isize, b: isize, c: isize) -> f32 {
 mod tests {
     use super::*;
 
-    lazy_static! {
-        static ref TEST_INPUT: String = String::from(
+    fn input() -> String {
+        String::from(
             "\
             Time:      7  15   30\n\
-            Distance:  9  40  200"
-        );
+            Distance:  9  40  200",
+        )
     }
 
     #[test]
     fn test_part_one() {
-        assert_eq!(part1(&TEST_INPUT), 288);
+        assert_eq!(part_one(&input()), 288);
     }
 
     #[test]
     fn test_part_two() {
-        assert_eq!(part2(&TEST_INPUT), 71503);
+        assert_eq!(part_two(&input()), 71503);
     }
 }
