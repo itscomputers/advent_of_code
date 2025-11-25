@@ -8,8 +8,13 @@ pub fn solve(part: &str, input: &String) -> Solution {
     Solution::build(part, input, &part_one, &part_two)
 }
 
-fn part_one(input: &String) -> isize { 0 }
-fn part_two(input: &String) -> isize { 0 }
+fn part_one(input: &String) -> isize {
+    0
+}
+
+fn part_two(input: &String) -> isize {
+    0
+}
 
 #[cfg(test)]
 mod tests {
@@ -18,7 +23,7 @@ mod tests {
     fn input() -> String {
         String::from(
             \"\\
-            test\"
+            \"
         )
     }
 
