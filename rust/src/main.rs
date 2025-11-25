@@ -3,7 +3,10 @@
 use std::env;
 use std::fs::read_to_string;
 
+mod line;
+mod point;
 mod solution;
+
 mod year2019;
 mod year2023;
 mod year2024;
