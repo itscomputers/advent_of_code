@@ -1,5 +1,4 @@
-use std::str::FromStr;
-
+use crate::parser;
 use crate::solution::Solution;
 
 pub fn solve(part: &str, input: &String) -> Solution {
@@ -15,10 +14,9 @@ fn part_two(input: &String) -> isize {
 }
 
 fn total_fuel(input: &String, recursive: bool) -> isize {
-    input.lines().fold(0, |acc, s| {
-        let value = isize::from_str(s).unwrap();
-        acc + fuel_for(value, recursive)
-    })
+    parser::int_vec(input.as_str(), "\n")
+        .iter()
+        .fold(0, |acc, value| acc + fuel_for(*value, recursive))
 }
 
 fn fuel_for(value: isize, recursive: bool) -> isize {

@@ -1,6 +1,6 @@
 use std::ops::RangeInclusive;
-use std::str::FromStr;
 
+use crate::parser;
 use crate::solution::Solution;
 
 pub fn solve(part: &str, input: &String) -> Solution {
@@ -17,10 +17,7 @@ fn part_two(passwords: &Vec<Password>) -> usize {
 }
 
 fn range(input: &String) -> RangeInclusive<isize> {
-    let bounds = input
-        .split("-")
-        .map(|s| isize::from_str(s).unwrap())
-        .collect::<Vec<_>>();
+    let bounds = parser::int_vec(input.as_str(), "-");
     bounds[0]..=bounds[1]
 }
 

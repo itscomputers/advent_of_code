@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use crate::solution::Solution;
 
 pub fn solve(part: &str, input: &String) -> Solution {
@@ -20,7 +18,7 @@ fn get_reports(input: &String) -> Vec<Vec<isize>> {
         .lines()
         .map(|line| {
             line.split_ascii_whitespace()
-                .map(|s| isize::from_str(s).unwrap())
+                .map(|s| s.parse::<isize>().unwrap())
                 .collect::<Vec<_>>()
         })
         .collect::<Vec<_>>()

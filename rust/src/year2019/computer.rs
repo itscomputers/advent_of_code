@@ -2,6 +2,8 @@ use std::collections::VecDeque;
 use std::str::FromStr;
 use std::{io, io::Write};
 
+use crate::parser;
+
 pub struct Computer {
     program: Vec<isize>,
     index: usize,
@@ -18,10 +20,7 @@ impl FromStr for Computer {
     type Err = ProgramParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let program = s
-            .split(",")
-            .map(|x| isize::from_str(x).unwrap())
-            .collect::<Vec<isize>>();
+        let program = parser::int_vec(s, ",");
         Ok(Computer::new(program))
     }
 }

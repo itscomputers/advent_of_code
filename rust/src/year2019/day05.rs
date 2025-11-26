@@ -1,3 +1,4 @@
+use crate::parser;
 use crate::solution::Solution;
 use crate::year2019::computer::Computer;
 
@@ -6,11 +7,7 @@ pub fn solve(part: &str, input: &String) -> Solution {
 }
 
 fn program(input: &String) -> Vec<isize> {
-    input
-        .trim()
-        .split(",")
-        .map(|x| x.parse::<isize>().unwrap())
-        .collect::<Vec<isize>>()
+    parser::int_vec(input.as_str(), ",")
 }
 
 fn part_one(input: &String) -> isize {

@@ -4,6 +4,7 @@ use std::env;
 use std::fs::read_to_string;
 
 mod line;
+mod parser;
 mod point;
 mod solution;
 

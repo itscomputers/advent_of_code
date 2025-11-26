@@ -1,6 +1,6 @@
 use itertools::Itertools;
-use std::str::FromStr;
 
+use crate::parser;
 use crate::solution::Solution;
 use crate::year2019::computer::Computer;
 
@@ -28,11 +28,7 @@ fn part_two(input: &String) -> isize {
 }
 
 fn program(input: &String, v1: isize, v2: isize) -> Vec<isize> {
-    let mut program = input
-        .trim()
-        .split(",")
-        .map(|x| isize::from_str(x).unwrap())
-        .collect::<Vec<isize>>();
+    let mut program = parser::int_vec(input.as_str(), ",");
     program[1] = v1;
     program[2] = v2;
     program

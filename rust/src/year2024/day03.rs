@@ -1,6 +1,5 @@
 use itertools::Itertools;
 use regex::Regex;
-use std::str::FromStr;
 
 use crate::solution::Solution;
 
@@ -26,7 +25,7 @@ fn matches(input: &String) -> Vec<(isize, isize)> {
         .captures_iter(input)
         .map(|c| {
             let (_, [a, b]) = c.extract();
-            (isize::from_str(a).unwrap(), isize::from_str(b).unwrap())
+            (a.parse::<isize>().unwrap(), b.parse::<isize>().unwrap())
         })
         .collect::<Vec<_>>()
 }

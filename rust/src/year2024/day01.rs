@@ -1,5 +1,4 @@
 use crate::solution::Solution;
-use std::str::FromStr;
 
 pub fn solve(part: &str, input: &String) -> Solution {
     let lists = get_lists(input);
@@ -12,7 +11,7 @@ fn get_lists(input: &String) -> (Vec<i32>, Vec<i32>) {
     input.lines().for_each(|line| {
         match line
             .split_ascii_whitespace()
-            .map(i32::from_str)
+            .map(|s| s.parse::<i32>())
             .collect::<Vec<_>>()[..]
         {
             [Ok(a), Ok(b)] => {
