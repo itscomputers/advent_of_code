@@ -5,6 +5,7 @@ mod day01;
 mod day02;
 mod day03;
 mod day04;
+mod day05;
 
 pub fn solve(day: &str, part: &str, input: &String) -> Solution {
     match day {
@@ -12,6 +13,7 @@ pub fn solve(day: &str, part: &str, input: &String) -> Solution {
         "02" => day02::solve(&part, &input),
         "03" => day03::solve(&part, &input),
         "04" => day04::solve(&part, &input),
+        "05" => day05::solve(&part, &input),
         _ => Solution::default(),
     }
 }
