@@ -1,12 +1,35 @@
 use regex::Regex;
 
-use crate::solution::Solution;
+use crate::io::{Input, Solution};
 
-pub fn solve(part: &str, input: &String) -> Solution {
+pub fn solve(part: &str, input: &Input) -> Solution {
     Solution::build(part, input, &part_one, &part_two)
 }
 
-fn get_maxes(line: &str) -> [usize; 3] {
+fn part_one(input: &Input) -> u32 {
+    input
+        .data
+        .lines()
+        .enumerate()
+        .filter(|(_, line)| {
+            get_maxes(line)
+                .iter()
+                .zip([14, 12, 13].as_ref())
+                .all(|(max, bound)| max <= bound)
+        })
+        .map(|(i, _)| (i + 1) as u32)
+        .sum()
+}
+
+fn part_two(input: &Input) -> u32 {
+    input
+        .data
+        .lines()
+        .map(|line| get_maxes(line).iter().product::<u32>())
+        .sum()
+}
+
+fn get_maxes(line: &str) -> [u32; 3] {
     ["blue", "red", "green"].map(|color| {
         let str: String = format!(r"(\d+) {}", color);
         Regex::new(&str)
@@ -19,33 +42,12 @@ fn get_maxes(line: &str) -> [usize; 3] {
     })
 }
 
-fn part_one(input: &String) -> usize {
-    input
-        .lines()
-        .enumerate()
-        .filter(|(_, line)| {
-            get_maxes(&line)
-                .iter()
-                .zip([14, 12, 13].as_ref())
-                .all(|(max, bound)| max <= bound)
-        })
-        .map(|(i, _)| i + 1)
-        .sum()
-}
-
-fn part_two(input: &String) -> usize {
-    input
-        .lines()
-        .map(|line| get_maxes(line).iter().product::<usize>())
-        .sum()
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    fn input() -> String {
-        String::from(
+    fn input() -> Input {
+        Input::from_str(
             "\
             Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green\n\
             Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue\n\

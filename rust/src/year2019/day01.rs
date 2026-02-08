@@ -1,25 +1,30 @@
-use crate::parser;
-use crate::solution::Solution;
+use crate::io::{Input, Solution};
 
-pub fn solve(part: &str, input: &String) -> Solution {
+pub fn solve(part: &str, input: &Input) -> Solution {
     Solution::build(part, input, &part_one, &part_two)
 }
 
-fn part_one(input: &String) -> isize {
-    total_fuel(&input, false)
+impl Input {
+    fn fuel(&self) -> Vec<i32> {
+        self.int_vec("\n")
+    }
+
+    fn total_fuel(&self, recursive: bool) -> i32 {
+        self.fuel()
+            .iter()
+            .fold(0, |acc, val| acc + fuel_for(*val, recursive))
+    }
 }
 
-fn part_two(input: &String) -> isize {
-    total_fuel(&input, true)
+fn part_one(input: &Input) -> i32 {
+    input.total_fuel(false)
 }
 
-fn total_fuel(input: &String, recursive: bool) -> isize {
-    parser::int_vec(input.as_str(), "\n")
-        .iter()
-        .fold(0, |acc, value| acc + fuel_for(*value, recursive))
+fn part_two(input: &Input) -> i32 {
+    input.total_fuel(true)
 }
 
-fn fuel_for(value: isize, recursive: bool) -> isize {
+fn fuel_for(value: i32, recursive: bool) -> i32 {
     let fuel = value / 3 - 2;
     if fuel < 0 {
         0
@@ -34,8 +39,8 @@ fn fuel_for(value: isize, recursive: bool) -> isize {
 mod tests {
     use super::*;
 
-    fn input() -> String {
-        String::from(
+    fn input() -> Input {
+        Input::from_str(
             "\
             12\n\
             14\n\

@@ -1,50 +1,49 @@
 use regex::{Captures, Regex};
 use std::collections::HashMap;
 
-use crate::solution::Solution;
+use crate::io::{Input, Solution};
 
-pub fn solve(part: &str, input: &String) -> Solution {
+pub fn solve(part: &str, input: &Input) -> Solution {
     Solution::build(part, input, &part_one, &part_two)
 }
 
-fn part_one(input: &String) -> usize {
-    total(&input.as_ref(), r"\d", &HashMap::from([]))
+fn part_one(input: &Input) -> u32 {
+    total(&input.data, r"\d", &HashMap::from([]))
 }
 
-fn part_two(input: &String) -> usize {
+fn part_two(input: &Input) -> u32 {
     let pattern = r"\d|one|two|three|four|five|six|seven|eight|nine";
     let map = HashMap::from_iter(
-        vec![
+        [
             "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
         ]
         .iter()
         .enumerate()
-        .map(|(i, &s)| (s.to_string(), i + 1)),
+        .map(|(i, &s)| (s.to_string(), (i + 1) as u32)),
     );
 
-    total(&input.as_ref(), &pattern, &map)
+    total(&input.data, pattern, &map)
 }
 
-fn build_number(str: &String, map: &HashMap<String, usize>) -> usize {
+fn build_number(str: &String, map: &HashMap<String, u32>) -> u32 {
     match map.get(str) {
         Some(n) => *n,
         None => str.parse().unwrap(),
     }
 }
 
-fn total(input: &str, pattern: &str, map: &HashMap<String, usize>) -> usize {
+fn total(input: &str, pattern: &str, map: &HashMap<String, u32>) -> u32 {
     input
         .lines()
         .map(|line| get_number(line, pattern, map))
         .sum()
 }
 
-fn get_number(line: &str, pattern: &str, map: &HashMap<String, usize>) -> usize {
-    let captures: Vec<Captures<'_>> =
-        vec![format!("({}).*$", pattern), format!("^.*({})", pattern)]
-            .iter()
-            .map(|s| Regex::new(&s).unwrap().captures(line).unwrap())
-            .collect();
+fn get_number(line: &str, pattern: &str, map: &HashMap<String, u32>) -> u32 {
+    let captures: Vec<Captures<'_>> = [format!("({}).*$", pattern), format!("^.*({})", pattern)]
+        .iter()
+        .map(|s| Regex::new(s).unwrap().captures(line).unwrap())
+        .collect();
     let a = build_number(&captures[0][1].to_string(), map);
     let b = build_number(&captures[1][1].to_string(), map);
     10 * a + b
@@ -56,7 +55,7 @@ mod tests {
 
     #[test]
     fn test_part_one() {
-        let input = String::from(
+        let input = Input::from_str(
             "\
             1abc2\n\
             pqr3stu8vwx\n\
@@ -68,7 +67,7 @@ mod tests {
 
     #[test]
     fn test_part_two() {
-        let input = String::from(
+        let input = Input::from_str(
             "\
             two1nine\n\
             eightwothree\n\

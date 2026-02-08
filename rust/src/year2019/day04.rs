@@ -1,31 +1,29 @@
-use std::ops::RangeInclusive;
+use crate::io::{Input, Solution};
 
-use crate::parser;
-use crate::solution::Solution;
-
-pub fn solve(part: &str, input: &String) -> Solution {
-    let passwords = passwords(&input.trim().to_string());
-    Solution::build(part, &passwords, &part_one, &part_two)
+pub fn solve(part: &str, input: &Input) -> Solution {
+    Solution::build(part, input, &part_one, &part_two)
 }
 
-fn part_one(passwords: &Vec<Password>) -> usize {
-    passwords.iter().filter(|&p| p.has_repeat()).count()
+impl Input {
+    fn passwords(&self) -> Vec<Password> {
+        let bounds = self.int_vec("-");
+        (bounds[0]..=bounds[1])
+            .map(Password::new)
+            .filter(Password::is_nondecreasing)
+            .collect::<Vec<_>>()
+    }
 }
 
-fn part_two(passwords: &Vec<Password>) -> usize {
-    passwords.iter().filter(|&p| p.has_strict_repeat()).count()
+fn part_one(input: &Input) -> usize {
+    input.passwords().iter().filter(|&p| p.has_repeat()).count()
 }
 
-fn range(input: &String) -> RangeInclusive<isize> {
-    let bounds = parser::int_vec(input.as_str(), "-");
-    bounds[0]..=bounds[1]
-}
-
-fn passwords(input: &String) -> Vec<Password> {
-    range(&input)
-        .map(Password::new)
-        .filter(Password::is_nondecreasing)
-        .collect::<Vec<_>>()
+fn part_two(input: &Input) -> usize {
+    input
+        .passwords()
+        .iter()
+        .filter(|&p| p.has_strict_repeat())
+        .count()
 }
 
 #[derive(Debug, Default, PartialEq, Clone)]
@@ -34,7 +32,7 @@ struct Password {
 }
 
 impl Password {
-    fn new(password: isize) -> Self {
+    fn new(password: i32) -> Self {
         let chars = password.to_string().chars().collect::<Vec<_>>();
         Self { chars }
     }

@@ -5,10 +5,10 @@ use std::{io, io::Write};
 use crate::parser;
 
 pub struct Computer {
-    program: Vec<isize>,
+    program: Vec<i32>,
     index: usize,
-    inputs: VecDeque<isize>,
-    output: Option<isize>,
+    inputs: VecDeque<i32>,
+    output: Option<i32>,
     terminated: bool,
     debug: bool,
 }
@@ -26,7 +26,7 @@ impl FromStr for Computer {
 }
 
 impl Computer {
-    pub fn new(program: Vec<isize>) -> Computer {
+    pub fn new(program: Vec<i32>) -> Computer {
         Computer {
             program,
             index: 0,
@@ -37,7 +37,7 @@ impl Computer {
         }
     }
 
-    pub fn automated(program: Vec<isize>, inputs: Vec<isize>) -> Computer {
+    pub fn automated(program: Vec<i32>, inputs: Vec<i32>) -> Computer {
         Computer {
             program,
             index: 0,
@@ -48,7 +48,7 @@ impl Computer {
         }
     }
 
-    pub fn debug(program: Vec<isize>, inputs: Vec<isize>) -> Computer {
+    pub fn debug(program: Vec<i32>, inputs: Vec<i32>) -> Computer {
         Computer {
             program,
             index: 0,
@@ -79,15 +79,15 @@ impl Computer {
         }
     }
 
-    pub fn program(&self) -> &Vec<isize> {
+    pub fn program(&self) -> &Vec<i32> {
         &self.program
     }
 
-    pub fn output(&self) -> Option<isize> {
+    pub fn output(&self) -> Option<i32> {
         self.output
     }
 
-    fn opcode(&self) -> isize {
+    fn opcode(&self) -> i32 {
         self.program[self.index] % 100
     }
 
@@ -100,18 +100,18 @@ impl Computer {
         )
     }
 
-    fn parameter(&self, index: usize, mode: Mode) -> isize {
+    fn parameter(&self, index: usize, mode: Mode) -> i32 {
         match mode {
             Mode::Position => self.value(self.program[index]),
             Mode::Immediate => self.program[index],
         }
     }
 
-    fn value(&self, index: isize) -> isize {
+    fn value(&self, index: i32) -> i32 {
         self.program[self.address(index)]
     }
 
-    fn address(&self, index: isize) -> usize {
+    fn address(&self, index: i32) -> usize {
         match usize::try_from(index) {
             Ok(index) => index,
             Err(_) => panic!("invalid program"),
@@ -126,8 +126,8 @@ impl Computer {
         let value = match self.opcode() {
             1 => a + b,
             2 => a * b,
-            7 => (a < b) as isize,
-            8 => (a == b) as isize,
+            7 => (a < b) as i32,
+            8 => (a == b) as i32,
             _ => panic!("unsupported operation"),
         };
         self.program[addr] = value;
@@ -165,7 +165,7 @@ impl Computer {
         self.next()
     }
 
-    fn automated_stdin(&mut self, input: isize) {
+    fn automated_stdin(&mut self, input: i32) {
         let addr = self.address(self.program[self.index + 1]);
         self.program[addr] = input;
         self.index += 2;
@@ -177,7 +177,7 @@ impl Computer {
         print!("program requires input: ");
         io::stdout().flush().expect("error with stdout");
         match io::stdin().read_line(&mut str_input) {
-            Ok(_) => match str_input.trim().parse::<isize>() {
+            Ok(_) => match str_input.trim().parse::<i32>() {
                 Ok(input) => self.automated_stdin(input),
                 Err(_) => panic!("unsupported input"),
             },
@@ -193,7 +193,7 @@ enum Mode {
 }
 
 impl Mode {
-    fn new(value: &isize, power: isize) -> Self {
+    fn new(value: &i32, power: i32) -> Self {
         match (value / power) % 10 {
             0 => Mode::Position,
             1 => Mode::Immediate,

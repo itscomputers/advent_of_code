@@ -1,45 +1,41 @@
 use std::str::FromStr;
 
-use crate::solution::Solution;
+use crate::io::{Input, Solution};
 
-pub fn solve(part: &str, input: &String) -> Solution {
+pub fn solve(part: &str, input: &Input) -> Solution {
     Solution::build(part, input, &part_one, &part_two)
 }
 
-fn part_one(input: &String) -> isize {
-    predict_sum(&input, predict_right)
+impl Input {
+    fn predict_sum(&self, func: fn(Vec<i32>) -> i32) -> i32 {
+        self.data
+            .lines()
+            .map(|line| {
+                func(
+                    line.split_ascii_whitespace()
+                        .map(|s| i32::from_str(s).unwrap())
+                        .collect::<Vec<i32>>(),
+                )
+            })
+            .sum::<i32>()
+    }
 }
 
-fn part_two(input: &String) -> isize {
-    predict_sum(&input, predict_left)
+fn part_one(input: &Input) -> i32 {
+    input.predict_sum(predict_right)
 }
 
-fn get_histories(input: &str) -> Vec<Vec<isize>> {
-    input
-        .split("\n")
-        .map(|line| {
-            line.split_ascii_whitespace()
-                .map(|s| isize::from_str(s).unwrap())
-                .collect::<Vec<isize>>()
-        })
-        .collect()
+fn part_two(input: &Input) -> i32 {
+    input.predict_sum(predict_left)
 }
 
-fn predict_sum(input: &str, function: fn(Vec<isize>) -> isize) -> isize {
-    get_histories(input)
-        .iter()
-        .map(|history| function(history.clone()))
-        .sum::<isize>()
-}
-
-fn predict_right(history: Vec<isize>) -> isize {
-    let sequences = differentiate(history);
-    sequences
+fn predict_right(history: Vec<i32>) -> i32 {
+    differentiate(history)
         .iter()
         .fold(0, |acc, list| acc + list.last().unwrap())
 }
 
-fn predict_left(history: Vec<isize>) -> isize {
+fn predict_left(history: Vec<i32>) -> i32 {
     let mut sequences = differentiate(history);
     sequences.reverse();
     sequences
@@ -47,35 +43,35 @@ fn predict_left(history: Vec<isize>) -> isize {
         .fold(0, |acc, list| list.first().unwrap() - acc)
 }
 
-fn differentiate(sequence: Vec<isize>) -> Vec<Vec<isize>> {
+fn differentiate(sequence: Vec<i32>) -> Vec<Vec<i32>> {
     let mut sequences = vec![sequence];
 
     loop {
-        let last: &Vec<isize> = sequences.last().unwrap();
+        let last: &Vec<i32> = sequences.last().unwrap();
         if last.iter().all(|n| n == last.first().unwrap()) {
             return sequences;
         } else {
-            sequences.push(differences(&last));
+            sequences.push(differences(last));
         }
     }
 }
 
-fn differences(sequence: &Vec<isize>) -> Vec<isize> {
+fn differences(sequence: &[i32]) -> Vec<i32> {
     sequence
         .windows(2)
         .map(|slice| match slice {
             &[n1, n2] => n2 - n1,
             _ => 0,
         })
-        .collect::<Vec<isize>>()
+        .collect::<Vec<i32>>()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    fn input() -> String {
-        String::from(
+    fn input() -> Input {
+        Input::from_str(
             "\
             0 3 6 9 12 15\n\
             1 3 6 10 15 21\n\

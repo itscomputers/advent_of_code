@@ -2,8 +2,8 @@ use std::ops::{Add, Mul, Neg, Sub};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Point {
-    pub x: isize,
-    pub y: isize,
+    pub x: i32,
+    pub y: i32,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -15,12 +15,12 @@ pub enum Direction {
 }
 
 impl Point {
-    pub fn new(x: isize, y: isize) -> Self {
+    pub fn new(x: i32, y: i32) -> Self {
         Self { x, y }
     }
 
-    pub fn norm(&self) -> isize {
-        isize::abs(self.x) + isize::abs(self.y)
+    pub fn norm(&self) -> i32 {
+        i32::abs(self.x) + i32::abs(self.y)
     }
 }
 
@@ -65,10 +65,10 @@ impl Sub for Point {
     }
 }
 
-impl Mul<isize> for Point {
+impl Mul<i32> for Point {
     type Output = Self;
 
-    fn mul(self, rhs: isize) -> Self {
+    fn mul(self, rhs: i32) -> Self {
         Self {
             x: self.x * rhs,
             y: self.y * rhs,
@@ -76,7 +76,7 @@ impl Mul<isize> for Point {
     }
 }
 
-impl Mul<Point> for isize {
+impl Mul<Point> for i32 {
     type Output = Point;
 
     fn mul(self, rhs: Point) -> Point {

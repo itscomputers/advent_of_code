@@ -1,23 +1,24 @@
-use crate::parser;
-use crate::solution::Solution;
+use crate::io::{Input, Solution};
 use crate::year2019::computer::Computer;
 
-pub fn solve(part: &str, input: &String) -> Solution {
+pub fn solve(part: &str, input: &Input) -> Solution {
     Solution::build(part, input, &part_one, &part_two)
 }
 
-fn program(input: &String) -> Vec<isize> {
-    parser::int_vec(input.as_str(), ",")
+impl Input {
+    fn program(&self) -> Vec<i32> {
+        self.int_vec(",")
+    }
 }
 
-fn part_one(input: &String) -> isize {
-    let mut computer = Computer::new(program(&input));
+fn part_one(input: &Input) -> i32 {
+    let mut computer = Computer::new(input.program());
     computer.run();
     computer.output().unwrap()
 }
 
-fn part_two(input: &String) -> isize {
-    let mut computer = Computer::automated(program(&input), vec![5]);
+fn part_two(input: &Input) -> i32 {
+    let mut computer = Computer::automated(input.program(), vec![5]);
     computer.run();
     computer.output().unwrap()
 }

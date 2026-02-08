@@ -1,4 +1,33 @@
 use std::fmt;
+use std::fs::read_to_string;
+
+#[derive(Default, Debug)]
+pub struct Input {
+    pub data: String,
+}
+
+impl Input {
+    pub fn build(year: &str, day: &str) -> Self {
+        let filepath = format!("../inputs/{}/{}.txt", &year, &day);
+        let data = read_to_string(&filepath)
+            .unwrap_or_else(|_| panic!("could not find input file {filepath}"));
+        Input { data }
+    }
+
+    pub fn from_str(data: &str) -> Self {
+        Input {
+            data: data.to_string(),
+        }
+    }
+
+    pub fn int_vec(&self, separator: &str) -> Vec<i32> {
+        self.data
+            .trim()
+            .split(separator)
+            .map(|x| x.parse::<i32>().unwrap())
+            .collect::<Vec<_>>()
+    }
+}
 
 #[derive(Default, Debug)]
 pub struct Solution {
@@ -28,11 +57,11 @@ impl Solution {
         }
     }
 
-    pub fn build<'a, T: fmt::Display, U>(
+    pub fn build<'a, T: fmt::Display>(
         part: &str,
-        input: &'a U,
-        p1: &dyn Fn(&'a U) -> T,
-        p2: &dyn Fn(&'a U) -> T,
+        input: &'a Input,
+        p1: &dyn Fn(&'a Input) -> T,
+        p2: &dyn Fn(&'a Input) -> T,
     ) -> Solution {
         match part {
             "1" => Solution::one(format!("{}", p1(input))),

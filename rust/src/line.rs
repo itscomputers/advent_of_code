@@ -4,11 +4,11 @@ use crate::point::{Direction, Point};
 pub struct Line {
     src: Point,
     dir: Direction,
-    len: isize,
+    len: i32,
 }
 
 impl Line {
-    pub fn new(src: Point, dir: Direction, len: isize) -> Self {
+    pub fn new(src: Point, dir: Direction, len: i32) -> Self {
         Line { src, dir, len }
     }
 
@@ -20,7 +20,7 @@ impl Line {
         self.src + (self.len * Point::from(self.dir))
     }
 
-    pub fn len(&self) -> isize {
+    pub fn len(&self) -> i32 {
         self.len
     }
 
@@ -59,7 +59,7 @@ impl Line {
     }
 }
 
-fn between(a: isize, b: isize, target: isize) -> bool {
+fn between(a: i32, b: i32, target: i32) -> bool {
     if a <= b {
         a < target && target < b
     } else {

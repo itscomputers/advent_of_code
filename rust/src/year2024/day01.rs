@@ -1,47 +1,43 @@
-use crate::solution::Solution;
+use crate::io::{Input, Solution};
 
-pub fn solve(part: &str, input: &String) -> Solution {
-    let lists = get_lists(input);
-    Solution::build(&part, &lists, &part_one, &part_two)
+pub fn solve(part: &str, input: &Input) -> Solution {
+    Solution::build(part, input, &part_one, &part_two)
 }
 
-fn get_lists(input: &String) -> (Vec<i32>, Vec<i32>) {
-    let mut v1 = Vec::new();
-    let mut v2 = Vec::new();
-    input.lines().for_each(|line| {
-        match line
-            .split_ascii_whitespace()
-            .map(|s| s.parse::<i32>())
-            .collect::<Vec<_>>()[..]
-        {
-            [Ok(a), Ok(b)] => {
-                v1.push(a);
-                v2.push(b);
-            }
-            _ => {}
-        }
-    });
-    v1.sort();
-    v2.sort();
-    (v1, v2)
+impl Input {
+    fn lists(&self) -> (Vec<i32>, Vec<i32>) {
+        let mut v1 = Vec::new();
+        let mut v2 = Vec::new();
+        self.data.lines().for_each(|line| {
+            let values = line
+                .split_ascii_whitespace()
+                .map(|s| s.parse::<i32>().unwrap())
+                .collect::<Vec<i32>>();
+            v1.push(values[0]);
+            v2.push(values[1]);
+        });
+        v1.sort();
+        v2.sort();
+        (v1, v2)
+    }
 }
 
-fn part_one(lists: &(Vec<i32>, Vec<i32>)) -> i32 {
-    let (a, b) = lists;
+fn part_one(input: &Input) -> i32 {
+    let (a, b) = input.lists();
     a.iter().zip(b).fold(0, |acc, (x, y)| acc + i32::abs(x - y))
 }
 
-fn part_two(lists: &(Vec<i32>, Vec<i32>)) -> i32 {
-    let (a, b) = lists;
+fn part_two(input: &Input) -> i32 {
+    let (a, b) = input.lists();
     a.iter().fold(0, |acc, value| {
         let mut index = 0;
         let mut count = 0;
         while index < b.len() && &b[index] < value {
-            index = index + 1;
+            index += 1;
         }
         while index < b.len() && &b[index] == value {
-            index = index + 1;
-            count = count + 1;
+            index += 1;
+            count += 1;
         }
         acc + count * value
     })
@@ -51,8 +47,8 @@ fn part_two(lists: &(Vec<i32>, Vec<i32>)) -> i32 {
 mod tests {
     use super::*;
 
-    fn input() -> String {
-        String::from(
+    fn input() -> Input {
+        Input::from_str(
             "\
             3   4\n\
             4   3\n\
@@ -63,17 +59,13 @@ mod tests {
         )
     }
 
-    fn lists() -> (Vec<i32>, Vec<i32>) {
-        get_lists(&input())
-    }
-
     #[test]
     fn test_part_one() {
-        assert_eq!(part_one(&lists()), 11);
+        assert_eq!(part_one(&input()), 11);
     }
 
     #[test]
     fn test_part_two() {
-        assert_eq!(part_two(&lists()), 31);
+        assert_eq!(part_two(&input()), 31);
     }
 }

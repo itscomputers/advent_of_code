@@ -1,10 +1,12 @@
-use crate::solution::Solution;
+use crate::io::{Input, Solution};
 
 mod day01;
+mod day02;
 
-pub fn solve(day: &str, part: &str, input: &String) -> Solution {
+pub fn solve(day: &str, part: &str, input: &Input) -> Solution {
     match day {
-        "01" => day01::solve(&part, &input),
+        "01" => day01::solve(part, &input),
+        "02" => day02::solve(part, &input),
         _ => Solution::default(),
     }
 }

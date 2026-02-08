@@ -1,30 +1,32 @@
-use crate::solution::Solution;
+use crate::io::{Input, Solution};
 
-pub fn solve(part: &str, input: &String) -> Solution {
-    let reports = get_reports(&input);
-    Solution::build(part, &reports, &part_one, &part_two)
+pub fn solve(part: &str, input: &Input) -> Solution {
+    Solution::build(part, input, &part_one, &part_two)
 }
 
-fn part_one(reports: &Vec<Vec<isize>>) -> usize {
-    reports.iter().filter(is_safe).count()
+impl Input {
+    fn count(&self, predicate: fn(&[i32]) -> bool) -> usize {
+        self.data
+            .lines()
+            .map(|line| {
+                line.split_ascii_whitespace()
+                    .map(|s| s.parse::<i32>().unwrap())
+                    .collect::<Vec<_>>()
+            })
+            .filter(|v| predicate(v.as_slice()))
+            .count()
+    }
 }
 
-fn part_two(reports: &Vec<Vec<isize>>) -> usize {
-    reports.iter().filter(is_almost_safe).count()
+fn part_one(input: &Input) -> usize {
+    input.count(is_safe)
 }
 
-fn get_reports(input: &String) -> Vec<Vec<isize>> {
-    input
-        .lines()
-        .map(|line| {
-            line.split_ascii_whitespace()
-                .map(|s| s.parse::<isize>().unwrap())
-                .collect::<Vec<_>>()
-        })
-        .collect::<Vec<_>>()
+fn part_two(input: &Input) -> usize {
+    input.count(is_almost_safe)
 }
 
-fn get_diff(report: &Vec<isize>) -> Vec<isize> {
+fn get_diff(report: &[i32]) -> Vec<i32> {
     let negative = report[1] - report[0] < 0;
     report
         .windows(2)
@@ -38,20 +40,20 @@ fn get_diff(report: &Vec<isize>) -> Vec<isize> {
         .collect::<Vec<_>>()
 }
 
-fn is_safe(report: &&Vec<isize>) -> bool {
+fn is_safe(report: &[i32]) -> bool {
     get_diff(report).iter().all(|d| 0 < *d && *d < 4)
 }
 
-fn is_almost_safe(report: &&Vec<isize>) -> bool {
-    (0..report.len()).any(|idx| is_safe(&&[&report[..idx], &report[idx + 1..]].concat()))
+fn is_almost_safe(report: &[i32]) -> bool {
+    (0..report.len()).any(|idx| is_safe(&[&report[..idx], &report[idx + 1..]].concat()))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    fn input() -> String {
-        String::from(
+    fn input() -> Input {
+        Input::from_str(
             "\
             7 6 4 2 1
             1 2 7 8 9
@@ -62,17 +64,13 @@ mod tests {
         )
     }
 
-    fn reports() -> Vec<Vec<isize>> {
-        get_reports(&input())
-    }
-
     #[test]
     fn test_part_one() {
-        assert_eq!(part_one(&reports()), 2);
+        assert_eq!(part_one(&input()), 2);
     }
 
     #[test]
     fn test_part_two() {
-        assert_eq!(part_two(&reports()), 4);
+        assert_eq!(part_two(&input()), 4);
     }
 }
