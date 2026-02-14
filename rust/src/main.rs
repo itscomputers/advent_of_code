@@ -1,7 +1,9 @@
 #![allow(dead_code)]
 
+mod grid;
 mod io;
 mod line;
+mod parser;
 mod point;
 
 mod year2019;

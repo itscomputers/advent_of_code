@@ -9,7 +9,9 @@ pub fn solve(part: &str, input: &Input) -> Solution {
     Solution::build(part, input, &part_one, &part_two)
 }
 
-impl Input {
+type SchematicInput = Input;
+
+impl SchematicInput {
     fn schematic(&self) -> Schematic {
         let symbols = self.symbols();
         let parts = self.parts(&symbols);
@@ -112,7 +114,7 @@ mod tests {
     use super::*;
 
     fn input() -> Input {
-        Input::from_str(
+        Input::from(
             "\
             467..114..\n\
             ...*......\n\

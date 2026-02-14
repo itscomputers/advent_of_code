@@ -47,7 +47,7 @@ mod tests {
     use super::*;
 
     fn input() -> Input {
-        Input::from_str(
+        Input::from(
             "\
             Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green\n\
             Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue\n\

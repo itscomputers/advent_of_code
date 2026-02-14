@@ -4,7 +4,9 @@ pub fn solve(part: &str, input: &Input) -> Solution {
     Solution::build(part, input, &part_one, &part_two)
 }
 
-impl Input {
+type Reports = Input;
+
+impl Reports {
     fn count(&self, predicate: fn(&[i32]) -> bool) -> usize {
         self.data
             .lines()
@@ -53,7 +55,7 @@ mod tests {
     use super::*;
 
     fn input() -> Input {
-        Input::from_str(
+        Input::from(
             "\
             7 6 4 2 1
             1 2 7 8 9

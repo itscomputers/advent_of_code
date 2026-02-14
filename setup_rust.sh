@@ -2,17 +2,17 @@
 
 printf -v day "%02d" $2
 file="rust/src/year${1}/day${day}.rs"
-code="use crate::solution::Solution;
+code="use crate::io::{Input, Solution};
 
-pub fn solve(part: &str, input: &String) -> Solution {
+pub fn solve(part: &str, input: &Input) -> Solution {
     Solution::build(part, input, &part_one, &part_two)
 }
 
-fn part_one(input: &String) -> isize {
+fn part_one(input: &Input) -> i32 {
     0
 }
 
-fn part_two(input: &String) -> isize {
+fn part_two(input: &Input) -> i32 {
     0
 }
 
@@ -20,8 +20,8 @@ fn part_two(input: &String) -> isize {
 mod tests {
     use super::*;
 
-    fn input() -> String {
-        String::from(
+    fn input() -> Input {
+        Input::from_str(
             \"\\
             \"
         )

@@ -6,7 +6,9 @@ pub fn solve(part: &str, input: &Input) -> Solution {
     Solution::build(part, input, &part_one, &part_two)
 }
 
-impl Input {
+type ScratcherInput = Input;
+
+impl ScratcherInput {
     fn scratchers(&self) -> Vec<Scratcher> {
         self.data
             .lines()
@@ -74,7 +76,7 @@ mod tests {
     use super::*;
 
     fn input() -> Input {
-        Input::from_str(
+        Input::from(
             "\
             Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53\n\
             Card 2: 13 32 20 16 61 | 61 30 68 82 17 32 24 19\n\

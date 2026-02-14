@@ -9,7 +9,9 @@ pub fn solve(part: &str, input: &Input) -> Solution {
     Solution::build(part, input, &part_one, &part_two)
 }
 
-impl Input {
+type Panel = Input;
+
+impl Panel {
     fn wires(&self) -> (Wire, Wire) {
         let mut lines = self.data.lines();
         let w1 = Wire::new(lines.next().unwrap());
@@ -102,7 +104,7 @@ mod tests {
     use super::*;
 
     fn input() -> Input {
-        Input::from_str(
+        Input::from(
             "\
             R8,U5,L5,D3\n\
             U7,R6,D4,L4",

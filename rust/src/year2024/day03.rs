@@ -7,7 +7,9 @@ pub fn solve(part: &str, input: &Input) -> Solution {
     Solution::build(part, input, &part_one, &part_two)
 }
 
-impl Input {
+type Program = Input;
+
+impl Program {
     fn eval(&self) -> i32 {
         Regex::new(r"mul\((\d\d?\d?),(\d\d?\d?)\)")
             .unwrap()
@@ -43,15 +45,14 @@ mod tests {
 
     #[test]
     fn test_part_one() {
-        let input = Input::from_str(
-            "xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))",
-        );
+        let input =
+            Input::from("xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))");
         assert_eq!(part_one(&input), 161);
     }
 
     #[test]
     fn test_part_two() {
-        let input = Input::from_str(
+        let input = Input::from(
             "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))",
         );
         assert_eq!(part_two(&input), 48);

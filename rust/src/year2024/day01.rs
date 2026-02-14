@@ -4,7 +4,9 @@ pub fn solve(part: &str, input: &Input) -> Solution {
     Solution::build(part, input, &part_one, &part_two)
 }
 
-impl Input {
+type LocationsInput = Input;
+
+impl LocationsInput {
     fn lists(&self) -> (Vec<i32>, Vec<i32>) {
         let mut v1 = Vec::new();
         let mut v2 = Vec::new();
@@ -48,7 +50,7 @@ mod tests {
     use super::*;
 
     fn input() -> Input {
-        Input::from_str(
+        Input::from(
             "\
             3   4\n\
             4   3\n\

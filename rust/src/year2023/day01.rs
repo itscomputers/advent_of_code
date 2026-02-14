@@ -55,7 +55,7 @@ mod tests {
 
     #[test]
     fn test_part_one() {
-        let input = Input::from_str(
+        let input = Input::from(
             "\
             1abc2\n\
             pqr3stu8vwx\n\
@@ -67,7 +67,7 @@ mod tests {
 
     #[test]
     fn test_part_two() {
-        let input = Input::from_str(
+        let input = Input::from(
             "\
             two1nine\n\
             eightwothree\n\

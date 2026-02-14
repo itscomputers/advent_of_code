@@ -4,7 +4,9 @@ pub fn solve(part: &str, input: &Input) -> Solution {
     Solution::build(part, input, &part_one, &part_two)
 }
 
-impl Input {
+type PasswordCollection = Input;
+
+impl PasswordCollection {
     fn passwords(&self) -> Vec<Password> {
         let bounds = self.int_vec("-");
         (bounds[0]..=bounds[1])

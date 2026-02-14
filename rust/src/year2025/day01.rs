@@ -4,7 +4,9 @@ pub fn solve(part: &str, input: &Input) -> Solution {
     Solution::build(part, input, &part_one, &part_two)
 }
 
-impl Input {
+type RotationsInput = Input;
+
+impl RotationsInput {
     fn rotations(&self) -> Vec<i32> {
         self.data
             .lines()
@@ -56,7 +58,7 @@ mod tests {
     use super::*;
 
     fn input() -> Input {
-        Input::from_str(
+        Input::from(
             "\
             L68\n\
             L30\n\

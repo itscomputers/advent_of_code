@@ -6,25 +6,6 @@ pub fn solve(part: &str, input: &Input) -> Solution {
     Solution::build(part, input, &part_one, &part_two)
 }
 
-impl Input {
-    fn numbers(&self) -> Vec<i64> {
-        self.data
-            .split_ascii_whitespace()
-            .dropping(1)
-            .map(|s| s.parse::<i64>().unwrap())
-            .collect::<Vec<i64>>()
-    }
-
-    fn number(&self) -> i64 {
-        self.data
-            .split_ascii_whitespace()
-            .dropping(1)
-            .join("")
-            .parse::<i64>()
-            .unwrap()
-    }
-}
-
 fn part_one(input: &Input) -> i64 {
     match input
         .data
@@ -88,7 +69,7 @@ mod tests {
     use super::*;
 
     fn input() -> Input {
-        Input::from_str(
+        Input::from(
             "\
             Time:      7  15   30\n\
             Distance:  9  40  200",

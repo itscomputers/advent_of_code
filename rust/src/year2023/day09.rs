@@ -6,7 +6,9 @@ pub fn solve(part: &str, input: &Input) -> Solution {
     Solution::build(part, input, &part_one, &part_two)
 }
 
-impl Input {
+type Report = Input;
+
+impl Report {
     fn predict_sum(&self, func: fn(Vec<i32>) -> i32) -> i32 {
         self.data
             .lines()
@@ -71,7 +73,7 @@ mod tests {
     use super::*;
 
     fn input() -> Input {
-        Input::from_str(
+        Input::from(
             "\
             0 3 6 9 12 15\n\
             1 3 6 10 15 21\n\

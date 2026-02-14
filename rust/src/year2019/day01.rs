@@ -4,7 +4,9 @@ pub fn solve(part: &str, input: &Input) -> Solution {
     Solution::build(part, input, &part_one, &part_two)
 }
 
-impl Input {
+type Module = Input;
+
+impl Module {
     fn fuel(&self) -> Vec<i32> {
         self.int_vec("\n")
     }
@@ -40,7 +42,7 @@ mod tests {
     use super::*;
 
     fn input() -> Input {
-        Input::from_str(
+        Input::from(
             "\
             12\n\
             14\n\

@@ -1,6 +1,8 @@
 use std::fmt;
 use std::fs::read_to_string;
 
+use crate::parser;
+
 #[derive(Default, Debug)]
 pub struct Input {
     pub data: String,
@@ -14,18 +16,24 @@ impl Input {
         Input { data }
     }
 
-    pub fn from_str(data: &str) -> Self {
-        Input {
-            data: data.to_string(),
-        }
+    pub fn int_vec(&self, separator: &str) -> Vec<i32> {
+        parser::int_vec(&self.data, separator)
     }
 
-    pub fn int_vec(&self, separator: &str) -> Vec<i32> {
-        self.data
-            .trim()
-            .split(separator)
-            .map(|x| x.parse::<i32>().unwrap())
-            .collect::<Vec<_>>()
+    pub fn transform_lines<T>(&self, func: impl Fn(&str) -> T) -> Vec<T> {
+        self.data.trim().lines().map(func).collect::<Vec<T>>()
+    }
+
+    pub fn int_vec_lines(&self, separator: &str) -> Vec<Vec<i32>> {
+        self.transform_lines(|line| parser::int_vec(line, separator))
+    }
+}
+
+impl From<&str> for Input {
+    fn from(s: &str) -> Self {
+        Self {
+            data: s.to_string(),
+        }
     }
 }
 

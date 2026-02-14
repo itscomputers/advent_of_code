@@ -4,7 +4,9 @@ pub fn solve(part: &str, input: &Input) -> Solution {
     Solution::build(part, input, &part_one, &part_two)
 }
 
-impl Input {
+type Ranges = Input;
+
+impl Ranges {
     fn invalid_sum(&self, condition: fn(&i64) -> bool) -> i64 {
         self.data.split(",").fold(0, |acc, range| {
             let parts = range
@@ -27,7 +29,7 @@ fn part_two(input: &Input) -> i64 {
 fn is_invalid(id: &i64, restricted: bool) -> bool {
     let id_str = id.to_string();
     if restricted {
-        id_str.len() % 2 == 0 && is_repeated(&id_str, id_str.len() / 2)
+        id_str.len().is_multiple_of(2) && is_repeated(&id_str, id_str.len() / 2)
     } else {
         (1..=id_str.len() / 2).any(|window| is_repeated(&id_str, window))
     }
@@ -48,7 +50,7 @@ mod tests {
     use super::*;
 
     fn input() -> Input {
-        Input::from_str(
+        Input::from(
             "\
             11-22,95-115,998-1012,1188511880-1188511890,222220-222224,\
             1698522-1698528,446443-446449,38593856-38593862,565653-565659,\

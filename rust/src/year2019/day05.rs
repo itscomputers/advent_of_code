@@ -5,7 +5,9 @@ pub fn solve(part: &str, input: &Input) -> Solution {
     Solution::build(part, input, &part_one, &part_two)
 }
 
-impl Input {
+type Program = Input;
+
+impl Program {
     fn program(&self) -> Vec<i32> {
         self.int_vec(",")
     }
