@@ -22,6 +22,37 @@ impl Point {
     pub fn norm(&self) -> i32 {
         i32::abs(self.x) + i32::abs(self.y)
     }
+
+    pub fn neighbors(&self) -> [Self; 4] {
+        [
+            self + &Point { x: 1, y: 0 },
+            self + &Point { x: 0, y: 1 },
+            self + &Point { x: -1, y: 0 },
+            self + &Point { x: 0, y: -1 },
+        ]
+    }
+
+    pub fn lax_neighbors(&self) -> [Self; 8] {
+        [
+            self + &Point { x: 1, y: 0 },
+            self + &Point { x: 0, y: 1 },
+            self + &Point { x: -1, y: 0 },
+            self + &Point { x: 0, y: -1 },
+            self + &Point { x: 1, y: 1 },
+            self + &Point { x: -1, y: 1 },
+            self + &Point { x: 1, y: -1 },
+            self + &Point { x: -1, y: -1 },
+        ]
+    }
+}
+
+impl From<&(i32, i32)> for Point {
+    fn from(pair: &(i32, i32)) -> Self {
+        Point {
+            x: pair.0,
+            y: pair.1,
+        }
+    }
 }
 
 impl From<Direction> for Point {
@@ -40,6 +71,17 @@ impl Add for Point {
 
     fn add(self, rhs: Self) -> Self {
         Self {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
+    }
+}
+
+impl Add for &Point {
+    type Output = Point;
+
+    fn add(self, rhs: Self) -> Point {
+        Point {
             x: self.x + rhs.x,
             y: self.y + rhs.y,
         }
