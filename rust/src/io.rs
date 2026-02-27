@@ -20,12 +20,20 @@ impl Input {
         parser::int_vec(&self.data, separator)
     }
 
+    pub fn i64_vec(&self, separator: &str) -> Vec<i64> {
+        parser::i64_vec(&self.data, separator)
+    }
+
     pub fn transform_lines<T>(&self, func: impl Fn(&str) -> T) -> Vec<T> {
         self.data.trim().lines().map(func).collect::<Vec<T>>()
     }
 
     pub fn int_vec_lines(&self, separator: &str) -> Vec<Vec<i32>> {
         self.transform_lines(|line| parser::int_vec(line, separator))
+    }
+
+    pub fn blocks(&self) -> Vec<Input> {
+        self.data.split("\n\n").map(Input::from).collect::<Vec<_>>()
     }
 }
 

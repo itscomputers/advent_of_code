@@ -5,6 +5,7 @@ mod io;
 mod line;
 mod parser;
 mod point;
+mod range;
 
 mod year2019;
 mod year2023;
