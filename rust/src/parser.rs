@@ -25,3 +25,10 @@ pub fn i64_vec(s: &str, separator: &str) -> Vec<i64> {
             .collect::<Vec<i64>>()
     }
 }
+
+pub fn match_indices(s: &str, target: char) -> Vec<usize> {
+    s.char_indices()
+        .filter(|(_, ch)| *ch == target)
+        .map(|(index, _)| index)
+        .collect::<Vec<_>>()
+}

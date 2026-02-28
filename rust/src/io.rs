@@ -42,6 +42,10 @@ impl Input {
         self.data.split("\n\n").map(Input::from).collect::<Vec<_>>()
     }
 
+    pub fn match_indices(&self, ch: char) -> Vec<usize> {
+        parser::match_indices(&self.data, ch)
+    }
+
     pub fn split_whitespace(&self) -> Vec<String> {
         self.data
             .split_ascii_whitespace()
@@ -64,6 +68,16 @@ impl Input {
             .data
             .rsplitn(count + 2, "\n")
             .dropping(1)
+            .take(count)
+            .join("\n")
+            .to_string();
+        Self { data }
+    }
+
+    pub fn first(&self, count: usize) -> Self {
+        let data = self
+            .data
+            .splitn(count + 1, "\n")
             .take(count)
             .join("\n")
             .to_string();
