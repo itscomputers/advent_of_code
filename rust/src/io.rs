@@ -1,6 +1,8 @@
 use std::fmt;
 use std::fs::read_to_string;
 
+use itertools::Itertools;
+
 use crate::parser;
 
 #[derive(Default, Debug)]
@@ -32,8 +34,40 @@ impl Input {
         self.transform_lines(|line| parser::int_vec(line, separator))
     }
 
+    pub fn i64_vec_lines(&self, separator: &str) -> Vec<Vec<i64>> {
+        self.transform_lines(|line| parser::i64_vec(line, separator))
+    }
+
     pub fn blocks(&self) -> Vec<Input> {
         self.data.split("\n\n").map(Input::from).collect::<Vec<_>>()
+    }
+
+    pub fn split_whitespace(&self) -> Vec<String> {
+        self.data
+            .split_ascii_whitespace()
+            .map(|s| s.to_string())
+            .collect::<Vec<_>>()
+    }
+
+    pub fn drop_last(&self, count: usize) -> Self {
+        let data = self
+            .data
+            .rsplitn(count + 2, "\n")
+            .nth(count + 1)
+            .unwrap()
+            .to_string();
+        Self { data }
+    }
+
+    pub fn last(&self, count: usize) -> Self {
+        let data = self
+            .data
+            .rsplitn(count + 2, "\n")
+            .dropping(1)
+            .take(count)
+            .join("\n")
+            .to_string();
+        Self { data }
     }
 }
 
