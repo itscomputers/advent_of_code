@@ -8,11 +8,11 @@ pub fn solve(part: &str, input: &Input) -> Solution {
     Solution::build(part, input, &part_one, &part_two)
 }
 
-fn part_one(input: &Input) -> i32 {
+fn part_one(_input: &Input) -> i32 {
     0
 }
 
-fn part_two(input: &Input) -> i32 {
+fn part_two(_input: &Input) -> i32 {
     0
 }
 
@@ -21,7 +21,7 @@ mod tests {
     use super::*;
 
     fn input() -> Input {
-        Input::from_str(
+        Input::from(
             \"\\
             \"
         )
