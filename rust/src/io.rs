@@ -1,5 +1,6 @@
 use std::fmt;
 use std::fs::read_to_string;
+use std::str::FromStr;
 
 use itertools::Itertools;
 
@@ -18,24 +19,24 @@ impl Input {
         Input { data }
     }
 
-    pub fn int_vec(&self, separator: &str) -> Vec<i32> {
-        parser::int_vec(&self.data, separator)
+    pub fn int_vec<I>(&self, separator: &str) -> Vec<I>
+    where
+        I: FromStr,
+        <I as FromStr>::Err: fmt::Debug,
+    {
+        parser::int_vec::<I>(&self.data, separator)
     }
 
-    pub fn i64_vec(&self, separator: &str) -> Vec<i64> {
-        parser::i64_vec(&self.data, separator)
+    pub fn int_vec_lines<I>(&self, separator: &str) -> Vec<Vec<I>>
+    where
+        I: FromStr,
+        <I as FromStr>::Err: fmt::Debug,
+    {
+        self.transform_lines(|line| parser::int_vec(line, separator))
     }
 
     pub fn transform_lines<T>(&self, func: impl Fn(&str) -> T) -> Vec<T> {
         self.data.trim().lines().map(func).collect::<Vec<T>>()
-    }
-
-    pub fn int_vec_lines(&self, separator: &str) -> Vec<Vec<i32>> {
-        self.transform_lines(|line| parser::int_vec(line, separator))
-    }
-
-    pub fn i64_vec_lines(&self, separator: &str) -> Vec<Vec<i64>> {
-        self.transform_lines(|line| parser::i64_vec(line, separator))
     }
 
     pub fn blocks(&self) -> Vec<Input> {

@@ -1,5 +1,4 @@
 use regex::Regex;
-use std::str::FromStr;
 
 use crate::io::{Input, Solution};
 use crate::line::Line;
@@ -51,7 +50,12 @@ impl Wire {
                         "U" => Direction::Up,
                         _ => panic!("error parsing direction"),
                     };
-                    let amt = i32::from_str(captures.name("amt").unwrap().as_str()).unwrap();
+                    let amt = captures
+                        .name("amt")
+                        .unwrap()
+                        .as_str()
+                        .parse::<i32>()
+                        .unwrap();
                     let src = match acc.last() {
                         Some(line) => line.dst(),
                         _ => Point::new(0, 0),

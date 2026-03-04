@@ -26,7 +26,7 @@ fn consolidate(input: &Input, count: usize) -> usize {
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 struct Vector {
-    coords: (i32, i32, i32),
+    coords: (i64, i64, i64),
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -111,8 +111,8 @@ impl PartialOrd for Connection {
     }
 }
 
-impl From<&Vec<i32>> for Vector {
-    fn from(value: &Vec<i32>) -> Self {
+impl From<&Vec<i64>> for Vector {
+    fn from(value: &Vec<i64>) -> Self {
         Vector {
             coords: (value[0], value[1], value[2]),
         }

@@ -35,7 +35,7 @@ impl From<&Input> for Fresh {
     fn from(input: &Input) -> Self {
         if let Some(input) = input.blocks().first() {
             let ranges = input.transform_lines(|line| {
-                let parts = parser::i64_vec(line, "-");
+                let parts = parser::int_vec(line, "-");
                 InclRange::from(&(parts[0], parts[1]))
             });
             let ranges = InclRange::reduce(&ranges);
@@ -53,7 +53,7 @@ struct Available {
 impl From<&Input> for Available {
     fn from(input: &Input) -> Self {
         if let Some(input) = input.blocks().last() {
-            let ids = input.i64_vec("\n");
+            let ids = input.int_vec("\n");
             Self { ids }
         } else {
             panic!("no last block")

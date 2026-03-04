@@ -20,19 +20,17 @@ fn part_two(input: &Input) -> i64 {
         .sum()
 }
 
-fn max_joltage(bank: &[i32], count: usize) -> i64 {
+fn max_joltage(bank: &[i64], count: usize) -> i64 {
     let upper = bank.len() - count;
     let mut indices = vec![max_index(bank, 0, upper)];
     for i in 1..count {
         let last = indices.last().unwrap();
         indices.push(max_index(bank, *last + 1, upper + i));
     }
-    indices
-        .iter()
-        .fold(0, |acc, idx| acc * 10 + (bank[*idx] as i64))
+    indices.iter().fold(0, |acc, idx| acc * 10 + bank[*idx])
 }
 
-fn max_index(slice: &[i32], lower: usize, upper: usize) -> usize {
+fn max_index(slice: &[i64], lower: usize, upper: usize) -> usize {
     let mut max = lower;
     for index in lower + 1..=upper {
         if slice[index] > slice[max] {

@@ -1,28 +1,20 @@
-pub fn int_vec(s: &str, separator: &str) -> Vec<i32> {
-    if separator.is_empty() {
-        s.trim()
-            .chars()
-            .map(|ch| ch.to_digit(10).unwrap() as i32)
-            .collect::<Vec<i32>>()
-    } else {
-        s.trim()
-            .split(separator)
-            .map(|x| x.parse::<i32>().unwrap())
-            .collect::<Vec<i32>>()
-    }
-}
+use std::str::FromStr;
 
-pub fn i64_vec(s: &str, separator: &str) -> Vec<i64> {
+pub fn int_vec<I>(s: &str, separator: &str) -> Vec<I>
+where
+    I: FromStr,
+    <I as FromStr>::Err: std::fmt::Debug,
+{
     if separator.is_empty() {
         s.trim()
             .chars()
-            .map(|ch| ch.to_digit(10).unwrap() as i64)
-            .collect::<Vec<i64>>()
+            .map(|ch| ch.to_string().parse::<I>().unwrap())
+            .collect::<Vec<I>>()
     } else {
         s.trim()
             .split(separator)
-            .map(|x| x.parse::<i64>().unwrap())
-            .collect::<Vec<i64>>()
+            .map(|x| x.parse::<I>().unwrap())
+            .collect::<Vec<I>>()
     }
 }
 
