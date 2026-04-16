@@ -1,5 +1,6 @@
 use std::{
     collections::{HashMap, HashSet, VecDeque},
+    fmt::Display,
     ops::RangeInclusive,
 };
 
@@ -16,7 +17,6 @@ impl InclRange {
 
     pub fn reduce<'a>(ranges: &'a [Self]) -> Vec<Self> {
         let graph = RangeGraph::from(ranges);
-        dbg!(&graph.connections);
         let mut visited: HashSet<&'a InclRange> = HashSet::new();
         let mut components = Vec::new();
         for range in graph.connections.keys() {
@@ -37,6 +37,14 @@ impl InclRange {
         &self.lower <= value && value <= &self.upper
     }
 
+    pub fn contains_proper(&self, value: &i64) -> bool {
+        !self.has_boundary(value) && self.contains(value)
+    }
+
+    pub fn has_boundary(&self, value: &i64) -> bool {
+        &self.lower == value || &self.upper == value
+    }
+
     pub fn has_subrange(&self, range: &Self) -> bool {
         self.lower <= range.lower && range.upper <= self.upper
     }
@@ -49,6 +57,17 @@ impl InclRange {
         Self {
             lower: self.lower + offset,
             upper: self.upper + offset,
+        }
+    }
+
+    pub fn extend(&mut self, value: &i64) {
+        if self.is_empty() {
+            self.lower = *value;
+            self.upper = *value;
+        } else if *value < self.lower {
+            self.lower = *value;
+        } else if *value > self.upper {
+            self.upper = *value;
         }
     }
 
@@ -80,6 +99,12 @@ impl InclRange {
             lower: self.lower.min(range.lower),
             upper: self.upper.max(range.upper),
         }
+    }
+}
+
+impl Display for InclRange {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}..={}", self.lower, self.upper)
     }
 }
 
