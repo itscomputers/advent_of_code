@@ -83,6 +83,10 @@ impl Computer {
         &self.program
     }
 
+    pub fn program_at(&self, index: usize) -> i32 {
+        self.program[index]
+    }
+
     pub fn output(&self) -> Option<i32> {
         self.output
     }

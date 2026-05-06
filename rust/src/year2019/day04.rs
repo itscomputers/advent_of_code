@@ -4,28 +4,23 @@ pub fn solve(part: &str, input: &Input) -> Solution {
     Solution::build(part, input, &part_one, &part_two)
 }
 
-type PasswordCollection = Input;
-
-impl PasswordCollection {
-    fn passwords(&self) -> Vec<Password> {
-        let bounds = self.int_vec("-");
-        (bounds[0]..=bounds[1])
-            .map(Password::new)
-            .filter(Password::is_nondecreasing)
-            .collect::<Vec<_>>()
-    }
-}
-
 fn part_one(input: &Input) -> usize {
-    input.passwords().iter().filter(|&p| p.has_repeat()).count()
+    passwords(input).iter().filter(|&p| p.has_repeat()).count()
 }
 
 fn part_two(input: &Input) -> usize {
-    input
-        .passwords()
+    passwords(input)
         .iter()
         .filter(|&p| p.has_strict_repeat())
         .count()
+}
+
+fn passwords(input: &Input) -> Vec<Password> {
+    let bounds = input.int_vec("-");
+    (bounds[0]..=bounds[1])
+        .map(Password::new)
+        .filter(Password::is_nondecreasing)
+        .collect::<Vec<_>>()
 }
 
 #[derive(Debug, Default, PartialEq, Clone)]

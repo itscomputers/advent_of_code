@@ -11,7 +11,7 @@ fn part_one(input: &Input) -> i32 {
     let program = program(input, 12, 2);
     let mut computer = Computer::new(program);
     computer.run();
-    computer.program()[0]
+    computer.program_at(0)
 }
 
 fn part_two(input: &Input) -> i32 {
@@ -19,7 +19,7 @@ fn part_two(input: &Input) -> i32 {
         let program = program(input, vec[0], vec[1]);
         let mut computer = Computer::new(program);
         computer.run();
-        computer.program()[0] == 19690720
+        computer.program_at(0) == 19690720
     }) {
         Some(vec) => 100 * vec[0] + vec[1],
         _ => 0,

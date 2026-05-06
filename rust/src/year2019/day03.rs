@@ -8,28 +8,32 @@ pub fn solve(part: &str, input: &Input) -> Solution {
     Solution::build(part, input, &part_one, &part_two)
 }
 
-type Panel = Input;
+struct Panel {
+    w1: Wire,
+    w2: Wire,
+}
 
 impl Panel {
-    fn wires(&self) -> (Wire, Wire) {
-        let mut lines = self.data.lines();
+    fn minimum_distance(&self, delay: bool) -> i32 {
+        self.w1.minimum_distance(&self.w2, delay)
+    }
+}
+
+impl From<&Input> for Panel {
+    fn from(input: &Input) -> Self {
+        let mut lines = input.data.lines();
         let w1 = Wire::new(lines.next().unwrap());
         let w2 = Wire::new(lines.next().unwrap());
-        (w1, w2)
-    }
-
-    fn minimum_distance(&self, delay: bool) -> i32 {
-        let (w1, w2) = self.wires();
-        w1.minimum_distance(&w2, delay)
+        Panel { w1, w2 }
     }
 }
 
 fn part_one(input: &Input) -> i32 {
-    input.minimum_distance(false)
+    Panel::from(input).minimum_distance(false)
 }
 
 fn part_two(input: &Input) -> i32 {
-    input.minimum_distance(true)
+    Panel::from(input).minimum_distance(true)
 }
 
 struct Wire {

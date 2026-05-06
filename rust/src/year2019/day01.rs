@@ -4,26 +4,22 @@ pub fn solve(part: &str, input: &Input) -> Solution {
     Solution::build(part, input, &part_one, &part_two)
 }
 
-type Module = Input;
-
-impl Module {
-    fn fuel(&self) -> Vec<i32> {
-        self.int_vec("\n")
-    }
-
-    fn total_fuel(&self, recursive: bool) -> i32 {
-        self.fuel()
-            .iter()
-            .fold(0, |acc, val| acc + fuel_for(*val, recursive))
-    }
-}
-
 fn part_one(input: &Input) -> i32 {
-    input.total_fuel(false)
+    total(input, false)
 }
 
 fn part_two(input: &Input) -> i32 {
-    input.total_fuel(true)
+    total(input, true)
+}
+
+fn fuel(input: &Input) -> Vec<i32> {
+    input.int_vec("\n")
+}
+
+fn total(input: &Input, recursive: bool) -> i32 {
+    fuel(input)
+        .iter()
+        .fold(0, |acc, val| acc + fuel_for(*val, recursive))
 }
 
 fn fuel_for(value: i32, recursive: bool) -> i32 {
