@@ -4,13 +4,67 @@ use std::{io, io::Write};
 
 use crate::parser;
 
+pub struct Interface {
+    computer: Computer,
+    inputs: VecDeque<i32>,
+    outputs: Vec<i32>,
+}
+
+impl Interface {
+    pub fn new(computer: Computer) -> Self {
+        Self {
+            computer,
+            inputs: VecDeque::new(),
+            outputs: Vec::new(),
+        }
+    }
+
+    pub fn next(&mut self) {
+        while !self.computer.interactable() {
+            self.computer.next();
+        }
+    }
+
+    pub fn next_with_input(&mut self, input: i32) {
+        self.computer.inputs.push_back(input);
+        self.next();
+    }
+
+    pub fn interact(&mut self) {
+        if self.computer.requires_input() {
+            if let Some(input) = self.inputs.pop_front() {
+                self.computer.inputs.push_back(input);
+                self.next();
+            }
+        }
+        if self.computer.supplies_output() {
+            self.computer.next();
+            self.outputs.push(self.computer.output().unwrap());
+            self.next();
+        }
+    }
+
+    pub fn io_cycle(&mut self, input: i32) -> i32 {
+        self.next_with_input(input);
+        self.interact();
+        *self.get_output()
+    }
+
+    pub fn get_output(&self) -> &i32 {
+        self.outputs.last().unwrap()
+    }
+
+    pub fn terminated(&self) -> bool {
+        self.computer.terminated
+    }
+}
+
 pub struct Computer {
     program: Vec<i32>,
     index: usize,
     inputs: VecDeque<i32>,
     output: Option<i32>,
     terminated: bool,
-    debug: bool,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -33,29 +87,16 @@ impl Computer {
             inputs: VecDeque::new(),
             output: None,
             terminated: false,
-            debug: false,
         }
     }
 
-    pub fn automated(program: Vec<i32>, inputs: Vec<i32>) -> Computer {
+    pub fn with_inputs(program: Vec<i32>, inputs: Vec<i32>) -> Computer {
         Computer {
             program,
             index: 0,
             inputs: VecDeque::from(inputs),
             output: None,
             terminated: false,
-            debug: false,
-        }
-    }
-
-    pub fn debug(program: Vec<i32>, inputs: Vec<i32>) -> Computer {
-        Computer {
-            program,
-            index: 0,
-            inputs: VecDeque::from(inputs),
-            output: None,
-            terminated: false,
-            debug: true,
         }
     }
 
@@ -89,6 +130,18 @@ impl Computer {
 
     pub fn output(&self) -> Option<i32> {
         self.output
+    }
+
+    fn requires_input(&self) -> bool {
+        self.opcode() == 3 && self.inputs.is_empty()
+    }
+
+    fn supplies_output(&self) -> bool {
+        self.opcode() == 4
+    }
+
+    fn interactable(&self) -> bool {
+        self.terminated || self.requires_input() || self.supplies_output()
     }
 
     fn opcode(&self) -> i32 {
@@ -136,7 +189,6 @@ impl Computer {
         };
         self.program[addr] = value;
         self.index += 4;
-        self.next()
     }
 
     fn halt(&mut self) {
@@ -145,7 +197,7 @@ impl Computer {
 
     fn stdin(&mut self) {
         match self.inputs.pop_front() {
-            Some(input) => self.automated_stdin(input),
+            Some(input) => self.process_input(input),
             None => self.io_stdin(),
         }
     }
@@ -155,7 +207,6 @@ impl Computer {
         let value = self.parameter(self.index + 1, m);
         self.output = Some(value);
         self.index += 2;
-        self.next()
     }
 
     fn jump_if(&mut self, condition: bool) {
@@ -166,14 +217,12 @@ impl Computer {
         } else {
             self.index += 3;
         }
-        self.next()
     }
 
-    fn automated_stdin(&mut self, input: i32) {
+    fn process_input(&mut self, input: i32) {
         let addr = self.address(self.program[self.index + 1]);
         self.program[addr] = input;
         self.index += 2;
-        self.next()
     }
 
     fn io_stdin(&mut self) {
@@ -182,7 +231,7 @@ impl Computer {
         io::stdout().flush().expect("error with stdout");
         match io::stdin().read_line(&mut str_input) {
             Ok(_) => match str_input.trim().parse::<i32>() {
-                Ok(input) => self.automated_stdin(input),
+                Ok(input) => self.process_input(input),
                 Err(_) => panic!("unsupported input"),
             },
             Err(_) => panic!("unsupported input"),
@@ -259,14 +308,14 @@ mod tests {
 
     #[test]
     fn test_opcode_3() {
-        let mut computer = Computer::automated(vec![3, 2, 0], vec![99]);
+        let mut computer = Computer::with_inputs(vec![3, 2, 0], vec![99]);
         computer.run();
         assert_eq!(&vec![3, 2, 99], computer.program());
     }
 
     #[test]
     fn test_opcodes_1_2_3() {
-        let mut computer = Computer::automated(vec![1, 0, 4, 4, 2, 0, 99], vec![69]);
+        let mut computer = Computer::with_inputs(vec![1, 0, 4, 4, 2, 0, 99], vec![69]);
         computer.run();
         assert_eq!(&vec![69, 0, 4, 4, 3, 0, 99], computer.program());
     }
@@ -281,7 +330,7 @@ mod tests {
 
     #[test]
     fn test_opcode_3_4() {
-        let mut computer = Computer::automated(vec![3, 0, 4, 0, 99], vec![69]);
+        let mut computer = Computer::with_inputs(vec![3, 0, 4, 0, 99], vec![69]);
         computer.run();
         assert_eq!(&vec![69, 0, 4, 0, 99], computer.program());
         assert_eq!(Some(69), computer.output());
@@ -394,77 +443,79 @@ mod tests {
 
     #[test]
     fn test_position_mode_ex_a() {
-        let mut computer = Computer::automated(vec![3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8], vec![10]);
+        let mut computer =
+            Computer::with_inputs(vec![3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8], vec![10]);
         computer.run();
         assert_eq!(Some(0), computer.output());
     }
 
     #[test]
     fn test_position_mode_ex_b() {
-        let mut computer = Computer::automated(vec![3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8], vec![8]);
+        let mut computer = Computer::with_inputs(vec![3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8], vec![8]);
         computer.run();
         assert_eq!(Some(1), computer.output());
     }
 
     #[test]
     fn test_position_mode_ex_c() {
-        let mut computer = Computer::automated(vec![3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8], vec![7]);
+        let mut computer = Computer::with_inputs(vec![3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8], vec![7]);
         computer.run();
         assert_eq!(Some(1), computer.output());
     }
 
     #[test]
     fn test_position_mode_ex_d() {
-        let mut computer = Computer::automated(vec![3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8], vec![8]);
+        let mut computer = Computer::with_inputs(vec![3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8], vec![8]);
         computer.run();
         assert_eq!(Some(0), computer.output());
     }
 
     #[test]
     fn test_position_mode_ex_e() {
-        let mut computer = Computer::automated(vec![3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8], vec![10]);
+        let mut computer =
+            Computer::with_inputs(vec![3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8], vec![10]);
         computer.run();
         assert_eq!(Some(0), computer.output());
     }
 
     #[test]
     fn test_immediate_mode_ex_a() {
-        let mut computer = Computer::automated(vec![3, 3, 1108, -1, 8, 3, 4, 3, 99], vec![10]);
+        let mut computer = Computer::with_inputs(vec![3, 3, 1108, -1, 8, 3, 4, 3, 99], vec![10]);
         computer.run();
         assert_eq!(Some(0), computer.output());
     }
 
     #[test]
     fn test_immediate_mode_ex_b() {
-        let mut computer = Computer::automated(vec![3, 3, 1108, -1, 8, 3, 4, 3, 99], vec![8]);
+        let mut computer = Computer::with_inputs(vec![3, 3, 1108, -1, 8, 3, 4, 3, 99], vec![8]);
         computer.run();
         assert_eq!(Some(1), computer.output());
     }
 
     #[test]
     fn test_immediate_mode_ex_c() {
-        let mut computer = Computer::automated(vec![3, 3, 1107, -1, 8, 3, 4, 3, 99], vec![7]);
+        let mut computer = Computer::with_inputs(vec![3, 3, 1107, -1, 8, 3, 4, 3, 99], vec![7]);
         computer.run();
         assert_eq!(Some(1), computer.output());
     }
 
     #[test]
     fn test_immediate_mode_ex_d() {
-        let mut computer = Computer::automated(vec![3, 3, 1107, -1, 8, 3, 4, 3, 99], vec![8]);
+        let mut computer = Computer::with_inputs(vec![3, 3, 1107, -1, 8, 3, 4, 3, 99], vec![8]);
         computer.run();
         assert_eq!(Some(0), computer.output());
     }
 
     #[test]
     fn test_immediate_mode_ex_e() {
-        let mut computer = Computer::automated(vec![3, 3, 1107, -1, 8, 3, 4, 3, 99], vec![10]);
+        let mut computer = Computer::with_inputs(vec![3, 3, 1107, -1, 8, 3, 4, 3, 99], vec![10]);
         computer.run();
         assert_eq!(Some(0), computer.output());
     }
 
     #[test]
     fn test_long_program_ex_a() {
-        let mut computer = Computer::automated(
+        let mut computer = Computer::with_inputs(
             vec![
                 3, 21, 1008, 21, 8, 20, 1005, 20, 22, 107, 8, 21, 20, 1006, 20, 31, 1106, 0, 36,
                 98, 0, 0, 1002, 21, 125, 20, 4, 20, 1105, 1, 46, 104, 999, 1105, 1, 46, 1101, 1000,
@@ -478,7 +529,7 @@ mod tests {
 
     #[test]
     fn test_long_program_ex_b() {
-        let mut computer = Computer::automated(
+        let mut computer = Computer::with_inputs(
             vec![
                 3, 21, 1008, 21, 8, 20, 1005, 20, 22, 107, 8, 21, 20, 1006, 20, 31, 1106, 0, 36,
                 98, 0, 0, 1002, 21, 125, 20, 4, 20, 1105, 1, 46, 104, 999, 1105, 1, 46, 1101, 1000,
@@ -492,7 +543,7 @@ mod tests {
 
     #[test]
     fn test_long_program_ex_c() {
-        let mut computer = Computer::automated(
+        let mut computer = Computer::with_inputs(
             vec![
                 3, 21, 1008, 21, 8, 20, 1005, 20, 22, 107, 8, 21, 20, 1006, 20, 31, 1106, 0, 36,
                 98, 0, 0, 1002, 21, 125, 20, 4, 20, 1105, 1, 46, 104, 999, 1105, 1, 46, 1101, 1000,

@@ -16,7 +16,7 @@ fn part_one(input: &Input) -> i32 {
 }
 
 fn part_two(input: &Input) -> i32 {
-    let mut computer = Computer::automated(program(input), vec![5]);
+    let mut computer = Computer::with_inputs(program(input), vec![5]);
     computer.run();
     computer.output().unwrap()
 }
