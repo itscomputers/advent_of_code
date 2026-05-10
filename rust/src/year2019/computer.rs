@@ -51,7 +51,11 @@ impl Interface {
     }
 
     pub fn get_output(&self) -> &i32 {
-        self.outputs.last().unwrap()
+        if let Some(output) = self.outputs.last() {
+            output
+        } else {
+            panic!("expected at least one output")
+        }
     }
 
     pub fn terminated(&self) -> bool {
