@@ -1,33 +1,31 @@
 use itertools::Itertools;
 
 use crate::io::{Input, Solution};
-use crate::year2019::computer::Computer;
+use crate::year2019::computer::Program;
 
 pub fn solve(part: &str, input: &Input) -> Solution {
     Solution::build(part, input, &part_one, &part_two)
 }
 
-fn part_one(input: &Input) -> i32 {
-    let program = program(input, 12, 2);
-    let mut computer = Computer::new(program);
-    computer.run();
-    computer.program_at(0)
+fn part_one(input: &Input) -> i64 {
+    let mut program = Program::new(program_data(input, 12, 2));
+    program.run();
+    program.get(0)
 }
 
-fn part_two(input: &Input) -> i32 {
+fn part_two(input: &Input) -> i64 {
     match (0..100).permutations(2).find(|vec| {
-        let program = program(input, vec[0], vec[1]);
-        let mut computer = Computer::new(program);
-        computer.run();
-        computer.program_at(0) == 19690720
+        let mut program = Program::new(program_data(input, vec[0], vec[1]));
+        program.run();
+        program.get(0) == 19690720
     }) {
         Some(vec) => 100 * vec[0] + vec[1],
         _ => 0,
     }
 }
 
-fn program(input: &Input, v1: i32, v2: i32) -> Vec<i32> {
-    let mut program = input.int_vec("\n");
+fn program_data(input: &Input, v1: i64, v2: i64) -> Vec<i64> {
+    let mut program = input.int_vec(",");
     program[1] = v1;
     program[2] = v2;
     program

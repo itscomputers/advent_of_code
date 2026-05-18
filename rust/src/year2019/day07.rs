@@ -2,23 +2,23 @@ use itertools::Itertools;
 
 use crate::{
     io::{Input, Solution},
-    year2019::computer::{Computer, Interface},
+    year2019::computer::{Computer, Program},
 };
 
 pub fn solve(part: &str, input: &Input) -> Solution {
     Solution::build(part, input, &part_one, &part_two)
 }
 
-fn part_one(input: &Input) -> i32 {
+fn part_one(input: &Input) -> i64 {
     [0, 1, 2, 3, 4]
         .iter()
         .permutations(5)
-        .map(|phases| run_series(input.int_vec(","), phases))
+        .map(|phases| run_series(input, phases))
         .max()
         .unwrap()
 }
 
-fn part_two(input: &Input) -> i32 {
+fn part_two(input: &Input) -> i64 {
     [5, 6, 7, 8, 9]
         .iter()
         .permutations(5)
@@ -27,40 +27,40 @@ fn part_two(input: &Input) -> i32 {
         .unwrap()
 }
 
-fn run(program: Vec<i32>, phase: &i32, input: i32) -> i32 {
-    let mut computer = Computer::with_inputs(program, vec![*phase, input]);
-    computer.run();
-    computer.output().unwrap()
+fn run(input: &Input, phase: &i64, initial: i64) -> i64 {
+    let mut program = Program::from((input, vec![*phase, initial]));
+    program.run();
+    program.output().unwrap()
 }
 
-fn run_series(program: Vec<i32>, phases: Vec<&i32>) -> i32 {
-    let out0 = run(program.clone(), phases[0], 0);
-    let out1 = run(program.clone(), phases[1], out0);
-    let out2 = run(program.clone(), phases[2], out1);
-    let out3 = run(program.clone(), phases[3], out2);
-    run(program, phases[4], out3)
+fn run_series(input: &Input, phases: Vec<&i64>) -> i64 {
+    let out0 = run(input, phases[0], 0);
+    let out1 = run(input, phases[1], out0);
+    let out2 = run(input, phases[2], out1);
+    let out3 = run(input, phases[3], out2);
+    run(input, phases[4], out3)
 }
 
 struct Series {
-    interfaces: Vec<Interface>,
+    computers: Vec<Computer>,
 }
 
 impl Series {
-    fn new(input: &Input, phases: &[&i32]) -> Self {
-        let interfaces = phases
+    fn new(input: &Input, phases: &[&i64]) -> Self {
+        let computers = phases
             .iter()
-            .map(|phase| Interface::new(Computer::with_inputs(input.int_vec(","), vec![**phase])))
+            .map(|phase| Computer::new(Program::from((input, **phase))))
             .collect::<Vec<_>>();
-        Self { interfaces }
+        Self { computers }
     }
 
-    fn thruster(&mut self) -> i32 {
+    fn thruster(&mut self) -> i64 {
         let mut input = 0;
         for i in (0..5).cycle() {
-            if self.interfaces[i].terminated() {
-                return *self.interfaces[4].get_output();
+            if self.computers[i].terminated() {
+                return *self.computers[4].output();
             }
-            input = self.interfaces[i].io_cycle(input);
+            input = self.computers[i].io_loop(input);
         }
         0
     }
