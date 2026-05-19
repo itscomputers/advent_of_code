@@ -18,9 +18,7 @@ impl Computer {
 
     pub fn io_loop(&mut self, input: i64) -> i64 {
         self.computer.inputs.push_back(input);
-        self.next_io();
-        self.interact();
-        *self.output()
+        self.next_output()
     }
 
     pub fn outputs(&self) -> &Vec<i64> {
@@ -33,6 +31,12 @@ impl Computer {
         } else {
             panic!("expected at least one output")
         }
+    }
+
+    pub fn next_output(&mut self) -> i64 {
+        self.next_io();
+        self.interact();
+        *self.output()
     }
 
     pub fn terminated(&self) -> bool {

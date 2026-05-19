@@ -1,6 +1,6 @@
 use std::ops::{Add, Mul, Neg, Sub};
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct Point {
     pub x: i32,
     pub y: i32,
@@ -43,6 +43,26 @@ impl Point {
             self + &Point { x: 1, y: -1 },
             self + &Point { x: -1, y: -1 },
         ]
+    }
+}
+
+impl Direction {
+    pub fn cw(&self) -> Self {
+        match self {
+            Direction::Up => Direction::Right,
+            Direction::Right => Direction::Down,
+            Direction::Down => Direction::Left,
+            Direction::Left => Direction::Up,
+        }
+    }
+
+    pub fn ccw(&self) -> Self {
+        match self {
+            Direction::Up => Direction::Left,
+            Direction::Left => Direction::Down,
+            Direction::Down => Direction::Right,
+            Direction::Right => Direction::Up,
+        }
     }
 }
 
