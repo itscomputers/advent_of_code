@@ -4,20 +4,24 @@ use std::{io, io::Write};
 use crate::io::Input;
 
 pub struct Computer {
-    computer: Program,
+    program: Program,
     outputs: Vec<i64>,
 }
 
 impl Computer {
-    pub fn new(computer: Program) -> Self {
+    pub fn new(program: Program) -> Self {
         Self {
-            computer,
+            program,
             outputs: Vec::new(),
         }
     }
 
+    pub fn input(&mut self, input: i64) {
+        self.program.inputs.push_back(input);
+    }
+
     pub fn io_loop(&mut self, input: i64) -> i64 {
-        self.computer.inputs.push_back(input);
+        self.input(input);
         self.next_output()
     }
 
@@ -40,34 +44,47 @@ impl Computer {
     }
 
     pub fn terminated(&self) -> bool {
-        self.computer.terminated
+        self.program.terminated
     }
 
-    fn next_io(&mut self) {
-        while !self.computer.interactable() {
-            self.computer.next();
+    pub fn next_io(&mut self) -> IO {
+        while !self.program.interactable() {
+            self.program.next();
+        }
+        if self.program.terminated {
+            IO::Terminated
+        } else if self.program.requires_input() {
+            IO::Input
+        } else {
+            IO::Output
         }
     }
 
-    fn interact(&mut self) {
-        if self.computer.requires_input() {
+    pub fn interact(&mut self) {
+        if self.program.requires_input() {
             let mut str_input = String::new();
             print!("program requires input: ");
             io::stdout().flush().expect("error with stdout");
             match io::stdin().read_line(&mut str_input) {
                 Ok(_) => match str_input.trim().parse::<i64>() {
-                    Ok(input) => self.computer.inputs.push_back(input),
+                    Ok(input) => self.program.inputs.push_back(input),
                     Err(_) => panic!("unsupported input"),
                 },
                 Err(_) => panic!("unsupported input"),
             }
         }
-        if self.computer.supplies_output() {
-            self.computer.next();
-            self.outputs.push(self.computer.output().unwrap());
+        if self.program.supplies_output() {
+            self.program.next();
+            self.outputs.push(self.program.output().unwrap());
             self.next_io();
         }
     }
+}
+
+pub enum IO {
+    Input,
+    Output,
+    Terminated,
 }
 
 pub struct Program {
@@ -129,7 +146,7 @@ impl Program {
         }
     }
 
-    fn set(&mut self, index: i64, value: i64) {
+    pub fn set(&mut self, index: i64, value: i64) {
         let addr = as_usize(index);
         if addr < self.data.len() {
             self.data[addr] = value;
