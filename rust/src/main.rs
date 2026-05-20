@@ -3,6 +3,7 @@
 mod grid;
 mod io;
 mod line;
+mod num;
 mod parser;
 mod point;
 mod range;

@@ -2,6 +2,7 @@ use std::collections::HashSet;
 
 use crate::{
     io::{Input, Solution},
+    num::Gcd,
     parser,
 };
 
@@ -154,18 +155,10 @@ fn region(pt: &(i32, i32)) -> i32 {
 fn pts_between(a: &(i32, i32), b: &(i32, i32)) -> Vec<(i32, i32)> {
     let dx = b.0 - a.0;
     let dy = b.1 - a.1;
-    let d = gcd(dx, dy);
+    let d = dx.gcd(&dy);
     (1..d)
         .map(|i| (a.0 + i * dx / d, a.1 + i * dy / d))
         .collect::<Vec<_>>()
-}
-
-fn gcd(a: i32, b: i32) -> i32 {
-    if b == 0 {
-        a.abs()
-    } else {
-        gcd(b, a % b)
-    }
 }
 
 #[cfg(test)]
