@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+mod graph;
 mod grid;
 mod io;
 mod line;

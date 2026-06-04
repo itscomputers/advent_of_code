@@ -1,4 +1,7 @@
-use std::ops::{Add, Mul, Neg, Sub};
+use std::{
+    fmt::Display,
+    ops::{Add, Mul, Neg, Sub},
+};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct Point {
@@ -64,6 +67,15 @@ impl Direction {
             Direction::Right => Direction::Up,
         }
     }
+
+    pub fn all() -> Vec<Direction> {
+        vec![
+            Direction::Right,
+            Direction::Down,
+            Direction::Left,
+            Direction::Up,
+        ]
+    }
 }
 
 impl From<&(i32, i32)> for Point {
@@ -83,6 +95,23 @@ impl From<Direction> for Point {
             Direction::Left => Self { x: -1, y: 0 },
             Direction::Up => Self { x: 0, y: -1 },
         }
+    }
+}
+
+impl From<&Direction> for Point {
+    fn from(direction: &Direction) -> Self {
+        match direction {
+            Direction::Right => Self { x: 1, y: 0 },
+            Direction::Down => Self { x: 0, y: 1 },
+            Direction::Left => Self { x: -1, y: 0 },
+            Direction::Up => Self { x: 0, y: -1 },
+        }
+    }
+}
+
+impl Display for Point {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({}, {})", self.x, self.y)
     }
 }
 

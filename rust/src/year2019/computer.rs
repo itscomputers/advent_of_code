@@ -3,6 +3,7 @@ use std::{io, io::Write};
 
 use crate::io::Input;
 
+#[derive(Clone)]
 pub struct Computer {
     program: Program,
     outputs: Vec<i64>,
@@ -87,6 +88,7 @@ pub enum IO {
     Terminated,
 }
 
+#[derive(Clone)]
 pub struct Program {
     data: Vec<i64>,
     overflow: HashMap<usize, i64>,
