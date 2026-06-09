@@ -174,25 +174,3 @@ impl From<i64> for Status {
         }
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn input() -> Input {
-        Input::from(
-            "\
-            ",
-        )
-    }
-
-    #[test]
-    fn test_part_one() {
-        assert_eq!(part_one(&input()), 0);
-    }
-
-    #[test]
-    fn test_part_two() {
-        assert_eq!(part_two(&input()), 0);
-    }
-}
