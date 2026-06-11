@@ -8,7 +8,7 @@ pub struct Grid<V> {
     pub lookup: HashMap<(i32, i32), V>,
 }
 
-impl<V: Default + Copy + Clone> Grid<V> {
+impl<V: Default + Copy + Clone + PartialEq> Grid<V> {
     pub fn points(&self) -> impl Iterator<Item = &(i32, i32)> {
         self.lookup.keys()
     }
@@ -18,6 +18,13 @@ impl<V: Default + Copy + Clone> Grid<V> {
             Some(val) => *val,
             None => V::default(),
         }
+    }
+
+    pub fn find<F>(&self, predicate: F) -> Option<(&(i32, i32), &V)>
+    where
+        F: Fn(&(i32, i32), &V) -> bool,
+    {
+        self.lookup.iter().find(|(k, v)| predicate(k, v))
     }
 
     pub fn neighbors(&self, point: &(i32, i32)) -> Vec<&V> {
@@ -70,15 +77,19 @@ impl<V> Default for Grid<V> {
 
 impl From<&Input> for Grid<char> {
     fn from(input: &Input) -> Self {
-        input
-            .data
-            .trim()
+        Self::from(&input.data)
+    }
+}
+
+impl From<&String> for Grid<char> {
+    fn from(str: &String) -> Self {
+        str.trim()
             .lines()
             .enumerate()
             .fold(Self::default(), |mut grid, (row, line)| {
                 line.chars().enumerate().for_each(|(col, ch)| {
                     grid.set_width(col as i32);
-                    grid.set_value((row as i32, col as i32), ch);
+                    grid.set_value((col as i32, row as i32), ch);
                 });
                 grid.set_height(row as i32);
                 grid
