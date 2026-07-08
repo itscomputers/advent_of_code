@@ -27,6 +27,16 @@ impl<V: Default + Copy + Clone + PartialEq> Grid<V> {
         self.lookup.iter().find(|(k, v)| predicate(k, v))
     }
 
+    pub fn filter<F>(&self, predicate: F) -> Vec<(&(i32, i32), &V)>
+    where
+        F: Fn(&(i32, i32), &V) -> bool,
+    {
+        self.lookup
+            .iter()
+            .filter(|(k, v)| predicate(k, v))
+            .collect::<Vec<_>>()
+    }
+
     pub fn neighbors(&self, point: &(i32, i32)) -> Vec<&V> {
         Point::from(point)
             .neighbors()
@@ -61,7 +71,7 @@ impl<V: Default + Copy + Clone + PartialEq> Grid<V> {
         self.size = (width, self.size.1);
     }
 
-    fn set_value(&mut self, point: (i32, i32), value: V) {
+    pub fn set_value(&mut self, point: (i32, i32), value: V) {
         self.lookup.insert(point, value);
     }
 }
