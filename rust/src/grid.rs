@@ -1,4 +1,6 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::Display};
+
+use itertools::Itertools;
 
 use crate::{io::Input, point::Point};
 
@@ -71,8 +73,14 @@ impl<V: Default + Copy + Clone + PartialEq> Grid<V> {
         self.size = (width, self.size.1);
     }
 
-    pub fn set_value(&mut self, point: (i32, i32), value: V) {
+    pub fn insert(&mut self, point: (i32, i32), value: V) {
         self.lookup.insert(point, value);
+        if point.0 > self.size.0 {
+            self.size.0 = point.0;
+        }
+        if point.1 > self.size.1 {
+            self.size.1 = point.1;
+        }
     }
 }
 
@@ -82,6 +90,19 @@ impl<V> Default for Grid<V> {
             lookup: HashMap::new(),
             size: (0, 0),
         }
+    }
+}
+
+impl Display for Grid<char> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let string = (0..=self.size.1)
+            .map(|y| {
+                (0..=self.size.0)
+                    .map(|x| self.value(&(x, y)))
+                    .collect::<String>()
+            })
+            .join("\n");
+        write!(f, "{string}")
     }
 }
 
@@ -99,7 +120,7 @@ impl From<&String> for Grid<char> {
             .fold(Self::default(), |mut grid, (row, line)| {
                 line.chars().enumerate().for_each(|(col, ch)| {
                     grid.set_width(col as i32);
-                    grid.set_value((col as i32, row as i32), ch);
+                    grid.insert((col as i32, row as i32), ch);
                 });
                 grid.set_height(row as i32);
                 grid

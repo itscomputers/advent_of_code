@@ -192,13 +192,13 @@ impl From<&Input> for KeyVault4 {
         let mut vault = Vault::from(input);
         let entrance = vault.entrance();
         entrance.neighbors().iter().for_each(|pt| {
-            vault.grid.set_value((pt.x, pt.y), '#');
+            vault.grid.insert((pt.x, pt.y), '#');
         });
-        vault.grid.set_value((entrance.x, entrance.y), '#');
-        vault.grid.set_value((entrance.x - 1, entrance.y - 1), '1');
-        vault.grid.set_value((entrance.x - 1, entrance.y + 1), '2');
-        vault.grid.set_value((entrance.x + 1, entrance.y + 1), '3');
-        vault.grid.set_value((entrance.x + 1, entrance.y - 1), '4');
+        vault.grid.insert((entrance.x, entrance.y), '#');
+        vault.grid.insert((entrance.x - 1, entrance.y - 1), '1');
+        vault.grid.insert((entrance.x - 1, entrance.y + 1), '2');
+        vault.grid.insert((entrance.x + 1, entrance.y + 1), '3');
+        vault.grid.insert((entrance.x + 1, entrance.y - 1), '4');
         let vault = vault.collapse();
         let mut key = Key::new();
         for ch in vault.keys() {

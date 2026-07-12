@@ -73,8 +73,7 @@ impl Computer {
                 },
                 Err(_) => panic!("unsupported input"),
             }
-        }
-        if self.program.supplies_output() {
+        } else if self.program.supplies_output() {
             self.program.next();
             self.outputs.push(self.program.output().unwrap());
             self.next_io();
@@ -82,6 +81,7 @@ impl Computer {
     }
 }
 
+#[derive(Debug)]
 pub enum IO {
     Input,
     Output,
